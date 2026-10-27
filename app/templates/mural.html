@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mural de projetos · Ciência Delas{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica">
+
+    <section class="abertura">
+      <div class="abertura__lateral">
+        <div class="postit postit--rosa abertura__nota">
+          <span class="pin" style="--cor-pin: var(--pin-violeta)" aria-hidden="true"></span>
+          <h1>Mural de projetos</h1>
+          <p>Pesquisas, apps, pôsteres e ideias de mulheres e meninas na ciência. Publique o seu e inspire a próxima.</p>
+          <a class="link-mao" href="/mural/novo">Publicar meu projeto</a>
+        </div>
+
+        {# Espaço do canto de eventos (Pessoa 3): pode trocar o conteúdo, mantendo a classe cartaz-eventos. #}
+        <a class="cartaz-eventos" href="/eventos">
+          <span class="pin" style="--cor-pin: var(--pin-verde)" aria-hidden="true"></span>
+          <span class="cartaz-eventos__folha" aria-hidden="true">
+            <span class="cartaz-eventos__mes" id="cartaz-mes"></span>
+            <span class="cartaz-eventos__dia" id="cartaz-dia"></span>
+          </span>
+          <span class="cartaz-eventos__titulo">Eventos</span>
+          <span class="cartaz-eventos__texto">Veja a agenda perto de você e ganhe carimbos no passaporte.</span>
+        </a>
+      </div>
+
+      <div class="destaques" id="destaques" hidden>
+        <h2 class="fita">Destaques da semana</h2>
+        <ul class="destaques__lista" id="destaques-lista"></ul>
+      </div>
+    </section>
+
+    <form class="filtros" id="filtros" role="search" aria-label="Filtrar projetos">
+      <span class="pin pin--canto-esq" style="--cor-pin: var(--pin-ambar)" aria-hidden="true"></span>
+      <span class="pin pin--canto-dir" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
+
+      <div class="filtros__busca">
+        <label for="f-q">Buscar</label>
+        <div class="campo-busca">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          <input id="f-q" name="q" type="search" placeholder="Título ou resumo, ex.: astronomia" autocomplete="off">
+        </div>
+      </div>
+
+      <button class="filtros__alternar" type="button" id="filtros-alternar" aria-expanded="false" aria-controls="filtros-campos">
+        Mais filtros
+      </button>
+
+      <div class="filtros__campos" id="filtros-campos">
+        <div class="campo">
+          <label for="f-tipo">Tipo</label>
+          <select id="f-tipo" name="tipo"><option value="">Todos os tipos</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-area">Área</label>
+          <select id="f-area" name="area"><option value="">Todas as áreas</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-nivel">Nível</label>
+          <select id="f-nivel" name="nivel"><option value="">Todos os níveis</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-instituicao">Instituição</label>
+          <select id="f-instituicao" name="instituicao"><option value="">Todas as instituições</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-cidade">Cidade</label>
+          <select id="f-cidade" name="cidade"><option value="">Todas as cidades</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-identidade">Autoras</label>
+          <select id="f-identidade" name="identidade" aria-describedby="f-identidade-ajuda">
+            <option value="">Todas as autoras</option>
+          </select>
+          <small id="f-identidade-ajuda">Inclui só quem escolheu mostrar isso no perfil.</small>
+        </div>
+      </div>
+
+      <button class="filtros__limpar" type="reset" id="filtros-limpar" hidden>Limpar filtros</button>
+    </form>
+
+    <section class="todos" aria-labelledby="titulo-todos">
+      <div class="todos__cabecalho">
+        <h2 class="fita" id="titulo-todos">Todos os projetos</h2>
+        <p class="todos__contagem" id="contagem" aria-live="polite"></p>
+      </div>
+
+      <ul class="grade" id="grade" aria-busy="true"></ul>
+      <div id="estado"></div>
+
+      <div class="todos__mais">
+        <button class="etiqueta" type="button" id="carregar-mais" hidden>Carregar mais projetos</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" id="detalhe-fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div id="detalhe-conteudo"></div>
+  </div>
+</dialog>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/mural.js') }}"></script>
+{% endblock %}

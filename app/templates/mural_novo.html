@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block titulo %}Publicar projeto · Ciência Delas{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+{% endblock %}
+
+{% block acao_topo %}{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica cortica--form">
+    <form class="folha-form" id="form-projeto" novalidate>
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+
+      <a class="folha-form__voltar" href="/mural">Voltar ao mural</a>
+      <h1>Publicar projeto</h1>
+      <p class="folha-form__intro">Seu projeto aparece no mural assim que você publicar. Campos com * são obrigatórios.</p>
+
+      <div class="resumo-erros" id="resumo-erros" role="alert" tabindex="-1" hidden></div>
+
+      <fieldset class="bloco">
+        <legend>Que tipo de projeto é? *</legend>
+        <div class="tipos" id="tipos" data-erro="tipo">
+          <p class="carregando">Carregando tipos…</p>
+        </div>
+        <p class="campo__erro" id="erro-tipo" hidden></p>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Sobre o projeto</legend>
+
+        <div class="campo">
+          <label for="titulo">Título *</label>
+          <input id="titulo" name="titulo" maxlength="160" required aria-describedby="erro-titulo">
+          <p class="campo__erro" id="erro-titulo" hidden></p>
+        </div>
+
+        <div class="campo">
+          <label for="resumo">Resumo *</label>
+          <textarea id="resumo" name="resumo" rows="6" maxlength="3000" required
+                    aria-describedby="resumo-ajuda erro-resumo"></textarea>
+          <small id="resumo-ajuda">Conte o que você fez, como fez e o que descobriu. <span id="resumo-contador">0</span> de 3000 caracteres.</small>
+          <p class="campo__erro" id="erro-resumo" hidden></p>
+        </div>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="area">Área *</label>
+            <select id="area" name="area" required aria-describedby="erro-area">
+              <option value="">Escolha</option>
+            </select>
+            <p class="campo__erro" id="erro-area" hidden></p>
+          </div>
+          <div class="campo">
+            <label for="ano">Ano *</label>
+            <input id="ano" name="ano" type="number" inputmode="numeric" min="1950" required aria-describedby="erro-ano">
+            <p class="campo__erro" id="erro-ano" hidden></p>
+          </div>
+          <div class="campo">
+            <label for="nivel">Nível</label>
+            <select id="nivel" name="nivel" aria-describedby="erro-nivel">
+              <option value="">O do meu perfil</option>
+            </select>
+            <p class="campo__erro" id="erro-nivel" hidden></p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco" id="bloco-extras" hidden>
+        <legend id="extras-titulo">Detalhes</legend>
+        <div id="extras"></div>
+      </fieldset>
+
+      <fieldset class="bloco bloco--material" id="bloco-material" hidden>
+        <legend>Material do projeto *</legend>
+        <p class="bloco__regra" id="material-regra"></p>
+
+        <div class="campo" id="campo-arquivos">
+          <p class="rotulo" id="arquivos-rotulo">Arquivos</p>
+          <input class="visualmente-oculto" id="arquivos" type="file" multiple
+                 accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.pptx"
+                 aria-labelledby="arquivos-rotulo arquivos-botao" aria-describedby="arquivos-ajuda erro-arquivos">
+          <label class="soltar" for="arquivos" id="arquivos-soltar">
+            <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+            <span id="arquivos-botao" class="soltar__acao">Escolher arquivos</span>
+            <span class="soltar__dica">ou arraste para cá</span>
+          </label>
+          <small id="arquivos-ajuda">PDF, imagem, Word ou PowerPoint. Até 10 MB cada, no máximo 5 arquivos.</small>
+          <ul class="anexos" id="anexos" aria-live="polite"></ul>
+          <p class="campo__erro" id="erro-arquivos" hidden></p>
+        </div>
+
+        <div class="campo">
+          <label for="link_externo" id="link-rotulo">Link do projeto</label>
+          <input id="link_externo" name="link_externo" type="url" placeholder="https://"
+                 aria-describedby="link-ajuda erro-link_externo">
+          <small id="link-ajuda" hidden></small>
+          <p class="campo__erro" id="erro-link_externo" hidden></p>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Fotos do projeto (opcional)</legend>
+        <div class="campo" id="campo-fotos">
+          <input class="visualmente-oculto" id="fotos" type="file" multiple accept=".jpg,.jpeg,.png,.webp"
+                 aria-label="Escolher fotos do projeto" aria-describedby="fotos-ajuda erro-fotos">
+          <ul class="galeria-envio" id="galeria-envio" aria-live="polite">
+            <li class="galeria-envio__adicionar" id="fotos-adicionar">
+              <label class="soltar soltar--foto" for="fotos" id="fotos-soltar">
+                <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>
+                <span class="soltar__acao">Adicionar fotos</span>
+                <span class="soltar__dica">ou arraste para cá</span>
+              </label>
+            </li>
+          </ul>
+          <small id="fotos-ajuda">Até 5 fotos em jpg, png ou webp, com até 10 MB cada. A primeira vira a capa no mural.
+            Sem fotos, o projeto aparece como uma ficha pautada.</small>
+          <p class="campo__erro" id="erro-fotos" hidden></p>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Onde foi feito</legend>
+        <div class="linha">
+          <div class="campo">
+            <label for="instituicao">Instituição</label>
+            <input id="instituicao" name="instituicao" maxlength="160" placeholder="A do seu perfil, se vazio">
+          </div>
+          <div class="campo">
+            <label for="cidade">Cidade</label>
+            <input id="cidade" name="cidade" maxlength="120" placeholder="A do seu perfil, se vazio">
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="folha-form__acoes">
+        <button class="botao botao--primario botao--grande" type="submit" id="publicar">Publicar no mural</button>
+        <a class="botao botao--texto" href="/mural">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/cadastro-projeto.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,236 @@
+/* Estilos compartilhados por todas as páginas: cores, fontes, cabeçalho e botões. */
+
+:root {
+  /* Quadro */
+  --cortica: #c49a6c;
+  --madeira: #6e4628;
+  --madeira-escura: #3f2618;
+
+  /* Papel e tinta */
+  --papel: #fffdf7;
+  --papel-borda: #d9ccb4;
+  --tinta: #2a1c15;
+  --tinta-suave: #66524a;
+
+  /* Marca */
+  --magenta: #b8135c;
+  --magenta-escuro: #8c0d45;
+  --rosa-claro: #fbd3e3;
+
+  /* Post-its */
+  --postit-amarelo: #ffe873;
+  --postit-rosa: #ffc4dc;
+  --postit-verde: #cdefb0;
+
+  /* Pins */
+  --pin-magenta: #d81b60;
+  --pin-violeta: #7e3fb4;
+  --pin-verde: #17907f;
+  --pin-ambar: #efa20f;
+  --pin-azul: #2e6bd6;
+
+  --fonte: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fonte-mao: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+
+  --sombra-papel: 0 1px 1px rgb(42 28 21 / 0.2), 0 8px 14px -6px rgb(42 28 21 / 0.45);
+  --sombra-papel-alta: 0 2px 2px rgb(42 28 21 / 0.18), 0 22px 30px -10px rgb(42 28 21 / 0.55);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--fonte);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--tinta);
+  background-color: var(--madeira-escura);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Some da tela, mas continua acessível para leitores de tela e teclado. */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pular {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--papel);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.pular:focus {
+  top: 12px;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 8px 28px;
+  flex-wrap: wrap;
+  padding: 10px clamp(16px, 3vw, 40px);
+  background: var(--papel);
+  border-bottom: 4px solid var(--magenta);
+}
+
+.topo__marca {
+  font-family: var(--fonte-mao);
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta);
+  text-decoration: none;
+}
+
+.topo__nav ul {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topo__nav a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--tinta);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.topo__nav a:hover {
+  background: var(--rosa-claro);
+}
+
+.topo__nav a[aria-current="page"] {
+  text-decoration: underline wavy var(--magenta) 2px;
+  text-underline-offset: 6px;
+}
+
+.topo__acao {
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .topo__nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .topo__nav a {
+    padding: 6px 10px;
+  }
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao--primario {
+  background: var(--magenta);
+  color: #fff;
+}
+
+.botao--primario:hover {
+  background: var(--magenta-escuro);
+}
+
+.botao--secundario {
+  background: var(--papel);
+  border-color: var(--tinta);
+  color: var(--tinta);
+}
+
+.botao--secundario:hover {
+  background: var(--rosa-claro);
+}
+
+.botao--texto {
+  background: none;
+  color: var(--tinta-suave);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.botao--texto:hover {
+  color: var(--tinta);
+}
+
+.botao--grande {
+  min-height: 52px;
+  padding: 12px 26px;
+  font-size: 1.08rem;
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
