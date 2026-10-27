@@ -1,4 +1,4 @@
-"""Testes da frente de Vagas afirmativas (Pessoa 4)."""
+"""Testes da frente de Vagas afirmativas e Descobertas/Notícias (Pessoa 4)."""
 from datetime import date, timedelta
 
 import pytest
@@ -22,6 +22,8 @@ def app(tmp_path):
         assert r_mural.exit_code == 0, r_mural.output
         r_vagas = app.test_cli_runner().invoke(args=["seed-vagas"])
         assert r_vagas.exit_code == 0, r_vagas.output
+        r_noticias = app.test_cli_runner().invoke(args=["seed-noticias"])
+        assert r_noticias.exit_code == 0, r_noticias.output
     return app
 
 
@@ -132,3 +134,19 @@ def test_validacao_exige_fonte_afirmacao_quando_afirmativa(cliente):
     )
     assert resposta.status_code == 422
     assert "fonte_afirmacao" in resposta.get_json()["erros"]
+
+
+def test_pagina_e_api_de_noticias(cliente):
+    assert cliente.get("/noticias").status_code == 200
+    assert cliente.get("/api/noticias/opcoes").status_code == 200
+
+    destaques = cliente.get("/api/noticias/destaques").get_json()
+    assert len(destaques) == 3
+
+    lista = cliente.get("/api/noticias?cientista_negra=1").get_json()
+    assert lista["itens"]
+    assert all(n["cientista_negra"] is True for n in lista["itens"])
+
+    detalhe = cliente.get(f"/api/noticias/{lista['itens'][0]['id']}").get_json()
+    assert detalhe["link_fonte"].startswith("https://")
+    assert detalhe["cientista"]
