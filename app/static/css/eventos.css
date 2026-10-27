@@ -1,0 +1,718 @@
+/* Canto de eventos: cartazes da semana, ingressos da agenda e detalhe do evento.
+   Usa as peças do mural (quadro, cortiça, pin, fita, post-it, filtros, detalhe) de mural.css. */
+
+/* ---------- Abertura: nota com a estrela e "Acontece esta semana" ---------- */
+
+.abertura-eventos {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+  margin-bottom: clamp(36px, 4vw, 56px);
+}
+
+.eventos-nota {
+  padding-bottom: 132px;
+  transform: rotate(-2deg);
+}
+
+.eventos-nota h1 {
+  margin: 0 0 10px;
+  font-family: var(--fonte-mao);
+  font-size: clamp(2.6rem, 4vw, 3.4rem);
+  font-weight: 700;
+  line-height: 0.95;
+  color: var(--magenta-escuro);
+}
+
+.eventos-nota p {
+  margin: 0 0 10px;
+  max-width: 30ch;
+}
+
+.eventos-nota__passaporte {
+  font-size: 0.95rem;
+}
+
+.eventos-nota__passaporte .link-mao {
+  font-size: 1.4rem;
+}
+
+.eventos-nota__estrela {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  width: 128px;
+  height: auto;
+  transform: rotate(6deg);
+  pointer-events: none;
+}
+
+.semana {
+  min-width: 0;
+}
+
+.semana__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 34px 26px;
+  margin: 0;
+  padding: 10px 0 0;
+  list-style: none;
+}
+
+.semana__lista > li {
+  position: relative;
+  min-width: 0;
+}
+
+.semana__vazia {
+  grid-column: 1 / -1;
+  max-width: 360px;
+}
+
+.semana__vazia .postit {
+  display: grid;
+  gap: 4px;
+  transform: rotate(1.4deg);
+}
+
+.semana__vazia strong {
+  font-family: var(--fonte-mao);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+/* Cartaz colado com fita: cor de papel, data grande escrita à mão. */
+.cartaz {
+  --rot: 0deg;
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 210px;
+  padding: 22px 18px 18px;
+  background:
+    radial-gradient(rgb(255 255 255 / 0.4) 1.3px, transparent 1.7px) 0 0 / 14px 14px,
+    var(--cor-cartaz, var(--postit-rosa));
+  box-shadow: var(--sombra-papel);
+  transform: rotate(var(--rot));
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cartaz::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 3;
+  width: 92px;
+  height: 26px;
+  margin-left: -46px;
+  background: rgb(250 242 214 / 0.8);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+  transform: rotate(calc(var(--rot) * -2));
+  clip-path: polygon(0 10%, 4% 0, 8% 12%, 12% 0, 88% 0, 92% 10%, 96% 0, 100% 12%, 100% 88%, 96% 100%, 92% 90%, 88% 100%, 12% 100%, 8% 88%, 4% 100%, 0 90%);
+}
+
+.cartaz:hover,
+.cartaz:focus-within {
+  z-index: 4;
+  transform: rotate(0deg) translateY(-4px) scale(1.02);
+  box-shadow: var(--sombra-papel-alta);
+}
+
+.cartaz:has(.ingresso__link:focus-visible) {
+  outline: 3px solid var(--tinta);
+  outline-offset: 5px;
+}
+
+.cartaz__quando {
+  justify-self: start;
+  margin: 0;
+  padding: 1px 10px;
+  background: var(--tinta);
+  color: var(--papel);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cartaz__data {
+  margin: 2px 0 0;
+  font-family: var(--fonte-mao);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.cartaz__data span {
+  font-size: 3.3rem;
+}
+
+.cartaz__titulo {
+  margin: 4px 0 0;
+  font-size: 1.08rem;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.cartaz__info {
+  margin: auto 0 0;
+  padding-top: 6px;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+.cartaz .carimbo-selo {
+  top: 12px;
+  right: 8px;
+  width: 58px;
+  height: 58px;
+  font-size: 0.6rem;
+}
+
+.cartaz .carimbo-selo strong {
+  font-size: 0.64rem;
+}
+
+/* ---------- Filtros: busca + atalhos na mesma linha ---------- */
+
+.filtros__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 20px;
+}
+
+.filtros__linha .filtros__busca {
+  flex: 1 1 300px;
+}
+
+.atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.atalho {
+  position: relative;
+  margin: 0 !important;
+}
+
+.atalho input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+/* Etiqueta adesiva: clica para ligar e desligar. */
+.atalho span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 999px;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.atalho span::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--tinta-suave);
+  border-radius: 50%;
+}
+
+.atalho:hover span {
+  border-color: var(--tinta-suave);
+}
+
+.atalho input:checked + span {
+  border-color: var(--magenta);
+  background: var(--rosa-claro);
+}
+
+.atalho input:checked + span::before {
+  border-color: var(--magenta);
+  background: radial-gradient(circle, var(--magenta) 0 45%, transparent 50%);
+}
+
+.atalho input:focus-visible + span {
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+/* ---------- Agenda: ingressos presos no quadro ---------- */
+
+.agenda__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 40px 32px;
+  align-items: start;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Nome do mês escrito numa tira de papel, ocupando a linha inteira. */
+.agenda__mes {
+  grid-column: 1 / -1;
+  margin: 6px 0 -14px;
+}
+
+.agenda__mes:first-child {
+  margin-top: 0;
+}
+
+.agenda__mes span {
+  display: inline-block;
+  padding: 0 16px;
+  background: var(--papel);
+  font-family: var(--fonte-mao);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--magenta-escuro);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transform: rotate(-1.5deg);
+}
+
+.agenda__mes span::first-letter {
+  text-transform: uppercase;
+}
+
+.ingresso-item {
+  --rot: 0deg;
+  position: relative;
+  min-width: 0;
+  /* A sombra fica no item porque o ingresso tem os furos recortados com máscara. */
+  filter: drop-shadow(0 1px 1px rgb(42 28 21 / 0.22)) drop-shadow(0 9px 8px rgb(42 28 21 / 0.28));
+  transform: rotate(var(--rot));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.ingresso-item:hover,
+.ingresso-item:focus-within {
+  z-index: 4;
+  filter: drop-shadow(0 2px 2px rgb(42 28 21 / 0.2)) drop-shadow(0 18px 14px rgb(42 28 21 / 0.36));
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.ingresso-item:has(.ingresso__link:focus-visible) {
+  outline: 3px solid var(--tinta);
+  outline-offset: 5px;
+}
+
+.ingresso-item > .pin {
+  left: 50px;
+}
+
+.ingresso {
+  --canhoto: 86px;
+  --furo: 9px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--canhoto) minmax(0, 1fr);
+  min-height: 100%;
+  background: var(--papel);
+  /* Dois meios círculos recortados no picote entre o canhoto e o corpo. */
+  -webkit-mask:
+    radial-gradient(circle var(--furo) at var(--canhoto) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--furo) at var(--canhoto) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle var(--furo) at var(--canhoto) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--furo) at var(--canhoto) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+}
+
+.ingresso__canhoto,
+.detalhe-evento__data {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 18px 6px;
+  background: var(--magenta);
+  color: #fff;
+  text-align: center;
+}
+
+.ingresso__canhoto {
+  border-right: 2px dashed rgb(255 255 255 / 0.75);
+}
+
+.ingresso__semana {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ingresso__dia {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ingresso__mes {
+  font-family: var(--fonte-mao);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ingresso__corpo {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px 18px 14px;
+}
+
+.ingresso__corpo .cartao__tipo {
+  margin: 0;
+}
+
+.ingresso__quando {
+  justify-self: start;
+  margin: 0 0 2px;
+  font-family: var(--fonte-mao);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+  background: linear-gradient(transparent 58%, var(--postit-amarelo) 58% 92%, transparent 92%);
+}
+
+.ingresso__titulo {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.28;
+  text-wrap: balance;
+}
+
+/* O link do título cobre o ingresso inteiro, então clicar em qualquer parte abre o detalhe. */
+.ingresso__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ingresso__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.ingresso__link:focus-visible {
+  outline: none;
+}
+
+.ingresso__org {
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--tinta-suave);
+}
+
+.ingresso__info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+}
+
+.ingresso__info .icone {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  color: var(--magenta);
+}
+
+.ingresso__mais {
+  justify-self: start;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--magenta-escuro);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.ingresso-item:hover .ingresso__mais {
+  color: var(--tinta);
+}
+
+/* ---------- Selos e carimbo ---------- */
+
+.selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selo {
+  padding: 1px 9px;
+  border-radius: 4px;
+  background: #efe7da;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.selo--gratuito { background: var(--postit-verde); }
+.selo--online { background: #c9dcf5; }
+.selo--hibrido { background: #dccff5; }
+.selo--publico { background: var(--postit-amarelo); }
+.selo--area { background: var(--rosa-claro); }
+
+/* Carimbo de tinta: avisa que o evento vale carimbo no passaporte. */
+.carimbo-selo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: grid;
+  place-content: center;
+  width: 70px;
+  height: 70px;
+  border: 3px double var(--magenta);
+  border-radius: 50%;
+  color: var(--magenta);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transform: rotate(-14deg);
+  mix-blend-mode: multiply;
+}
+
+.carimbo-selo strong {
+  font-size: 0.74rem;
+}
+
+.ingresso:has(.carimbo-selo) .ingresso__corpo {
+  padding-right: 80px;
+}
+
+.esqueleto--ingresso {
+  height: 190px;
+}
+
+.esqueleto--cartaz {
+  height: 210px;
+}
+
+/* ---------- Estado vazio com a estrela ---------- */
+
+.estado--eventos {
+  padding-right: 130px;
+}
+
+.estado__estrela {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 104px;
+  height: auto;
+  transform: rotate(5deg);
+}
+
+/* ---------- Detalhe do evento ---------- */
+
+.detalhe-evento__topo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin: 0 44px 18px 0;
+}
+
+.detalhe-evento__data {
+  min-width: 84px;
+  padding: 12px 10px;
+  border-radius: 6px;
+  transform: rotate(-2deg);
+  box-shadow: var(--sombra-papel);
+}
+
+.detalhe--evento h2 {
+  margin-right: 0;
+}
+
+.detalhe--evento .detalhe__autora {
+  margin-bottom: 0;
+}
+
+.detalhe-evento__quando {
+  color: var(--magenta-escuro);
+}
+
+.aviso-carimbo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  background: var(--rosa-claro);
+  transform: rotate(-0.6deg);
+}
+
+.aviso-carimbo p {
+  margin: 0;
+}
+
+.aviso-carimbo a {
+  color: var(--magenta-escuro);
+  font-weight: 700;
+}
+
+.aviso-carimbo__selo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 3px double var(--magenta);
+  border-radius: 50%;
+  color: var(--magenta);
+  transform: rotate(-12deg);
+}
+
+.aviso-carimbo__selo .icone {
+  width: 26px;
+  height: 26px;
+}
+
+.detalhe--evento .selos {
+  margin: -8px 0 18px;
+}
+
+.detalhe-evento__nota {
+  margin: 18px 0 0;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Telas menores ---------- */
+
+@media (max-width: 860px) {
+  .abertura-eventos {
+    grid-template-columns: 1fr;
+  }
+
+  .eventos-nota {
+    max-width: 460px;
+  }
+}
+
+@media (max-width: 560px) {
+  .eventos-nota {
+    padding-bottom: 24px;
+    padding-right: 112px;
+  }
+
+  .eventos-nota__estrela {
+    width: 96px;
+  }
+
+  .semana__lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 16px;
+  }
+
+  .cartaz {
+    min-height: 0;
+    padding: 20px 12px 14px;
+  }
+
+  .cartaz__data span {
+    font-size: 2.6rem;
+  }
+
+  .cartaz .carimbo-selo {
+    top: 8px;
+    right: 4px;
+    width: 46px;
+    height: 46px;
+    border-width: 2px;
+    font-size: 0.5rem;
+  }
+
+  .cartaz .carimbo-selo strong {
+    font-size: 0.52rem;
+  }
+
+  .ingresso {
+    --canhoto: 70px;
+  }
+
+  .ingresso-item {
+    transform: rotate(calc(var(--rot) * 0.5));
+  }
+
+  .ingresso-item > .pin {
+    left: 42px;
+  }
+
+  .ingresso__corpo {
+    padding: 14px 14px 12px;
+  }
+
+  .ingresso:has(.carimbo-selo) .ingresso__corpo {
+    padding-right: 62px;
+  }
+
+  .ingresso .carimbo-selo {
+    top: 8px;
+    right: 6px;
+    width: 52px;
+    height: 52px;
+    border-width: 2px;
+    font-size: 0.54rem;
+  }
+
+  .ingresso .carimbo-selo strong {
+    font-size: 0.58rem;
+  }
+
+  .estado--eventos {
+    padding-right: 22px;
+    padding-bottom: 120px;
+  }
+
+  .detalhe-evento__topo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .detalhe-evento__data {
+    justify-self: start;
+    grid-auto-flow: column;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .aviso-carimbo {
+    align-items: flex-start;
+  }
+}
