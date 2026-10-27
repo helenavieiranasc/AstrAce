@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block titulo %}Vagas afirmativas · Ciência Delas{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vagas.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica">
+
+    <section class="abertura abertura--vagas">
+      <div class="postit postit--rosa abertura__nota">
+        <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+        <h1>Vagas e bolsas</h1>
+        <p>Iniciação científica, bolsas, estágios e programas afirmativos para dar o próximo passo na sua carreira.</p>
+      </div>
+
+      <div class="aviso-edital" role="note" aria-label="Aviso sobre editais e vagas afirmativas">
+        <span class="pin" style="--cor-pin: var(--pin-verde)" aria-hidden="true"></span>
+        <div class="aviso-edital__cabecalho">
+          <svg class="icone" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V13M12 16.5v.01"/></svg>
+          <strong>Confira sempre o edital oficial. Prazos e regras podem mudar.</strong>
+        </div>
+        <p class="aviso-edital__texto">
+          Os selos <span class="selo selo--mulheres">Afirmativa para mulheres</span> e
+          <span class="selo selo--trans">Afirmativa para mulheres trans</span> só aparecem quando a vaga declara isso no edital ou na página oficial. Clique em qualquer cartão para ver o trecho conferido e abrir o link original.
+        </p>
+      </div>
+    </section>
+
+    <form class="filtros" id="filtros" role="search" aria-label="Filtrar vagas">
+      <span class="pin pin--canto-esq" style="--cor-pin: var(--pin-ambar)" aria-hidden="true"></span>
+      <span class="pin pin--canto-dir" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
+
+      <div class="filtros__topo-vagas">
+        <div class="filtros__busca">
+          <label for="f-q">Buscar</label>
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input id="f-q" name="q" type="search" placeholder="Título, organização, descrição ou cidade, ex.: bolsa Python" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="campo filtros__ordem">
+          <label for="f-ordem">Ordenar por</label>
+          <select id="f-ordem" name="ordem">
+            <option value="prazo">Prazo mais próximo</option>
+            <option value="recentes">Mais recentes</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="filtros__alternar" type="button" id="filtros-alternar" aria-expanded="false" aria-controls="filtros-campos">
+        Mais filtros
+      </button>
+
+      <div class="filtros__campos" id="filtros-campos">
+        <div class="campo">
+          <label for="f-tipo">Tipo</label>
+          <select id="f-tipo" name="tipo"><option value="">Todos os tipos</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-area">Área</label>
+          <select id="f-area" name="area"><option value="">Todas as áreas</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-modalidade">Modalidade</label>
+          <select id="f-modalidade" name="modalidade"><option value="">Todas as modalidades</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-cidade">Cidade</label>
+          <select id="f-cidade" name="cidade"><option value="">Todas as cidades</option></select>
+        </div>
+
+        <fieldset class="filtros__recortes">
+          <legend class="visualmente-oculto">Recortes e prazos</legend>
+          <label class="pilula-filtro">
+            <input type="checkbox" id="f-prazo-aberto" name="prazo_aberto" value="1">
+            <span>Prazo aberto</span>
+          </label>
+          <label class="pilula-filtro pilula-filtro--mulheres">
+            <input type="checkbox" id="f-afirmativa-mulheres" name="afirmativa_mulheres" value="1">
+            <span>Afirmativa para mulheres</span>
+          </label>
+          <label class="pilula-filtro pilula-filtro--trans">
+            <input type="checkbox" id="f-afirmativa-trans" name="afirmativa_trans" value="1">
+            <span>Afirmativa para mulheres trans</span>
+          </label>
+        </fieldset>
+      </div>
+
+      <button class="filtros__limpar" type="reset" id="filtros-limpar" hidden>Limpar filtros</button>
+    </form>
+
+    <section class="todos" aria-labelledby="titulo-todos">
+      <div class="todos__cabecalho">
+        <h2 class="fita" id="titulo-todos">Vagas e programas</h2>
+        <p class="todos__contagem" id="contagem" aria-live="polite"></p>
+      </div>
+
+      <ul class="grade grade--vagas" id="grade" aria-busy="true"></ul>
+      <div id="estado"></div>
+
+      <div class="todos__mais">
+        <button class="etiqueta" type="button" id="carregar-mais" hidden>Carregar mais vagas</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" id="detalhe-fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div id="detalhe-conteudo"></div>
+  </div>
+</dialog>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/vagas.js') }}"></script>
+{% endblock %}

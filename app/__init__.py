@@ -17,10 +17,15 @@ def create_app(config=Config):
     from .mural import bp as mural_bp
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
+    from .vagas import bp as vagas_bp
+    from .vagas import models as _vagas  # noqa: F401
+    from .vagas.seed import seed_vagas
 
     app.register_blueprint(mural_bp)
     app.register_blueprint(uploads_bp)
+    app.register_blueprint(vagas_bp)
     app.cli.add_command(seed_mural)
+    app.cli.add_command(seed_vagas)
 
     @app.get("/")
     def inicio():
