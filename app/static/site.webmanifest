@@ -1,0 +1,13 @@
+{
+  "name": "AstrAce",
+  "short_name": "AstrAce",
+  "description": "Projetos, eventos e vagas para mulheres e meninas na ciência e tecnologia.",
+  "start_url": "/mural",
+  "display": "standalone",
+  "background_color": "#fffdf7",
+  "theme_color": "#b8135c",
+  "icons": [
+    { "src": "/static/img/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/img/icone-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

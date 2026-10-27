@@ -6,15 +6,17 @@ from flask import current_app
 from sqlalchemy import and_, or_
 
 from .. import catalogos
+from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
-from .models import Projeto, semana_atual
+from .models import Estrela, Projeto, semana_atual
 from .tipos import TIPOS_POR_VALOR
 
 FILTROS = ("tipo", "area", "instituicao", "cidade", "nivel", "identidade")
+ORDENS = ("recentes", "estrelas")
 
 
-def consultar(filtros, pagina=1, por_pagina=12):
+def consultar(filtros, pagina=1, por_pagina=12, ordem="recentes"):
     q = Projeto.query.filter(Projeto.oculto.is_(False))
 
     for campo in ("tipo", "area", "instituicao", "cidade", "nivel"):
@@ -40,8 +42,11 @@ def consultar(filtros, pagina=1, por_pagina=12):
         q = q.filter(or_(Projeto.titulo.ilike(like), Projeto.resumo.ilike(like)))
 
     total = q.count()
+    ordenacao = [Projeto.criado_em.desc(), Projeto.id.desc()]
+    if ordem == "estrelas":
+        ordenacao.insert(0, Projeto.total_estrelas.desc())
     itens = (
-        q.order_by(Projeto.criado_em.desc(), Projeto.id.desc())
+        q.order_by(*ordenacao)
         .offset((pagina - 1) * por_pagina)
         .limit(por_pagina)
         .all()
@@ -73,9 +78,32 @@ def valores_distintos(coluna):
     return [linha[0] for linha in linhas]
 
 
+def estrelados_por(usuaria, projetos):
+    """Ids, entre esses projetos, que a usuária já estrelou."""
+    if not usuaria or not projetos:
+        return set()
+    ids = [p.id for p in projetos]
+    linhas = Estrela.query.with_entities(Estrela.projeto_id).filter(
+        Estrela.usuaria_id == usuaria.id, Estrela.projeto_id.in_(ids)
+    )
+    return {linha[0] for linha in linhas}
+
+
+def alternar_estrela(projeto, usuaria):
+    """Dá a estrela se ainda não deu; tira se já deu. Devolve se ficou estrelado."""
+    existente = Estrela.query.filter_by(projeto_id=projeto.id, usuaria_id=usuaria.id).first()
+    if existente:
+        db.session.delete(existente)
+    else:
+        db.session.add(Estrela(projeto_id=projeto.id, usuaria_id=usuaria.id))
+    db.session.commit()
+    db.session.refresh(projeto)
+    return existente is None
+
+
 # ---------- JSON ----------
 
-def cartao(p):
+def cartao(p, estrelados=frozenset()):
     tipo = TIPOS_POR_VALOR.get(p.tipo, {})
     resumo = p.resumo or ""
     return {
@@ -92,11 +120,14 @@ def cartao(p):
         "resumo_curto": resumo if len(resumo) <= 150 else resumo[:147].rsplit(" ", 1)[0] + "…",
         "destaque": bool(p.destaque and p.destaque_semana == semana_atual()),
         "materiais": len(p.materiais) + len(p.fotos),
+        "estrelas": p.total_estrelas or 0,
+        "estrelado": p.id in estrelados,
+        "novo": p.novo,
     }
 
 
-def detalhe(p):
-    dados = cartao(p)
+def detalhe(p, estrelados=frozenset()):
+    dados = cartao(p, estrelados)
     tipo = TIPOS_POR_VALOR.get(p.tipo, {"campos": []})
     extras = []
     for campo in tipo["campos"]:

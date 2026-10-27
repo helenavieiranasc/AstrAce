@@ -3,8 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Ciência Delas{% endblock %}</title>
+  <title>{% block titulo %}AstrAce{% endblock %}</title>
   <meta name="description" content="{% block descricao %}Projetos, eventos e vagas para mulheres e meninas na ciência e tecnologia.{% endblock %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='img/icone-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+  <meta name="theme-color" content="#b8135c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap">
@@ -15,7 +19,9 @@
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
-    <a class="topo__marca" href="/">Ciência Delas</a>
+    <a class="topo__marca" href="/">
+      <img src="{{ url_for('static', filename='img/logo-astrace-topo.png') }}" alt="AstrAce, página inicial" width="289" height="92">
+    </a>
     <nav class="topo__nav" aria-label="Principal">
       <ul>
         <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural</a></li>
