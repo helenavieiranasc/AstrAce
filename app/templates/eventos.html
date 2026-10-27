@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block titulo %}Canto de eventos · Ciência Delas{% endblock %}
+{% block descricao %}Oficinas, palestras, hackathons e feiras de ciência perto de você. Vá, escaneie o QR e ganhe carimbos no passaporte.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/eventos.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica">
+
+    <section class="abertura-eventos">
+      <div class="postit postit--amarelo eventos-nota">
+        <span class="pin" style="--cor-pin: var(--pin-verde)" aria-hidden="true"></span>
+        <h1>Canto de eventos</h1>
+        <p>Oficinas, palestras, hackathons e feiras para mulheres e meninas na ciência.</p>
+        <p class="eventos-nota__passaporte">
+          Foi a um evento com QR? Escaneie e ganhe um carimbo no seu <a class="link-mao" href="/passaporte">passaporte</a>.
+        </p>
+        <img class="eventos-nota__estrela" src="{{ url_for('static', filename='img/estrela-eventos.png') }}" alt="" width="353" height="360">
+      </div>
+
+      <div class="semana" id="semana" aria-labelledby="titulo-semana">
+        <h2 class="fita" id="titulo-semana">Acontece esta semana</h2>
+        <ul class="semana__lista" id="semana-lista" aria-busy="true">
+          <li><div class="esqueleto esqueleto--cartaz"></div></li>
+          <li><div class="esqueleto esqueleto--cartaz"></div></li>
+          <li><div class="esqueleto esqueleto--cartaz"></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <form class="filtros filtros--eventos" id="filtros" role="search" aria-label="Filtrar eventos">
+      <span class="pin pin--canto-esq" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+      <span class="pin pin--canto-dir" style="--cor-pin: var(--pin-violeta)" aria-hidden="true"></span>
+
+      <div class="filtros__linha">
+        <div class="filtros__busca">
+          <label for="f-q">Buscar</label>
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input id="f-q" name="q" type="search" placeholder="Nome do evento ou organização, ex.: robótica" autocomplete="off">
+          </div>
+        </div>
+
+        <fieldset class="atalhos">
+          <legend class="visualmente-oculto">Atalhos</legend>
+          <label class="atalho">
+            <input type="checkbox" name="periodo" value="30dias">
+            <span>Próximos 30 dias</span>
+          </label>
+          <label class="atalho">
+            <input type="checkbox" name="gratuito" value="1">
+            <span>Só gratuitos</span>
+          </label>
+        </fieldset>
+      </div>
+
+      <button class="filtros__alternar" type="button" id="filtros-alternar" aria-expanded="false" aria-controls="filtros-campos">
+        Mais filtros
+      </button>
+
+      <div class="filtros__campos" id="filtros-campos">
+        <div class="campo">
+          <label for="f-cidade">Cidade</label>
+          <select id="f-cidade" name="cidade"><option value="">Todas as cidades</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-modalidade">Modalidade</label>
+          <select id="f-modalidade" name="modalidade"><option value="">Presencial ou online</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-publico">Para quem</label>
+          <select id="f-publico" name="publico" aria-describedby="f-publico-ajuda"><option value="">Todos os públicos</option></select>
+          <small id="f-publico-ajuda">Inclui os eventos abertos a todas.</small>
+        </div>
+        <div class="campo">
+          <label for="f-area">Área</label>
+          <select id="f-area" name="area"><option value="">Todas as áreas</option></select>
+        </div>
+        <div class="campo">
+          <label for="f-tipo">Tipo de evento</label>
+          <select id="f-tipo" name="tipo"><option value="">Todos os tipos</option></select>
+        </div>
+      </div>
+
+      <button class="filtros__limpar" type="reset" id="filtros-limpar" hidden>Limpar filtros</button>
+    </form>
+
+    <section class="agenda" aria-labelledby="titulo-agenda">
+      <div class="todos__cabecalho">
+        <h2 class="fita" id="titulo-agenda">Agenda</h2>
+        <p class="todos__contagem" id="contagem" aria-live="polite"></p>
+      </div>
+
+      <ul class="agenda__lista" id="agenda" aria-busy="true"></ul>
+      <div id="estado"></div>
+
+      <div class="todos__mais">
+        <button class="etiqueta" type="button" id="carregar-mais" hidden>Carregar mais eventos</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<dialog class="detalhe detalhe--evento" id="detalhe" aria-labelledby="detalhe-titulo">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" id="detalhe-fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div id="detalhe-conteudo"></div>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/eventos.js') }}"></script>
+{% endblock %}
