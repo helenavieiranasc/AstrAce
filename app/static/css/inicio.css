@@ -1,0 +1,741 @@
+/* Página inicial: o mural de navegação do astrAce.
+   Usa o quadro, os pins e os post-its de mural.css; aqui ficam só os papéis desta página. */
+
+.inicio-quadro {
+  margin-bottom: 14px;
+}
+
+.inicio-cortica {
+  padding: clamp(28px, 3.6vw, 56px) clamp(18px, 3.2vw, 52px) clamp(36px, 4vw, 60px);
+}
+
+/* Composição: projetos à esquerda, marca no meio, eventos e vagas à direita. */
+.inicio-mural {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-areas:
+    "proj proj proj marc marc marc marc marc marc even even even"
+    "proj proj proj noti noti noti pass pass pass vaga vaga vaga"
+    "reca reca reca noti noti noti pass pass pass vaga vaga vaga";
+  align-items: start;
+  gap: clamp(26px, 3vw, 44px) clamp(22px, 2.6vw, 40px);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.inicio-marca { grid-area: marc; }
+.inicio-projetos { grid-area: proj; align-self: stretch; }
+.inicio-eventos { grid-area: even; }
+.inicio-noticias { grid-area: noti; }
+.inicio-passaporte { grid-area: pass; }
+.inicio-vagas { grid-area: vaga; }
+.inicio-recado { grid-area: reca; }
+
+/* ---------- Papel: o que todos têm em comum ---------- */
+
+.inicio-papel {
+  --rot: 0deg;
+  --sombra: 0 1px 1px rgb(42 28 21 / 0.18), 0 10px 16px -8px rgb(42 28 21 / 0.5);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--tinta);
+  text-decoration: none;
+  box-shadow: var(--sombra);
+  transform: rotate(var(--rot));
+  animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Cada papel chega como se tivesse acabado de ser preso no mural. */
+@keyframes inicio-pregar {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) rotate(calc(var(--rot) * 2.2)) scale(1.03);
+    box-shadow: 0 2px 2px rgb(42 28 21 / 0.1), 0 34px 40px -16px rgb(42 28 21 / 0.45);
+  }
+}
+
+.inicio-link {
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Ao passar o mouse, o papel "descola" um pouco do quadro. */
+.inicio-link:hover {
+  transform: translateY(-6px) rotate(calc(var(--rot) * 0.35));
+  box-shadow: 0 2px 2px rgb(42 28 21 / 0.16), 0 26px 30px -12px rgb(42 28 21 / 0.55);
+}
+
+.inicio-link:active {
+  transform: translateY(-2px) rotate(calc(var(--rot) * 0.35));
+  transition-duration: 0.1s;
+}
+
+.inicio-link:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 6px;
+}
+
+.inicio-titulo {
+  font-family: var(--fonte-mao);
+  font-size: clamp(2.3rem, 3.2vw, 3rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.inicio-texto {
+  max-width: 34ch;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.inicio-contagem {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.7);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.inicio-abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  font-family: var(--fonte-mao);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.inicio-seta {
+  width: 30px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-link:hover .inicio-seta {
+  transform: translateX(5px);
+}
+
+/* Fita adesiva rosa, meio transparente, com as pontas rasgadas. */
+.inicio-durex {
+  position: absolute;
+  z-index: 2;
+  width: 96px;
+  height: 26px;
+  background: repeating-linear-gradient(-45deg, rgb(255 196 220 / 0.82) 0 7px, rgb(255 226 238 / 0.82) 7px 14px);
+  box-shadow: 0 1px 2px rgb(42 28 21 / 0.18);
+  clip-path: polygon(4% 0, 96% 6%, 100% 30%, 97% 55%, 100% 82%, 95% 100%, 5% 94%, 0 70%, 3% 45%, 0 18%);
+  pointer-events: none;
+}
+
+.inicio-durex--esq { top: -12px; left: 18px; rotate: -8deg; }
+.inicio-durex--dir { top: -10px; right: 22px; rotate: 6deg; }
+.inicio-durex--topo { top: -13px; left: 50%; margin-left: -48px; rotate: -3deg; }
+
+.inicio-rabisco {
+  position: absolute;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* Adesivo: imagem recortada com borda branca, como um adesivo de verdade. */
+.inicio-adesivo {
+  position: absolute;
+  height: auto;
+  filter:
+    drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
+    drop-shadow(2px 4px 3px rgb(42 28 21 / 0.35));
+  transition: rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.inicio-adesivo:hover {
+  rotate: -8deg;
+}
+
+/* ---------- Marca: folha de caderno quadriculada ---------- */
+
+.inicio-marca {
+  align-items: center;
+  padding: clamp(36px, 4vw, 52px) clamp(24px, 4vw, 56px) clamp(30px, 3.4vw, 44px);
+  text-align: center;
+  background-color: #fffdf9;
+  background-image:
+    linear-gradient(rgb(216 27 96 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(216 27 96 / 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+
+.inicio-marca__logo {
+  margin: 0;
+  line-height: 0;
+}
+
+.inicio-marca__logo img {
+  width: clamp(230px, 30vw, 400px);
+  height: auto;
+}
+
+.inicio-marca__oi {
+  margin: clamp(12px, 1.6vw, 20px) 0 0;
+  font-family: var(--fonte-mao);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.inicio-marca__texto {
+  max-width: 40ch;
+  margin: 4px 0 0;
+  color: var(--tinta-suave);
+  text-wrap: balance;
+}
+
+.inicio-rabisco--brilho1 { top: 26px; left: 8%; width: 26px; height: 26px; }
+.inicio-rabisco--brilho2 { bottom: 20px; right: 9%; width: 18px; height: 18px; stroke: var(--pin-violeta); }
+.inicio-rabisco--sublinhado {
+  bottom: clamp(8px, 1vw, 14px);
+  left: 50%;
+  width: 120px;
+  height: 12px;
+  margin-left: -60px;
+  stroke-width: 2.2;
+  opacity: 0.5;
+}
+
+.inicio-adesivo--mascote {
+  right: -26px;
+  bottom: -30px;
+  width: clamp(78px, 7.5vw, 104px);
+  rotate: 10deg;
+}
+
+/* ---------- Projetos: cartolina rosa ---------- */
+
+.inicio-projetos {
+  padding: 34px 26px 24px;
+  background:
+    radial-gradient(circle at 85% 12%, rgb(255 255 255 / 0.35), transparent 40%),
+    var(--postit-rosa);
+}
+
+.inicio-projetos .inicio-titulo {
+  font-size: clamp(2.8rem, 4vw, 3.6rem);
+  color: var(--magenta-escuro);
+}
+
+.inicio-polaroides {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin: 14px 0 8px;
+}
+
+.inicio-polaroide {
+  display: grid;
+  place-items: center;
+  width: 31%;
+  max-width: 92px;
+  aspect-ratio: 0.82;
+  padding: 8px 8px 22px;
+  background: #fff;
+  box-shadow: 0 1px 1px rgb(42 28 21 / 0.18), 0 6px 10px -4px rgb(42 28 21 / 0.4);
+  transform: rotate(var(--rot));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Rabisco de átomo no meio da cartolina (só no desktop, onde ela fica alta). */
+.inicio-rabisco--atomo {
+  position: static;
+  align-self: center;
+  width: 92px;
+  height: 92px;
+  margin: auto 0;
+  color: var(--magenta-escuro);
+  stroke: currentColor;
+  stroke-width: 1.1;
+  opacity: 0.55;
+  rotate: -12deg;
+}
+
+.inicio-polaroide svg {
+  width: 100%;
+  height: 100%;
+  padding: 18%;
+  border-radius: 2px;
+  background: #fff3f8;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* As fotinhas se espalham um pouco quando a cartolina é tocada. */
+.inicio-projetos:hover .inicio-polaroide:nth-child(1) { transform: rotate(-10deg) translate(-4px, -3px); }
+.inicio-projetos:hover .inicio-polaroide:nth-child(3) { transform: rotate(3deg) translate(4px, -2px); }
+
+/* ---------- Eventos: calendário de mesa com canhoto ---------- */
+
+.inicio-eventos {
+  align-items: flex-start;
+  padding: 30px 22px 22px;
+  background: var(--papel);
+}
+
+.inicio-eventos__argolas {
+  position: absolute;
+  top: -9px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 42%;
+}
+
+.inicio-eventos__argolas span {
+  width: 12px;
+  height: 22px;
+  border: 3px solid #6b5a52;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #8d7b72, #cfc3b9);
+}
+
+.inicio-eventos__data {
+  display: grid;
+  justify-items: center;
+  width: 104px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  border: 2px solid var(--tinta);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.inicio-eventos__mes {
+  width: 100%;
+  padding: 3px 0;
+  background: var(--magenta);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: lowercase;
+}
+
+.inicio-eventos__dia {
+  display: grid;
+  place-items: center;
+  min-height: 58px;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.inicio-eventos__dia svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+/* Canhoto de ingresso destacável, com picote. */
+.inicio-ingresso {
+  position: absolute;
+  top: 22px;
+  right: -14px;
+  padding: 6px 12px 6px 18px;
+  background: var(--postit-amarelo);
+  box-shadow: 0 1px 1px rgb(42 28 21 / 0.2), 2px 6px 8px -4px rgb(42 28 21 / 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  rotate: 8deg;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 100% 100%;
+  mask: radial-gradient(circle at 0 50%, transparent 6px, #000 6.5px) 0 0 / 100% 100%;
+  transition: rotate 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-ingresso::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 10px;
+  border-left: 2px dashed rgb(42 28 21 / 0.35);
+}
+
+.inicio-eventos:hover .inicio-ingresso {
+  rotate: 14deg;
+}
+
+/* ---------- Notícias: recorte de jornal ---------- */
+
+.inicio-noticias {
+  padding: 26px 22px 30px;
+  background: #f4efe4;
+  /* Borda de baixo rasgada. */
+  clip-path: polygon(0 0, 100% 0, 100% 96%, 94% 99%, 87% 96.5%, 79% 99.5%, 70% 97%, 61% 99.5%, 52% 96.8%,
+    43% 99.4%, 34% 97%, 25% 99.6%, 16% 96.8%, 8% 99.2%, 0 97%);
+  filter: drop-shadow(0 8px 8px rgb(42 28 21 / 0.28));
+  box-shadow: none;
+}
+
+.inicio-noticias:hover {
+  box-shadow: none;
+  filter: drop-shadow(0 18px 14px rgb(42 28 21 / 0.34));
+}
+
+.inicio-noticias .inicio-titulo {
+  padding-bottom: 6px;
+  border-bottom: 3px double var(--tinta);
+}
+
+.inicio-noticias__colunas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.inicio-noticias__colunas span {
+  height: 54px;
+  background: repeating-linear-gradient(to bottom, rgb(42 28 21 / 0.2) 0 2px, transparent 2px 9px);
+}
+
+.inicio-noticias__colunas span:last-child {
+  height: 36px;
+}
+
+.inicio-clipe {
+  position: absolute;
+  top: -14px;
+  right: 26px;
+  width: 30px;
+  height: 46px;
+  fill: none;
+  stroke: #8a8f98;
+  stroke-width: 2;
+  stroke-linecap: round;
+  rotate: 18deg;
+}
+
+/* ---------- Passaporte: só decoração por enquanto ---------- */
+
+/* No desktop o cartão é estreito: capa em cima, texto embaixo, e o aviãozinho no canto livre. */
+.inicio-passaporte {
+  z-index: 1;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px 20px 22px;
+  background: var(--papel);
+}
+
+.inicio-passaporte__capa {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  width: 92px;
+  aspect-ratio: 0.72;
+  border-radius: 4px 9px 9px 4px;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.22) 0 5px, transparent 5px),
+    var(--magenta-escuro);
+  box-shadow: 2px 4px 6px rgb(42 28 21 / 0.35);
+  color: #ffd6e8;
+}
+
+.inicio-passaporte__capa svg {
+  width: 34px;
+  height: 34px;
+  fill: currentColor;
+}
+
+.inicio-passaporte__capa span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.inicio-passaporte__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.inicio-passaporte .inicio-titulo {
+  font-size: clamp(2rem, 2.6vw, 2.5rem);
+}
+
+.inicio-passaporte .inicio-texto {
+  font-size: 0.92rem;
+}
+
+/* Carimbo de borracha, meio falhado. */
+.inicio-carimbo {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border: 2px solid var(--pin-violeta);
+  border-radius: 6px;
+  color: var(--pin-violeta);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  rotate: -7deg;
+  opacity: 0.82;
+  -webkit-mask: radial-gradient(circle at 30% 40%, #000 60%, rgb(0 0 0 / 0.55) 61%) 0 0 / 7px 7px;
+  mask: radial-gradient(circle at 30% 40%, #000 60%, rgb(0 0 0 / 0.55) 61%) 0 0 / 7px 7px;
+}
+
+/* Aviãozinho de papel (3D quando dá; senão o desenho). Sai um pouco do papel, por cima. */
+.inicio-aviao {
+  position: absolute;
+  top: -44px;
+  right: -26px;
+  width: 180px;
+  height: 140px;
+  pointer-events: none;
+}
+
+.inicio-aviao canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-aviao--3d canvas { opacity: 1; }
+.inicio-aviao--3d .inicio-aviao__desenho { opacity: 0; }
+
+.inicio-aviao__desenho {
+  position: absolute;
+  inset: 18% 12% 10% 10%;
+  overflow: visible;
+}
+
+.inicio-aviao__papel {
+  fill: #fffdf7;
+  stroke: var(--magenta-escuro);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  transition: opacity 0.4s ease;
+}
+
+.inicio-aviao__dobra {
+  fill: none;
+  stroke: var(--magenta-escuro);
+  stroke-width: 1.2;
+  transition: opacity 0.4s ease;
+}
+
+.inicio-aviao__rastro {
+  fill: none;
+  stroke: var(--magenta-escuro);
+  stroke-width: 1.6;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+/* ---------- Vagas: anúncio com tiras de destacar ---------- */
+
+.inicio-vagas {
+  padding: 30px 22px 0;
+  background: var(--postit-verde);
+}
+
+.inicio-vagas__selo {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: var(--tinta);
+  color: var(--postit-verde);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.inicio-vagas .inicio-titulo {
+  font-size: clamp(2.6rem, 3.6vw, 3.3rem);
+  color: #134a42;
+}
+
+.inicio-vagas__tiras {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  margin: 14px -22px 0;
+  border-top: 2px dashed rgb(19 74 66 / 0.4);
+}
+
+.inicio-vagas__tiras span {
+  display: grid;
+  place-items: center;
+  min-height: 76px;
+  border-left: 1px dashed rgb(19 74 66 / 0.35);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #134a42;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-vagas__tiras span:first-child {
+  border-left: 0;
+}
+
+/* Uma tira já foi levada; ao passar o mouse, outra entorta como se fosse sair. */
+.inicio-vagas__tiras span:nth-child(2) {
+  visibility: hidden;
+}
+
+.inicio-vagas:hover .inicio-vagas__tiras span:nth-child(4) {
+  transform: rotate(-9deg) translateY(4px);
+  transform-origin: top center;
+}
+
+/* ---------- Recado ---------- */
+
+.inicio-recado {
+  justify-self: center;
+  width: min(100%, 230px);
+  padding: 24px 20px 20px;
+  transform: rotate(var(--rot));
+  animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.inicio-recado p {
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.inicio-rabisco--coracao {
+  position: static;
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin: 8px 0 0 auto;
+  rotate: 12deg;
+}
+
+/* ---------- Telas menores: o mural se reorganiza, sem só encolher ---------- */
+
+@media (max-width: 1100px) {
+  .inicio-projetos {
+    align-self: start;
+  }
+
+  .inicio-rabisco--atomo {
+    display: none;
+  }
+
+  /* Aqui o cartão é largo: capa e texto lado a lado, com espaço à direita para o avião. */
+  .inicio-passaporte {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 150px 22px 20px;
+  }
+
+  .inicio-aviao {
+    top: -34px;
+    right: -16px;
+  }
+
+  .inicio-mural {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-areas:
+      "marc marc marc marc marc marc"
+      "proj proj proj even even even"
+      "vaga vaga vaga noti noti noti"
+      "pass pass pass pass reca reca";
+  }
+
+  .inicio-adesivo--mascote {
+    right: -10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .inicio-mural {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "marc" "proj" "even" "vaga" "noti" "pass" "reca";
+    gap: 34px;
+  }
+
+  /* Menos inclinação no celular, para ler sem esforço. */
+  .inicio-papel,
+  .inicio-recado {
+    --rot-celular: calc(var(--rot) * 0.5);
+    transform: rotate(var(--rot-celular));
+  }
+
+  .inicio-link:hover {
+    transform: translateY(-4px);
+  }
+
+  .inicio-marca {
+    padding-bottom: 54px;
+  }
+
+  .inicio-adesivo--mascote {
+    right: 6px;
+    bottom: -26px;
+    width: 76px;
+  }
+
+  .inicio-ingresso {
+    right: 8px;
+  }
+
+  /* Estreito de novo: capa em cima, texto embaixo, avião no canto livre. */
+  .inicio-passaporte {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 24px 20px 22px;
+  }
+
+  .inicio-aviao {
+    top: -40px;
+    right: -8px;
+    width: 160px;
+    height: 124px;
+  }
+
+  .inicio-recado {
+    width: min(78%, 240px);
+  }
+}

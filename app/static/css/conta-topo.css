@@ -1,15 +1,9 @@
-/* Foto da conta no canto direito do cabeçalho (só com login). Não muda o resto do .topo. */
+/* Foto da conta no canto direito do cabeçalho (só com login). */
 
 .conta-topo {
   position: relative;
   flex: none;
   margin-left: auto;
-}
-
-/* Quando a página tem o botão de ação, ele já empurra para a direita: a foto fica colada nele.
-   O -12px tira parte do espaço de 28px entre os itens do .topo (sobram 16px). */
-.topo__acao ~ .conta-topo {
-  margin-left: -12px;
 }
 
 .conta-topo__botao {
@@ -106,28 +100,4 @@
 
 .conta-topo__item[aria-current="page"] {
   color: var(--magenta-escuro);
-}
-
-/* No celular o menu de navegação já vai para uma segunda linha (base.css): a foto entra na
-   ponta direita dessa linha, em vez de abrir uma terceira, e o cabeçalho não fica mais alto. */
-@media (max-width: 720px) {
-  .topo:has(.conta-topo) .topo__nav {
-    width: calc(100% - 44px);
-  }
-
-  .conta-topo,
-  .topo__acao ~ .conta-topo {
-    order: 4;
-    align-self: center;
-    margin-left: -20px; /* sobram 8px dos 28px entre os itens */
-  }
-
-  .conta-topo__avatar {
-    width: 36px;
-    height: 36px;
-  }
-
-  .conta-topo__inicial {
-    font-size: 1.3rem;
-  }
 }

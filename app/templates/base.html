@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu-lateral.css') }}">
   {% if conta_topo %}<link rel="stylesheet" href="{{ url_for('static', filename='css/conta-topo.css') }}">{% endif %}
   {% block estilos %}{% endblock %}
 </head>
@@ -20,29 +21,48 @@
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
+    <button class="topo__menu" type="button" id="abrir-menu" aria-controls="menu-lateral" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Menu</span>
+    </button>
     <a class="topo__marca" href="/">
       <img src="{{ url_for('static', filename='img/logo-astrace-topo.png') }}" alt="AstrAce, página inicial" width="289" height="92">
     </a>
-    <nav class="topo__nav" aria-label="Principal">
-      <ul>
-        <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural</a></li>
-        <li><a href="/eventos" {% if request.path.startswith('/eventos') %}aria-current="page"{% endif %}>Eventos</a></li>
-        <li><a href="/vagas" {% if request.path.startswith('/vagas') %}aria-current="page"{% endif %}>Vagas</a></li>
-        <li><a href="/noticias" {% if request.path.startswith('/noticias') %}aria-current="page"{% endif %}>Notícias</a></li>
-        <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
-      </ul>
-    </nav>
-    {% block acao_topo %}
-    <a class="botao botao--primario topo__acao" href="/mural/novo">Publicar projeto</a>
-    {% endblock %}
     {% if conta_topo %}{% include "_conta_topo.html" %}{% endif %}
   </header>
+
+  {# Barra lateral com a navegação e a ação da página (o que antes ficava no cabeçalho). #}
+  <dialog class="lateral" id="menu-lateral" aria-labelledby="menu-lateral-titulo">
+    <div class="lateral__folha">
+      <div class="lateral__topo">
+        <p class="lateral__titulo" id="menu-lateral-titulo">Menu</p>
+        <button class="lateral__fechar" type="button" id="fechar-menu" aria-label="Fechar menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <nav class="lateral__nav" aria-label="Principal">
+        <ul>
+          <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural</a></li>
+          <li><a href="/eventos" {% if request.path.startswith('/eventos') %}aria-current="page"{% endif %}>Eventos</a></li>
+          <li><a href="/vagas" {% if request.path.startswith('/vagas') %}aria-current="page"{% endif %}>Vagas</a></li>
+          <li><a href="/noticias" {% if request.path.startswith('/noticias') %}aria-current="page"{% endif %}>Notícias</a></li>
+          <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
+        </ul>
+      </nav>
+      <div class="lateral__acao">
+        {% block acao_topo %}
+        <a class="botao botao--primario topo__acao" href="/mural/novo">Publicar projeto</a>
+        {% endblock %}
+      </div>
+    </div>
+  </dialog>
 
   <main id="conteudo">
     {% block conteudo %}{% endblock %}
   </main>
 
   {% block scripts %}{% endblock %}
+  <script type="module" src="{{ url_for('static', filename='js/menu-lateral.js') }}"></script>
   {% if conta_topo %}<script type="module" src="{{ url_for('static', filename='js/conta-topo.js') }}"></script>{% endif %}
 </body>
 </html>

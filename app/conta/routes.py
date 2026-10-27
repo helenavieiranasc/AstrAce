@@ -34,7 +34,8 @@ def _cadastro_completo(usuaria):
 
 
 def _destino(usuaria):
-    return url_for("mural.pagina_mural") if _cadastro_completo(usuaria) else url_for("conta.pagina_cadastro")
+    """Depois de entrar: a página inicial (o próprio /) ou, se o perfil não está pronto, o cadastro."""
+    return url_for("conta.landing") if _cadastro_completo(usuaria) else url_for("conta.pagina_cadastro")
 
 
 # ---------- Landing e login ----------
@@ -42,9 +43,12 @@ def _destino(usuaria):
 
 @bp.get("/")
 def landing():
+    """Sem login: a landing. Com o cadastro completo: a página inicial (o mural de navegação)."""
     usuaria = _usuaria_logada()
     if usuaria:
-        return redirect(_destino(usuaria))
+        if not _cadastro_completo(usuaria):
+            return redirect(url_for("conta.pagina_cadastro"))
+        return render_template("inicio.html", nome=usuaria.nome_publico)
     codigo = request.args.get("erro")
     return render_template(
         "landing.html",
@@ -349,4 +353,4 @@ def api_salvar_perfil():
     db.session.add(conta)
     db.session.commit()
 
-    return jsonify({"perfil": _perfil_json(usuaria), "proximo": url_for("mural.pagina_mural")})
+    return jsonify({"perfil": _perfil_json(usuaria), "proximo": url_for("conta.landing")})

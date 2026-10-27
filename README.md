@@ -139,9 +139,21 @@ assim ninguém precisa apagar o banco.
 A estrela 3D da landing (`frontend/src/estrela-3d.ts`) é a mascote da logo (`static/img/logo-estrela-original.png`)
 modelada em Three.js, que vem do CDN só quando o navegador tem WebGL. Sem ele, aparece o desenho da logo.
 
+## Página inicial
+
+Com o cadastro completo, o `/` é a página inicial (`templates/inicio.html`): um mural com a logo e um papel
+para cada área (Projetos `/mural`, Eventos `/eventos`, Vagas `/vagas`, Notícias `/noticias`). É para lá que o login
+e o fim do cadastro levam, e a logo do cabeçalho já aponta para `/`. Sem login, o `/` continua sendo a landing.
+
+Os papéis usam dados que já existem: a data do próximo evento (`/api/eventos/proximo`) e quantos projetos e vagas há.
+O Passaporte ainda não tem página, então aparece como decoração, sem link, com um aviãozinho de papel 3D
+(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho). Quando `/passaporte` existir,
+é só trocar a `div.inicio-passaporte` por um link.
+
 ## Perfil
 
-Com login, a foto da usuária aparece no canto direito do cabeçalho (`templates/_conta_topo.html`), com um menu
+O cabeçalho tem o botão "Menu" (abre a barra lateral com os links e a ação da página, `{% block acao_topo %}`), a logo e,
+com login, a foto da usuária no canto direito (`templates/_conta_topo.html`), com um menu
 "Meu perfil / Sair". A foto exibida é a escolhida por ela; sem ela, a do Google; sem as duas, a inicial do nome.
 Remover a foto escolhida volta para a do Google.
 

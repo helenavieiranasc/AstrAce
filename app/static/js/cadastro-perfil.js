@@ -461,7 +461,7 @@ form.addEventListener("submit", async (evento) => {
         salvar.textContent = "Perfil salvo";
         status.classList.add("perfil-status--ok");
         atualizarFotoDoTopo(resposta.perfil.foto_url);
-        status.textContent = modo === "editar" ? "Pronto! Voltando ao seu perfil…" : "Pronto! Abrindo o mural…";
+        status.textContent = modo === "editar" ? "Pronto! Voltando ao seu perfil…" : "Pronto! Entrando no astrAce…";
         const destino = form.dataset.destino || resposta.proximo;
         window.setTimeout(() => (window.location.href = destino), 900);
     }

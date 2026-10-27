@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block titulo %}Início · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inicio.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+{#- Desenhos de traço, reaproveitados nos papéis. Só decoração. -#}
+{% set icone_ideia %}<path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1v.1h5v-.1c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3z"/>{% endset %}
+{% set icone_frasco %}<path d="M9 3h6M10 3v6.2L4.6 18.4A1.8 1.8 0 0 0 6.2 21h11.6a1.8 1.8 0 0 0 1.6-2.6L14 9.2V3"/><path d="M7.2 15h9.6"/>{% endset %}
+{% set icone_codigo %}<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8.5h18"/><path d="m10 12-2.5 2.5L10 17M14 12l2.5 2.5L14 17"/>{% endset %}
+{% set seta %}<svg class="inicio-seta" viewBox="0 0 28 16" aria-hidden="true"><path d="M2 9c5-1.6 11-1.8 21-.6"/><path d="M18 3.5 24 8.6l-6.4 4.4"/></svg>{% endset %}
+{% set brilho %}<path d="M12 2.5c.7 4.6 3 6.9 7.6 7.6-4.6.7-6.9 3-7.6 7.6-.7-4.6-3-6.9-7.6-7.6 4.6-.7 6.9-3 7.6-7.6z"/>{% endset %}
+
+<div class="quadro inicio-quadro">
+  <div class="cortica inicio-cortica">
+    <div class="inicio-mural">
+
+      {# ---------- Marca: folha de caderno com a logo ---------- #}
+      <section class="inicio-papel inicio-marca" style="--rot: -1deg; --i: 0" aria-labelledby="inicio-oi">
+        <span class="inicio-durex inicio-durex--esq" aria-hidden="true"></span>
+        <span class="inicio-durex inicio-durex--dir" aria-hidden="true"></span>
+        <h1 class="inicio-marca__logo">
+          <img src="{{ url_for('static', filename='img/logo-astrace.png') }}" alt="AstrAce" width="1699" height="540">
+        </h1>
+        <p class="inicio-marca__oi" id="inicio-oi">Oi, {{ nome }}!</p>
+        <p class="inicio-marca__texto">Este é o seu mural. Cada papel leva a um canto do astrAce: escolha um e boa exploração.</p>
+        <svg class="inicio-rabisco inicio-rabisco--brilho1" viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg>
+        <svg class="inicio-rabisco inicio-rabisco--brilho2" viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg>
+        <svg class="inicio-rabisco inicio-rabisco--sublinhado" viewBox="0 0 120 12" aria-hidden="true"><path d="M3 8c20-5 45-6 70-3s30 2 44-1"/></svg>
+        <img class="inicio-adesivo inicio-adesivo--mascote" src="{{ url_for('static', filename='img/logo-estrela-magenta-240.png') }}"
+             alt="" width="240" height="244" aria-hidden="true">
+      </section>
+
+      {# ---------- Projetos: cartolina grande ---------- #}
+      <a class="inicio-papel inicio-link inicio-projetos" href="/mural" style="--rot: -2deg; --i: 1">
+        <span class="pin pin--canto-esq" style="--cor-pin: var(--pin-violeta)" aria-hidden="true"></span>
+        <span class="pin pin--canto-dir" style="--cor-pin: var(--pin-ambar)" aria-hidden="true"></span>
+        <span class="inicio-titulo">Projetos</span>
+        <span class="inicio-texto">Pesquisas, apps, pôsteres e ideias de meninas e mulheres na ciência.</span>
+        <span class="inicio-polaroides" aria-hidden="true">
+          <span class="inicio-polaroide" style="--rot: -6deg"><svg viewBox="0 0 24 24">{{ icone_ideia }}</svg></span>
+          <span class="inicio-polaroide" style="--rot: 4deg"><svg viewBox="0 0 24 24">{{ icone_frasco }}</svg></span>
+          <span class="inicio-polaroide" style="--rot: -2deg"><svg viewBox="0 0 24 24">{{ icone_codigo }}</svg></span>
+        </span>
+        <span class="inicio-contagem" data-contagem="projetos" hidden></span>
+        <svg class="inicio-rabisco inicio-rabisco--atomo" viewBox="0 0 48 48" aria-hidden="true">
+          <ellipse cx="24" cy="24" rx="20" ry="7.5"/>
+          <ellipse cx="24" cy="24" rx="20" ry="7.5" transform="rotate(60 24 24)"/>
+          <ellipse cx="24" cy="24" rx="20" ry="7.5" transform="rotate(-60 24 24)"/>
+          <circle cx="24" cy="24" r="2.6" fill="currentColor"/>
+        </svg>
+        <span class="inicio-abrir">ver o mural de projetos {{ seta }}</span>
+      </a>
+
+      {# ---------- Eventos: folha de calendário com canhoto de ingresso ---------- #}
+      <a class="inicio-papel inicio-link inicio-eventos" href="/eventos" style="--rot: 2.4deg; --i: 2">
+        <span class="inicio-eventos__argolas" aria-hidden="true"><span></span><span></span></span>
+        <span class="inicio-eventos__data" aria-hidden="true">
+          <span class="inicio-eventos__mes" id="inicio-mes">agenda</span>
+          <span class="inicio-eventos__dia" id="inicio-dia">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          </span>
+        </span>
+        <span class="inicio-titulo">Eventos</span>
+        <span class="inicio-texto" id="inicio-evento">Oficinas, palestras e hackathons para participar.</span>
+        <span class="inicio-ingresso" aria-hidden="true">entrada</span>
+        <span class="inicio-abrir">ver a agenda {{ seta }}</span>
+      </a>
+
+      {# ---------- Notícias: recorte de jornal preso com clipe ---------- #}
+      <a class="inicio-papel inicio-link inicio-noticias" href="/noticias" style="--rot: 1.4deg; --i: 3">
+        <svg class="inicio-clipe" viewBox="0 0 24 24" aria-hidden="true"><path d="m20.5 11.5-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg>
+        <span class="inicio-titulo">Notícias</span>
+        <span class="inicio-texto">Descobertas e conquistas atuais de mulheres na ciência.</span>
+        <span class="inicio-noticias__colunas" aria-hidden="true"><span></span><span></span></span>
+        <span class="inicio-abrir">ler as notícias {{ seta }}</span>
+      </a>
+
+      {# ---------- Passaporte: ainda não tem página, então é só decoração (sem link) ---------- #}
+      <div class="inicio-papel inicio-passaporte" style="--rot: -3deg; --i: 4">
+        <span class="inicio-passaporte__capa" aria-hidden="true">
+          <svg viewBox="0 0 24 24">{{ brilho }}</svg>
+          <span>passaporte</span>
+        </span>
+        <span class="inicio-passaporte__texto">
+          <span class="inicio-titulo">Passaporte</span>
+          <span class="inicio-texto">Carimbos dos eventos de que você participar.</span>
+          <span class="inicio-carimbo">em breve</span>
+        </span>
+        <div class="inicio-aviao" id="inicio-aviao" aria-hidden="true">
+          {# Sem WebGL, fica este aviãozinho desenhado. #}
+          <svg class="inicio-aviao__desenho" viewBox="0 0 64 48">
+            <path class="inicio-aviao__rastro" d="M2 44c10-2 14-12 24-12s8 8 2 8-4-14 12-20"/>
+            <path class="inicio-aviao__papel" d="M62 4 30 20l9 4z"/>
+            <path class="inicio-aviao__papel" d="M62 4 39 24l3 12z"/>
+            <path class="inicio-aviao__dobra" d="M62 4 39 24l-3 6 3-6"/>
+          </svg>
+        </div>
+      </div>
+
+      {# ---------- Vagas: anúncio com tiras de destacar ---------- #}
+      <a class="inicio-papel inicio-link inicio-vagas" href="/vagas" style="--rot: -1.6deg; --i: 5">
+        <span class="inicio-durex inicio-durex--topo" aria-hidden="true"></span>
+        <span class="inicio-vagas__selo" aria-hidden="true">oportunidade</span>
+        <span class="inicio-titulo">Vagas</span>
+        <span class="inicio-texto">Bolsas, estágios e programas afirmativos para o próximo passo.</span>
+        <span class="inicio-contagem" data-contagem="vagas" hidden></span>
+        <span class="inicio-vagas__tiras" aria-hidden="true">
+          {% for _ in range(6) %}<span>ver vagas</span>{% endfor %}
+        </span>
+      </a>
+
+      {# ---------- Recado: só decoração ---------- #}
+      <div class="postit postit--amarelo inicio-recado" style="--rot: 3deg; --i: 6" aria-hidden="true">
+        <span class="pin" style="--cor-pin: var(--pin-magenta)"></span>
+        <p>não esquecer: publicar aquele projeto!</p>
+        <svg class="inicio-rabisco inicio-rabisco--coracao" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.1a4.3 4.3 0 0 1 7.5 2.7C19.5 15.4 12 20 12 20z"/></svg>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/inicio.js') }}"></script>
+{% endblock %}

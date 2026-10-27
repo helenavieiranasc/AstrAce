@@ -226,3 +226,49 @@ def test_nao_usa_foto_de_outra_pessoa(ana, bia):
     foto = enviar_foto(ana)
     resposta = bia.post("/api/perfil", json={**PERFIL, "foto_id": foto["id"]})
     assert resposta.status_code == 422
+
+
+# ---------- Página inicial ----------
+
+
+def test_inicio_mostra_o_mural_de_navegacao(ana):
+    pagina = ana.get("/").get_data(as_text=True)
+    assert "Oi, Ana!" in pagina
+    for destino in ('href="/mural"', 'href="/eventos"', 'href="/vagas"', 'href="/noticias"'):
+        assert destino in pagina
+    # O Passaporte ainda não tem página: aparece no mural, mas sem link.
+    assert "Passaporte" in pagina
+    assert 'href="/passaporte" class' not in pagina and "inicio-passaporte\" href" not in pagina
+
+
+def test_inicio_sem_login_e_a_landing(app):
+    pagina = app.test_client().get("/").get_data(as_text=True)
+    assert "Entrar com Google" in pagina
+    assert "inicio-mural" not in pagina
+
+
+def test_inicio_com_cadastro_incompleto_vai_para_o_cadastro(app, monkeypatch):
+    perfil = {"sub": "sub-nova", "email": "nova@example.com", "email_verified": True, "name": "Nova"}
+    monkeypatch.setattr(google, "trocar_codigo", lambda codigo: "token")
+    monkeypatch.setattr(google, "buscar_perfil", lambda token: perfil)
+    cliente = app.test_client()
+    ida = cliente.get("/entrar/google")
+    estado = parse_qs(urlparse(ida.headers["Location"]).query)["state"][0]
+    cliente.get(f"/entrar/google/retorno?code=abc&state={estado}")
+    assert cliente.get("/").headers["Location"].endswith("/cadastro")
+
+
+def test_logo_do_cabecalho_leva_ao_inicio(ana):
+    pagina = ana.get("/vagas").get_data(as_text=True)
+    assert '<a class="topo__marca" href="/">' in pagina
+
+
+def test_navegacao_fica_na_barra_lateral(ana):
+    pagina = ana.get("/vagas").get_data(as_text=True)
+    cabecalho = pagina.split('<header class="topo">', 1)[1].split("</header>", 1)[0]
+    barra = pagina.split('id="menu-lateral"', 1)[1].split("</dialog>", 1)[0]
+    # No cabeçalho: botão do menu, logo e foto. Os links e a ação da página vão para a barra.
+    assert 'id="abrir-menu"' in cabecalho and "topo__marca" in cabecalho and 'id="conta-topo"' in cabecalho
+    assert 'href="/eventos"' not in cabecalho and "Publicar projeto" not in cabecalho
+    for destino in ("/mural", "/eventos", "/vagas", "/noticias", "/passaporte", "/mural/novo"):
+        assert f'href="{destino}"' in barra

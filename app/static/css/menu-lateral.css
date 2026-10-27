@@ -1,0 +1,190 @@
+/* Botão "Menu" do cabeçalho e a barra lateral com a navegação e a ação da página. */
+
+.topo__menu {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px 8px 10px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 8px;
+  background: var(--papel);
+  color: var(--tinta);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.topo__menu:hover,
+.topo__menu[aria-expanded="true"] {
+  border-color: var(--magenta);
+  background: var(--rosa-claro);
+}
+
+.topo__menu svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+/* O cabeçalho agora é uma linha só: menu, logo e (com login) a foto na ponta direita. */
+.topo {
+  flex-wrap: nowrap;
+  gap: 16px;
+}
+
+/* ---------- Barra lateral ---------- */
+
+.lateral {
+  width: min(330px, 88vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.lateral::backdrop {
+  background: rgb(42 28 21 / 0.5);
+}
+
+.lateral[open] .lateral__folha {
+  animation: lateral-entrar 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lateral[open]::backdrop {
+  animation: lateral-fundo 0.32s ease;
+}
+
+@keyframes lateral-entrar {
+  from { transform: translateX(-100%); }
+}
+
+@keyframes lateral-fundo {
+  from { opacity: 0; }
+}
+
+.lateral__folha {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 100%;
+  padding: 18px 18px 24px;
+  overflow-y: auto;
+  border-right: 1px solid var(--papel-borda);
+  background: var(--papel);
+  box-shadow: 12px 0 30px -10px rgb(42 28 21 / 0.5);
+}
+
+.lateral__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--papel-borda);
+}
+
+.lateral__titulo {
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.lateral__fechar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.lateral__fechar:hover {
+  background: var(--rosa-claro);
+}
+
+.lateral__fechar svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.lateral__nav ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lateral__nav a {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--tinta);
+  font-size: 1.12rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lateral__nav a:hover {
+  background: var(--rosa-claro);
+}
+
+.lateral__nav a[aria-current="page"] {
+  color: var(--magenta-escuro);
+  background: #fff0f6;
+  text-decoration: underline wavy var(--magenta) 2px;
+  text-underline-offset: 6px;
+}
+
+/* A ação da página (Publicar projeto, Sair...) fica no fim da barra. */
+.lateral__acao {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px dashed var(--papel-borda);
+}
+
+.lateral__acao:not(:has(*)) {
+  display: none;
+}
+
+.lateral__acao .topo__acao {
+  width: 100%;
+  margin: 0;
+}
+
+.lateral__acao form .botao {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .topo__menu span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .topo__menu {
+    padding: 8px 10px;
+  }
+}
