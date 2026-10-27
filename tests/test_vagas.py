@@ -149,4 +149,5 @@ def test_pagina_e_api_de_noticias(cliente):
 
     detalhe = cliente.get(f"/api/noticias/{lista['itens'][0]['id']}").get_json()
     assert detalhe["link_fonte"].startswith("https://")
+    assert detalhe["imagem_url"].startswith("/static/img/noticias/")
     assert detalhe["cientista"]

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d2b45"/>
+      <stop offset="55%" stop-color="#205c8a"/>
+      <stop offset="100%" stop-color="#2e6bd6"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <rect x="90" y="120" width="460" height="130" rx="24" fill="none" stroke="#c9dcf5" stroke-width="3" stroke-dasharray="10 6"/>
+  <g fill="#fffdf7">
+    <circle cx="180" cy="185" r="18" fill="#7ec8ff"/><circle cx="163" cy="168" r="8"/><circle cx="163" cy="202" r="8"/>
+    <circle cx="320" cy="185" r="18" fill="#7ec8ff"/><circle cx="303" cy="168" r="8"/><circle cx="303" cy="202" r="8"/>
+    <circle cx="460" cy="185" r="18" fill="#7ec8ff"/><circle cx="443" cy="168" r="8"/><circle cx="443" cy="202" r="8"/>
+  </g>
+  <path d="M215 185 L275 185 M355 185 L415 185" stroke="#ffe873" stroke-width="4" stroke-linecap="round"/>
+  <rect x="24" y="24" width="235" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">NANOTUBOS E ÁGUA · UFRGS</text>
+</svg>

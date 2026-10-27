@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#47122b"/>
+      <stop offset="60%" stop-color="#8c0d45"/>
+      <stop offset="100%" stop-color="#d81b60"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <circle cx="320" cy="190" r="88" fill="none" stroke="#fbd3e3" stroke-width="3" opacity="0.45"/>
+  <polygon points="320,120 380,155 380,225 320,260 260,225 260,155" fill="#ffc4dc" fill-opacity="0.2" stroke="#ffe873" stroke-width="3.5"/>
+  <circle cx="320" cy="190" r="26" fill="#ffe873"/>
+  <rect x="24" y="24" width="245" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">EPIDEMIOLOGIA · FIOCRUZ</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <radialGradient id="space" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1d2951"/>
+      <stop offset="60%" stop-color="#111633"/>
+      <stop offset="100%" stop-color="#070917"/>
+    </radialGradient>
+    <radialGradient id="blob" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7ec8ff"/>
+      <stop offset="55%" stop-color="#2e6bd6" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#2e6bd6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#space)"/>
+  <g fill="#fff">
+    <circle cx="80" cy="90" r="1.5"/><circle cx="140" cy="280" r="2"/><circle cx="540" cy="70" r="1.8"/>
+    <circle cx="590" cy="240" r="1.4"/><circle cx="480" cy="300" r="2.2"/><circle cx="210" cy="60" r="1.5"/>
+    <circle cx="65" cy="210" r="1.2"/><circle cx="410" cy="55" r="1.6"/>
+  </g>
+  <g transform="translate(275 185) rotate(-18)" fill="none" stroke-linecap="round">
+    <path d="M0 0 C35 -10, 75 20, 60 65 C42 115, -45 110, -95 75 C-150 35, -155 -45, -105 -95" stroke="#fbd3e3" stroke-width="5" opacity="0.75"/>
+    <path d="M0 0 C-35 10, -75 -20, -60 -65 C-42 -115, 45 -110, 95 -75 C150 -35, 155 45, 105 95" stroke="#ffe873" stroke-width="4" opacity="0.65"/>
+  </g>
+  <circle cx="275" cy="185" r="22" fill="#fffdf7"/>
+  <circle cx="475" cy="135" r="46" fill="url(#blob)"/>
+  <circle cx="465" cy="128" r="5" fill="#fff"/><circle cx="488" cy="142" r="4" fill="#d6eeff"/><circle cx="472" cy="150" r="3" fill="#fff"/>
+  <circle cx="525" cy="175" r="32" fill="url(#blob)"/>
+  <circle cx="525" cy="175" r="4" fill="#fff"/>
+  <rect x="24" y="24" width="220" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">ASTROFÍSICA · NASA</text>
+</svg>

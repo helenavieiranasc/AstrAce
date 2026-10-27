@@ -1,4 +1,11 @@
 import { api, el, esc, icone, mensagemDeErro, preencherSelect, urlSegura, } from "./comum.js";
+function urlImagemSegura(url) {
+    if (!url)
+        return null;
+    if (url.startsWith("/static/"))
+        return url;
+    return urlSegura(url);
+}
 const POR_PAGINA = 12;
 const CAMPOS_FILTRO = [
     "q",
@@ -100,6 +107,10 @@ function htmlSelos(selos) {
 }
 function htmlCartao(n, variante) {
     const pin = PINS[n.id % PINS.length];
+    const imagem = urlImagemSegura(n.imagem_url);
+    const foto = imagem
+        ? `<div class="recorte__foto"><img src="${esc(imagem)}" alt="" loading="lazy"></div>`
+        : "";
     const classes = ["cartao", "cartao--recorte"];
     if (variante === "destaque")
         classes.push("cartao--recorte-destaque");
@@ -112,6 +123,7 @@ function htmlCartao(n, variante) {
         style="--rot: ${rotacao(n.id, variante === "destaque" ? 1.2 : 1)}deg; --rot-fita: ${rotacao(n.id + 5, 2)}deg; --cor-ficha: var(${pin})">
         ${enfeite}
         <div>
+          ${foto}
           <div class="recorte__topo">
             <span class="recorte__categoria">${icone(n.icone)}${esc(n.categoria_rotulo)}</span>
             <span>${esc(n.data_publicacao_rotulo)}</span>
@@ -242,6 +254,10 @@ function itemFicha(rotulo, valor) {
 }
 function htmlDetalhe(n) {
     const link = urlSegura(n.link_fonte);
+    const imagem = urlImagemSegura(n.imagem_url);
+    const foto = imagem
+        ? `<figure class="detalhe__foto"><img src="${esc(imagem)}" alt="Ilustração: ${esc(n.titulo)}"></figure>`
+        : "";
     const urlVagasArea = `/vagas?area=${encodeURIComponent(n.area)}`;
     const urlMuralArea = `/mural?area=${encodeURIComponent(n.area)}`;
     return `
@@ -249,6 +265,7 @@ function htmlDetalhe(n) {
     <h2 id="detalhe-titulo">${esc(n.titulo)}</h2>
     <p class="detalhe__organizacao">${esc(n.cientista)}</p>
     ${htmlSelos(n.selos)}
+    ${foto}
     <p class="detalhe__resumo">${esc(n.resumo)}</p>
     <dl class="ficha-dados">
       ${itemFicha("Cientista / Protagonista", n.cientista)}

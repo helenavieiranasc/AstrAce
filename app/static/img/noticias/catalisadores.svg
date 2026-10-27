@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f2618"/>
+      <stop offset="55%" stop-color="#8c4319"/>
+      <stop offset="100%" stop-color="#efa20f"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <g stroke="#fffdf7" stroke-opacity="0.35" stroke-width="2" fill="none">
+    <polygon points="220,120 265,95 310,120 310,170 265,195 220,170"/>
+    <polygon points="310,120 355,95 400,120 400,170 355,195 310,170"/>
+    <polygon points="265,195 310,170 355,195 355,245 310,270 265,245"/>
+    <polygon points="355,195 400,170 445,195 445,245 400,270 355,245"/>
+  </g>
+  <g fill="#ffe873" stroke="#2a1c15" stroke-width="2.5">
+    <circle cx="265" cy="95" r="10"/><circle cx="355" cy="95" r="10"/>
+    <circle cx="220" cy="170" r="10"/><circle cx="310" cy="170" r="13" fill="#cdefb0"/>
+    <circle cx="400" cy="170" r="13" fill="#cdefb0"/><circle cx="265" cy="245" r="10"/>
+    <circle cx="355" cy="245" r="13" fill="#ffc4dc"/><circle cx="445" cy="245" r="10"/>
+  </g>
+  <rect x="24" y="24" width="235" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">CATÁLISE E AR LIMPO · ITA</text>
+</svg>

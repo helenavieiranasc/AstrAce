@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e4d2b"/>
+      <stop offset="55%" stop-color="#2c6b38"/>
+      <stop offset="100%" stop-color="#3f2618"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <line x1="0" y1="190" x2="640" y2="190" stroke="#cdefb0" stroke-opacity="0.4" stroke-width="3" stroke-dasharray="8 6"/>
+  <path d="M320 190 L320 95" stroke="#cdefb0" stroke-width="7" stroke-linecap="round"/>
+  <path d="M320 135 C270 125, 250 85, 295 75 C320 70, 320 115, 320 135 Z" fill="#cdefb0"/>
+  <path d="M320 120 C370 110, 390 70, 345 60 C320 55, 320 100, 320 120 Z" fill="#8fd66c"/>
+  <g stroke="#ffe873" stroke-width="3.5" fill="none" stroke-linecap="round">
+    <path d="M320 190 C305 235, 260 270, 210 315"/>
+    <path d="M320 190 C335 240, 385 275, 435 315"/>
+    <path d="M320 190 C320 245, 310 290, 325 335"/>
+  </g>
+  <g fill="#ffc4dc" stroke="#fffdf7" stroke-width="2">
+    <circle cx="275" cy="255" r="11"/><circle cx="240" cy="290" r="9"/>
+    <circle cx="365" cy="258" r="12"/><circle cx="320" cy="275" r="10"/><circle cx="402" cy="292" r="8"/>
+  </g>
+  <rect x="24" y="24" width="245" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">BIOINSUMOS · EMBRAPA</text>
+</svg>

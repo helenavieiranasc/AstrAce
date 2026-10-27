@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#261447"/>
+      <stop offset="55%" stop-color="#54297a"/>
+      <stop offset="100%" stop-color="#2e6bd6"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <g fill="none" stroke="#ffc4dc" stroke-width="2.5">
+    <ellipse cx="320" cy="185" rx="170" ry="75"/>
+    <ellipse cx="320" cy="185" rx="170" ry="75" transform="rotate(35 320 185)" stroke="#ffe873"/>
+    <ellipse cx="320" cy="185" rx="170" ry="75" transform="rotate(-35 320 185)" stroke="#cdefb0"/>
+  </g>
+  <rect x="24" y="24" width="245" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">GEOMETRIA ALGÉBRICA · IMPA</text>
+</svg>
