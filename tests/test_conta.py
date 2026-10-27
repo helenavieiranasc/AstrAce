@@ -108,7 +108,7 @@ def test_falha_do_google_volta_com_aviso(cliente, monkeypatch):
     assert entrar(cliente).headers["Location"].endswith("/?erro=google")
 
 
-def test_primeiro_acesso_vai_para_o_cadastro_e_depois_para_o_mural(app, cliente, google_falso):
+def test_primeiro_acesso_vai_para_o_cadastro_e_depois_para_o_inicio(app, cliente, google_falso):
     resposta = entrar(cliente)
     assert resposta.headers["Location"].endswith("/cadastro")
     assert cliente.get("/").headers["Location"].endswith("/cadastro")
@@ -121,8 +121,10 @@ def test_primeiro_acesso_vai_para_o_cadastro_e_depois_para_o_mural(app, cliente,
 
     salvo = cliente.post("/api/perfil", json=PERFIL_VALIDO)
     assert salvo.status_code == 200
-    assert salvo.get_json()["proximo"] == "/mural"
-    assert cliente.get("/").headers["Location"].endswith("/mural")
+    assert salvo.get_json()["proximo"] == "/"
+    inicio = cliente.get("/")
+    assert inicio.status_code == 200  # com o cadastro pronto, o / é a página inicial
+    assert "Oi, Ana!" in inicio.get_data(as_text=True)
 
     with app.app_context():
         ana = Usuaria.query.filter_by(email="ana@example.com").one()
@@ -138,14 +140,14 @@ def test_primeiro_acesso_vai_para_o_cadastro_e_depois_para_o_mural(app, cliente,
         assert ana.conta.cadastro_completo
 
 
-def test_quem_ja_tem_perfil_vai_direto_para_o_mural(app, cliente, google_falso):
+def test_quem_ja_tem_perfil_vai_direto_para_o_inicio(app, cliente, google_falso):
     entrar(cliente)
     cliente.post("/api/perfil", json=PERFIL_VALIDO)
     cliente.post("/sair")
     assert cliente.get("/").status_code == 200  # saiu: volta a ver a landing
 
     resposta = entrar(cliente)
-    assert resposta.headers["Location"].endswith("/mural")
+    assert urlparse(resposta.headers["Location"]).path == "/"
     with app.app_context():
         assert Usuaria.query.filter_by(email="ana@example.com").count() == 1
         assert ContaUsuaria.query.count() == 1
