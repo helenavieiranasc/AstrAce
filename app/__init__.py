@@ -14,13 +14,18 @@ def create_app(config=Config):
     # Cada frente registra o próprio blueprint aqui.
     from .usuarias import models as _usuarias  # noqa: F401  (registra as tabelas)
     from .uploads import models as _uploads  # noqa: F401
+    from .eventos import models as _eventos  # noqa: F401
     from .mural import bp as mural_bp
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
+    from .eventos import bp as eventos_bp
+    from .eventos.seed import seed_eventos
 
     app.register_blueprint(mural_bp)
     app.register_blueprint(uploads_bp)
+    app.register_blueprint(eventos_bp)
     app.cli.add_command(seed_mural)
+    app.cli.add_command(seed_eventos)
 
     @app.get("/")
     def inicio():

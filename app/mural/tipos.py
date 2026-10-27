@@ -3,7 +3,7 @@
 O formulário de cadastro é montado a partir daqui, então para ajustar
 um formulário basta mexer no tipo.
 
-Campo: nome, rotulo, tipo ("texto" | "selecao"), obrigatorio, opcoes, ajuda.
+Campo: nome, rotulo, tipo ("texto" | "selecao" | "url"), obrigatorio, opcoes, ajuda.
 
 Material: todo projeto precisa mostrar algo concreto.
   exige: "arquivo"     -> pelo menos um arquivo enviado
@@ -126,13 +126,50 @@ TIPOS = [
             fotos_contam=True,
         ),
     },
-    # ----- Parte B: a Pessoa 3 adiciona os campos extras destes tipos -----
+    # ----- Parte B: Pessoa 3 (canto de eventos + cadastros) -----
     {
         "valor": "software",
         "rotulo": "Software, app ou site",
         "icone": "software",
         "descricao": "Aplicativo, site, jogo, biblioteca ou ferramenta.",
-        "campos": [],
+        "campos": [
+            _campo(
+                "plataforma",
+                "Plataforma",
+                tipo="selecao",
+                obrigatorio=True,
+                opcoes=[
+                    ("web", "Site ou sistema web"),
+                    ("mobile", "App para celular"),
+                    ("desktop", "Programa para computador"),
+                    ("jogo", "Jogo"),
+                    ("biblioteca", "Biblioteca, API ou ferramenta"),
+                    ("outro", "Outra"),
+                ],
+            ),
+            _campo(
+                "tecnologias",
+                "Tecnologias usadas",
+                obrigatorio=True,
+                ajuda="Ex.: Python, Flask, MySQL, TypeScript.",
+            ),
+            _campo(
+                "situacao",
+                "Situação",
+                tipo="selecao",
+                opcoes=[
+                    ("desenvolvimento", "Em desenvolvimento"),
+                    ("publicado", "Publicado e em uso"),
+                    ("concluido", "Concluído"),
+                ],
+            ),
+            _campo(
+                "demo",
+                "Link para testar",
+                tipo="url",
+                ajuda="Site publicado, loja de apps ou vídeo de demonstração. Opcional.",
+            ),
+        ],
         "material": _material(
             "link",
             "Capturas de tela ou documentação",
@@ -145,7 +182,27 @@ TIPOS = [
         "rotulo": "Projeto social ou voluntário",
         "icone": "social",
         "descricao": "Ação social, voluntariado ou coletivo.",
-        "campos": [],
+        "campos": [
+            _campo(
+                "publico",
+                "Público atendido",
+                obrigatorio=True,
+                ajuda="Ex.: meninas de 10 a 14 anos da zona leste de São Paulo.",
+            ),
+            _campo("organizacao", "Coletivo, ONG ou organização", ajuda="Deixe em branco se foi uma iniciativa sua."),
+            _campo(
+                "papel",
+                "Seu papel",
+                tipo="selecao",
+                opcoes=[
+                    ("idealizadora", "Idealizadora"),
+                    ("coordenacao", "Coordenação"),
+                    ("voluntaria", "Voluntária"),
+                ],
+            ),
+            _campo("pessoas_alcancadas", "Quantas pessoas o projeto alcançou", ajuda="Um número aproximado já ajuda."),
+            _campo("periodo", "Período", ajuda="Ex.: março a junho de 2025, ou desde 2023."),
+        ],
         "material": _material(
             "um_dos_dois",
             "Relatório ou material produzido",
@@ -159,7 +216,17 @@ TIPOS = [
         "rotulo": "Trabalho de disciplina",
         "icone": "aula",
         "descricao": "Trabalho feito em aula para alguma matéria.",
-        "campos": [],
+        "campos": [
+            _campo("disciplina", "Disciplina", obrigatorio=True, ajuda="Ex.: Banco de Dados, Química Orgânica."),
+            _campo("professor", "Professor(a)"),
+            _campo("curso", "Curso"),
+            _campo(
+                "formato",
+                "Feito",
+                tipo="selecao",
+                opcoes=[("individual", "Individualmente"), ("grupo", "Em grupo")],
+            ),
+        ],
         "material": _material(
             "um_dos_dois",
             "Trabalho entregue",
@@ -172,7 +239,27 @@ TIPOS = [
         "rotulo": "Protótipo ou invenção",
         "icone": "prototipo",
         "descricao": "Protótipo, maquete, invenção ou hardware.",
-        "campos": [],
+        "campos": [
+            _campo(
+                "problema",
+                "Que problema resolve",
+                obrigatorio=True,
+                ajuda="Uma frase basta. Ex.: avisa quando a horta precisa de água.",
+            ),
+            _campo(
+                "estagio",
+                "Estágio",
+                tipo="selecao",
+                opcoes=[
+                    ("ideia", "Ideia ou esboço"),
+                    ("prototipo", "Protótipo funcionando"),
+                    ("testado", "Testado com pessoas"),
+                    ("registro", "Com pedido de patente ou registro"),
+                ],
+            ),
+            _campo("materiais", "Materiais e tecnologias", ajuda="Ex.: Arduino, sensores, impressão 3D, papelão."),
+            _campo("feira", "Feira ou competição", ajuda="Onde foi apresentado, se foi. Ex.: Febrace, Mostratec."),
+        ],
         "material": _material(
             "um_dos_dois",
             "Esquemas ou documentação",
