@@ -139,6 +139,24 @@ assim ninguém precisa apagar o banco.
 A estrela 3D da landing (`frontend/src/estrela-3d.ts`) é a mascote da logo (`static/img/logo-estrela-original.png`)
 modelada em Three.js, que vem do CDN só quando o navegador tem WebGL. Sem ele, aparece o desenho da logo.
 
+## Perfil
+
+Com login, a foto da usuária aparece no canto direito do cabeçalho (`templates/_conta_topo.html`), com um menu
+"Meu perfil / Sair". A foto exibida é a escolhida por ela; sem ela, a do Google; sem as duas, a inicial do nome.
+Remover a foto escolhida volta para a do Google.
+
+`/perfil` mostra os dados e as publicações dela (os projetos do mural). `/perfil/editar` é o mesmo formulário do
+cadastro, com o campo "Sobre você" (`usuaria.bio`). Publicar continua em `/mural/novo`.
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/minhas-publicacoes` | Projetos da usuária logada, inclusive os que saíram do mural por denúncia (`estado`) |
+| `GET /api/minhas-publicacoes/<id>` | Dados do projeto para editar, com os campos extras do tipo |
+| `PATCH /api/minhas-publicacoes/<id>` | Edita título, resumo, área, ano, nível, instituição, cidade, link e campos extras. Usa a mesma validação do mural; tipo, arquivos e fotos não mudam |
+| `DELETE /api/minhas-publicacoes/<id>` | Exclui o projeto, com estrelas, denúncias e arquivos (também do disco) |
+
+Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem `403`, e sem login `401`.
+
 ## Pontos de encaixe com as outras frentes
 
 - **Pessoa 2 (login e perfil):** o login com Google e o cadastro inicial já existem (seção acima) e gravam `session["usuaria_id"]`,

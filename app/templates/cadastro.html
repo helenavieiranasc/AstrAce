@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Seu perfil · AstrAce{% endblock %}
+{% block titulo %}{{ "Editar perfil" if modo == "editar" else "Seu perfil" }} · AstrAce{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
@@ -8,21 +8,30 @@
 {% endblock %}
 
 {% block acao_topo %}
+{% if modo == "editar" %}{{ super() }}{% else %}
 <form class="topo__acao" method="post" action="{{ url_for('conta.sair') }}">
   <button class="botao botao--texto" type="submit">Sair</button>
 </form>
+{% endif %}
 {% endblock %}
 
 {% block conteudo %}
 <div class="quadro quadro--perfil">
   <div class="cortica cortica--perfil">
-    <form class="folha-form folha-perfil" id="form-perfil" novalidate aria-busy="true">
+    <form class="folha-form folha-perfil" id="form-perfil" novalidate aria-busy="true" data-modo="{{ modo }}"
+          {% if modo == "editar" %}data-destino="{{ url_for('conta.pagina_perfil', salvo=1) }}"{% endif %}>
       <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
 
       <header class="folha-perfil__cabecalho">
+        {% if modo == "editar" %}
+        <a class="folha-form__voltar" href="{{ url_for('conta.pagina_perfil') }}">Voltar ao perfil</a>
+        <h1>Editar perfil</h1>
+        <p class="folha-form__intro">Mude o que quiser e salve. Campos com * são obrigatórios.</p>
+        {% else %}
         <h1>Seu perfil</h1>
         <p class="folha-form__intro">Falta pouco. Conte quem você é para o mural mostrar seus projetos do jeito certo.
           Campos com * são obrigatórios.</p>
+        {% endif %}
       </header>
 
       <div class="resumo-erros" id="resumo-erros" role="alert" tabindex="-1" hidden></div>
@@ -53,6 +62,15 @@
             <small id="apelido-ajuda">É o nome que aparece nos seus projetos.</small>
             <p class="campo__erro" id="erro-apelido" hidden></p>
           </div>
+
+          {% if modo == "editar" %}
+          <div class="campo">
+            <label for="bio">Sobre você</label>
+            <textarea id="bio" name="bio" rows="4" maxlength="500" aria-describedby="bio-ajuda erro-bio"></textarea>
+            <small id="bio-ajuda">Opcional. Aparece no seu perfil. <span id="bio-contador">0</span> de 500 caracteres.</small>
+            <p class="campo__erro" id="erro-bio" hidden></p>
+          </div>
+          {% endif %}
 
           {# Três listas em vez do calendário do navegador, que não aceita o estilo do site. #}
           <fieldset class="campo data-nascimento" aria-describedby="erro-data_nascimento">
@@ -136,7 +154,12 @@
       </div>
 
       <div class="folha-form__acoes folha-perfil__acoes">
-        <button class="botao botao--primario botao--grande" type="submit" id="salvar" disabled>Salvar e entrar</button>
+        <button class="botao botao--primario botao--grande" type="submit" id="salvar" disabled>
+          {{- "Salvar alterações" if modo == "editar" else "Salvar e entrar" -}}
+        </button>
+        {% if modo == "editar" %}
+        <a class="botao botao--texto" href="{{ url_for('conta.pagina_perfil') }}">Cancelar</a>
+        {% endif %}
         <p class="perfil-status" id="status" role="status" aria-live="polite"></p>
       </div>
     </form>

@@ -219,8 +219,12 @@ def test_foto_enviada_vira_foto_do_perfil(cliente, google_falso):
     salvo = cliente.post("/api/perfil", json={**PERFIL_VALIDO, "foto_id": foto["id"]})
     assert salvo.get_json()["perfil"]["foto_url"] == foto["url"]
 
-    removida = cliente.post("/api/perfil", json={**PERFIL_VALIDO, "remover_foto": True})
-    assert removida.get_json()["perfil"]["foto_url"] is None
+    assert salvo.get_json()["perfil"]["foto_propria"] is True
+
+    # Sem a foto própria, volta a do Google.
+    removida = cliente.post("/api/perfil", json={**PERFIL_VALIDO, "remover_foto": True}).get_json()["perfil"]
+    assert removida["foto_url"] == google_falso["picture"]
+    assert removida["foto_propria"] is False
 
 
 def test_foto_de_outra_pessoa_e_recusada(app, cliente, google_falso):

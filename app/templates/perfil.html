@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block titulo %}Meu perfil · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conta.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+{% set nome = usuaria.nome_publico %}
+<div class="quadro">
+  <div class="cortica cortica--perfil-pagina">
+
+    <section class="perfil-folha" aria-labelledby="perfil-nome">
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+
+      <div class="perfil-folha__foto" aria-hidden="true">
+        {% if foto_url %}
+        <img src="{{ foto_url }}" alt="" width="128" height="128" referrerpolicy="no-referrer">
+        {% endif %}
+        <span class="perfil-folha__inicial"{% if foto_url %} hidden{% endif %}>{{ nome[:1] | upper }}</span>
+      </div>
+
+      <div class="perfil-folha__dados">
+        <h1 id="perfil-nome">{{ nome }}</h1>
+        {% if nivel or area %}
+        <p class="perfil-folha__linha">{{ nivel or "" }}{% if nivel and area %} · {% endif %}{{ area or "" }}</p>
+        {% endif %}
+
+        {% if escola or formacoes or local %}
+        <ul class="perfil-folha__fatos">
+          {% if escola %}<li>{{ escola }}</li>{% endif %}
+          {% for f in formacoes %}
+          <li>{{ f.curso }}{% if f.curso and f.instituicao %}, {% endif %}{{ f.instituicao }}</li>
+          {% endfor %}
+          {% if local %}<li>{{ local }}</li>{% endif %}
+        </ul>
+        {% endif %}
+
+        {% if usuaria.bio %}
+        <p class="perfil-folha__bio">{{ usuaria.bio }}</p>
+        {% endif %}
+
+        {% if identidades %}
+        <div class="perfil-folha__identidades">
+          <p class="perfil-folha__rotulo">Aparece no filtro de autoras do mural:</p>
+          <ul>{% for i in identidades %}<li>{{ i }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="perfil-folha__acoes">
+        <a class="botao botao--secundario" href="{{ url_for('conta.pagina_editar_perfil') }}">Editar perfil</a>
+      </div>
+    </section>
+
+    <section class="minhas" aria-labelledby="titulo-minhas">
+      <div class="minhas__cabecalho">
+        <h2 class="fita" id="titulo-minhas" tabindex="-1">Minhas publicações</h2>
+        <p class="minhas__contagem" id="minhas-contagem" aria-live="polite"></p>
+        <a class="botao botao--primario minhas__nova" href="/mural/novo">Publicar projeto</a>
+      </div>
+
+      <div class="minhas__folha">
+        <ul class="minhas__lista" id="minhas-lista" aria-busy="true"></ul>
+        <div id="minhas-estado"><p class="minhas__carregando">Carregando suas publicações…</p></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<dialog class="dialogo" id="dialogo-editar" aria-labelledby="editar-titulo">
+  <form class="folha-form folha-edicao" id="form-editar" novalidate>
+    <h2 id="editar-titulo">Editar publicação</h2>
+    <p class="folha-form__intro" id="editar-intro"></p>
+    <div class="resumo-erros" id="editar-erros" role="alert" tabindex="-1" hidden></div>
+    <div id="editar-campos"><p class="carregando">Carregando…</p></div>
+    <div class="folha-form__acoes">
+      <button class="botao botao--primario" type="submit" id="editar-salvar">Salvar alterações</button>
+      <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+      <p class="perfil-status" id="editar-status" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dialogo dialogo--pequeno" id="dialogo-excluir" aria-labelledby="excluir-titulo" aria-describedby="excluir-texto">
+  <div class="folha-form folha-edicao">
+    <h2 id="excluir-titulo">Excluir esta publicação?</h2>
+    <p id="excluir-texto"></p>
+    <div class="folha-form__acoes">
+      <button class="botao botao--perigo" type="button" id="excluir-confirmar">Excluir de vez</button>
+      <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+      <p class="perfil-status" id="excluir-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</dialog>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite"{% if not salvo %} hidden{% endif %}>
+  {% if salvo %}Perfil salvo.{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+{% endblock %}

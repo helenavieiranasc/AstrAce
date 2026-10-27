@@ -4,7 +4,7 @@ from sqlalchemy import inspect, text
 
 bp = Blueprint("conta", __name__)
 
-from . import routes  # noqa: E402,F401
+from . import perfil, routes  # noqa: E402,F401
 
 
 def completar_colunas(db):

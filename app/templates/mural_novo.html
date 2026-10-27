@@ -9,9 +9,9 @@
 {% block acao_topo %}{% endblock %}
 
 {% block conteudo %}
-<div class="quadro">
-  <div class="cortica cortica--form">
-    <form class="folha-form" id="form-projeto" novalidate>
+<div class="quadro quadro--publicar">
+  <div class="cortica cortica--form cortica--publicar">
+    <form class="folha-form folha-form--publicar" id="form-projeto" novalidate>
       <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
 
       <img class="folha-form__mascote" src="{{ url_for('static', filename='img/logo-estrela-original-240.png') }}"
