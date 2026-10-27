@@ -1752,3 +1752,20 @@ input:focus-visible + .botao {
 .folha-form__intro {
   margin-right: clamp(96px, 16vw, 160px);
 }
+
+/* ---------- Publicar projeto: folha ocupando quase a tela toda (como no cadastro do perfil) ---------- */
+
+.quadro--publicar {
+  margin-bottom: 14px;
+}
+
+.cortica--publicar {
+  padding: clamp(12px, 2.2vw, 30px);
+}
+
+.folha-form--publicar {
+  max-width: none;
+  min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
+  padding: clamp(30px, 4vw, 56px) clamp(20px, 4.5vw, 64px) clamp(24px, 3vw, 40px);
+}

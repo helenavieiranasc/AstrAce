@@ -1,5 +1,6 @@
 // Cadastro inicial do perfil, logo depois do primeiro login com Google.
 import { EXTENSOES_IMAGEM, ErroApi, api, conferirArquivo, el, enviarArquivo, esc, mensagemDeErro, postJson, preencherSelect, urlSegura, } from "./comum.js";
+import { atualizarFotoDoTopo } from "./conta-topo.js";
 const form = el("form-perfil");
 const salvar = el("salvar");
 const status = el("status");
@@ -25,6 +26,7 @@ const ROTULOS = {
     nivel: "Fase dos estudos",
     area_interesse: "Área de interesse",
     data_nascimento: "Data de nascimento",
+    bio: "Sobre você",
     estado: "Estado",
     foto: "Foto de perfil",
 };
@@ -34,8 +36,14 @@ let fotoRemovida = false;
 let enviandoFoto = false;
 let urlPreviaLocal = null;
 let cidadesExistentes = [];
+let fotoGoogle = null;
+let temFotoPropria = false;
+const modo = form.dataset.modo ?? "cadastro";
+const bio = document.getElementById("bio");
 // ---------- Foto ----------
-function mostrarFoto(url) {
+/** propria: a foto foi escolhida pela usuária (só ela pode ser removida; a do Google volta no lugar). */
+function mostrarFoto(url, propria = temFotoPropria) {
+    temFotoPropria = propria && Boolean(url);
     moldura.querySelector("img")?.remove();
     const segura = url && (url.startsWith("blob:") ? url : urlSegura(url));
     if (segura) {
@@ -48,7 +56,7 @@ function mostrarFoto(url) {
         moldura.prepend(img);
     }
     iniciais.hidden = Boolean(segura);
-    removerFoto.hidden = !segura;
+    removerFoto.hidden = !(segura && temFotoPropria);
 }
 function atualizarIniciais() {
     const nome = apelido.value.trim();
@@ -66,10 +74,11 @@ entradaFoto.addEventListener("change", async () => {
         return;
     }
     const anterior = moldura.querySelector("img")?.src ?? null;
+    const anteriorPropria = temFotoPropria;
     if (urlPreviaLocal)
         URL.revokeObjectURL(urlPreviaLocal);
     urlPreviaLocal = URL.createObjectURL(arquivo);
-    mostrarFoto(urlPreviaLocal);
+    mostrarFoto(urlPreviaLocal, true);
     enviandoFoto = true;
     campoFoto.classList.add("perfil-foto--enviando");
     status.textContent = "Enviando sua foto…";
@@ -80,7 +89,7 @@ entradaFoto.addEventListener("change", async () => {
         status.textContent = "Foto pronta. Ela é salva junto com o perfil.";
     }
     catch (erro) {
-        mostrarFoto(anterior);
+        mostrarFoto(anterior, anteriorPropria);
         mostrarErro("foto", mensagemDeErro(erro));
         status.textContent = "";
     }
@@ -92,11 +101,20 @@ entradaFoto.addEventListener("change", async () => {
 removerFoto.addEventListener("click", () => {
     fotoId = null;
     fotoRemovida = true;
-    mostrarFoto(null);
+    mostrarFoto(fotoGoogle, false); // sem a própria, volta a do Google (ou a inicial)
     limparErro("foto");
     entradaFoto.focus();
 });
 apelido.addEventListener("input", atualizarIniciais);
+function contarBio() {
+    const contador = document.getElementById("bio-contador");
+    if (bio && contador)
+        contador.textContent = String(bio.value.length);
+}
+bio?.addEventListener("input", () => {
+    contarBio();
+    limparErro("bio");
+});
 // ---------- Estado e cidade (municípios do IBGE) ----------
 const municipiosPorUf = new Map();
 async function municipios(uf) {
@@ -324,7 +342,7 @@ function limparErro(nome) {
     document.getElementById(nome)?.removeAttribute("aria-invalid");
 }
 function mostrarErros(erros) {
-    for (const nome of [...CAMPOS_SIMPLES, "data_nascimento", "estado", "foto"])
+    for (const nome of [...CAMPOS_SIMPLES, "data_nascimento", "estado", "foto", "bio"])
         limparErro(nome);
     const nomes = Object.keys(erros);
     if (!nomes.length) {
@@ -399,7 +417,12 @@ async function carregar() {
     else if (perfil.cidade)
         cidadeComoTexto(perfil.cidade); // cidade antiga, de antes do campo de estado
     montarIdentidades(opcoes.identidades, perfil.identidades);
-    mostrarFoto(perfil.foto_url);
+    fotoGoogle = perfil.foto_google_url;
+    mostrarFoto(perfil.foto_url, perfil.foto_propria);
+    if (bio) {
+        bio.value = perfil.bio;
+        contarBio();
+    }
     atualizarIniciais();
     if (perfil.cadastro_completo)
         salvar.textContent = "Salvar alterações";
@@ -424,6 +447,7 @@ form.addEventListener("submit", async (evento) => {
     const ensinoMedio = nivel.value === "ensino_medio";
     try {
         const resposta = await postJson("/api/perfil", {
+            ...(bio ? { bio: bio.value.trim() } : {}),
             ...Object.fromEntries(CAMPOS_SIMPLES.map((nome) => [nome, valor(nome)])),
             data_nascimento: dataDeNascimento() || "",
             estado: estado.value,
@@ -436,8 +460,10 @@ form.addEventListener("submit", async (evento) => {
         });
         salvar.textContent = "Perfil salvo";
         status.classList.add("perfil-status--ok");
-        status.textContent = "Pronto! Abrindo o mural…";
-        window.setTimeout(() => (window.location.href = resposta.proximo), 900);
+        atualizarFotoDoTopo(resposta.perfil.foto_url);
+        status.textContent = modo === "editar" ? "Pronto! Voltando ao seu perfil…" : "Pronto! Abrindo o mural…";
+        const destino = form.dataset.destino || resposta.proximo;
+        window.setTimeout(() => (window.location.href = destino), 900);
     }
     catch (erro) {
         salvar.disabled = false;

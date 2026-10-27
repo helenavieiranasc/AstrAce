@@ -1,0 +1,19 @@
+{# Foto de quem entrou, no canto direito do cabeçalho, com um menu curto. Só aparece com login. #}
+<details class="conta-topo" id="conta-topo">
+  <summary class="conta-topo__botao" aria-label="Menu da sua conta, {{ conta_topo.nome }}">
+    <span class="conta-topo__avatar" aria-hidden="true">
+      {% if conta_topo.foto_url %}
+      <img class="conta-topo__foto" src="{{ conta_topo.foto_url }}" alt="" width="40" height="40" referrerpolicy="no-referrer">
+      {% endif %}
+      <span class="conta-topo__inicial"{% if conta_topo.foto_url %} hidden{% endif %}>{{ conta_topo.inicial }}</span>
+    </span>
+  </summary>
+  <div class="conta-topo__menu">
+    <p class="conta-topo__nome">{{ conta_topo.nome }}</p>
+    <a class="conta-topo__item" href="{{ url_for('conta.pagina_perfil') }}"
+       {% if request.path == url_for('conta.pagina_perfil') %}aria-current="page"{% endif %}>Meu perfil</a>
+    <form method="post" action="{{ url_for('conta.sair') }}">
+      <button class="conta-topo__item" type="submit">Sair</button>
+    </form>
+  </div>
+</details>

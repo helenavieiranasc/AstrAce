@@ -105,9 +105,10 @@ def _usuaria_do_google(perfil):
         conta.google_sub = perfil["sub"]
         db.session.add(conta)
 
-    # A foto do Google entra só como ponto de partida; a escolhida no cadastro vale mais.
-    if not conta.foto_url and perfil.get("picture"):
-        conta.foto_url = perfil["picture"][:500]
+    # A foto do Google fica à parte: aparece enquanto a usuária não escolhe uma própria.
+    if conta.foto_url and not conta.tem_foto_propria:
+        conta.foto_url = None  # contas antigas guardavam a foto do Google aqui
+    conta.foto_google_url = (perfil.get("picture") or "")[:500] or None
     conta.ultimo_acesso_em = datetime.utcnow()
     db.session.commit()
     return usuaria
@@ -126,7 +127,34 @@ def sair():
 def pagina_cadastro():
     if not _usuaria_logada():
         return redirect(url_for("conta.landing"))
-    return render_template("cadastro.html")
+    return render_template("cadastro.html", modo="cadastro")
+
+
+@bp.get("/perfil/editar")
+def pagina_editar_perfil():
+    """O mesmo formulário do cadastro, com biografia, cancelar e volta para o perfil."""
+    usuaria = _usuaria_logada()
+    if not usuaria:
+        return redirect(url_for("conta.landing"))
+    if not _cadastro_completo(usuaria):
+        return redirect(url_for("conta.pagina_cadastro"))
+    return render_template("cadastro.html", modo="editar")
+
+
+@bp.app_context_processor
+def _conta_no_topo():
+    """Foto e nome de quem entrou, para o canto direito do cabeçalho de todas as páginas."""
+    usuaria = _usuaria_logada()
+    if not usuaria:
+        return {"conta_topo": None}
+    nome = usuaria.nome_publico or ""
+    return {
+        "conta_topo": {
+            "nome": nome,
+            "inicial": nome[:1].upper() or "?",
+            "foto_url": usuaria.conta.foto_exibida if usuaria.conta else None,
+        }
+    }
 
 
 def _formacoes(usuaria):
@@ -147,7 +175,10 @@ def _perfil_json(usuaria):
         "nome": usuaria.nome,
         "apelido": usuaria.apelido or "",
         "email": usuaria.email,
-        "foto_url": conta.foto_url if conta else None,
+        "foto_url": conta.foto_exibida if conta else None,
+        "foto_propria": bool(conta and conta.tem_foto_propria),
+        "foto_google_url": conta.foto_google_url if conta else None,
+        "bio": usuaria.bio or "",
         "data_nascimento": conta.data_nascimento.isoformat() if conta and conta.data_nascimento else "",
         "nivel": usuaria.nivel or "",
         "area_interesse": usuaria.area_interesse or "",
@@ -272,7 +303,13 @@ def _validar_perfil(dados, usuaria):
         else:
             limpo["foto"] = foto.url
     elif dados.get("remover_foto"):
-        limpo["foto"] = None
+        limpo["foto"] = None  # volta para a foto do Google, se houver
+
+    # A biografia só existe na edição do perfil; o cadastro inicial não manda o campo.
+    if "bio" in dados:
+        limpo["bio"] = _texto(dados, "bio", 501)
+        if len(limpo["bio"]) > 500:
+            erros["bio"] = "Use no máximo 500 caracteres."
 
     return limpo, erros
 
@@ -289,6 +326,8 @@ def api_salvar_perfil():
 
     for campo in ("apelido", "nivel", "area_interesse", "instituicao", "curso", "cidade"):
         setattr(usuaria, campo, limpo[campo])
+    if "bio" in limpo:
+        usuaria.bio = limpo["bio"] or None
 
     atuais = {i.identidade: i for i in usuaria.identidades}
     for valor, identidade in atuais.items():

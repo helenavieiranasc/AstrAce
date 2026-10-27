@@ -48,7 +48,8 @@ class ContaUsuaria(db.Model):
 
     usuaria_id = db.Column(db.Integer, db.ForeignKey("usuarias.id"), primary_key=True)
     google_sub = db.Column(db.String(64), unique=True)  # id fixo da conta Google
-    foto_url = db.Column(db.String(500))  # /uploads/... ou a foto do Google
+    foto_url = db.Column(db.String(500))  # foto escolhida pela usuária (/uploads/...)
+    foto_google_url = db.Column(db.String(500))  # foto da conta Google, atualizada a cada login
     data_nascimento = db.Column(db.Date)
     estado = db.Column(db.String(2))  # sigla, de catalogos.ESTADOS
     # [{"curso", "instituicao"}]; a primeira também fica em Usuaria.curso/instituicao.
@@ -61,6 +62,18 @@ class ContaUsuaria(db.Model):
     @property
     def cadastro_completo(self):
         return self.cadastro_concluido_em is not None
+
+    @property
+    def tem_foto_propria(self):
+        return bool(self.foto_url and self.foto_url.startswith("/uploads/"))
+
+    @property
+    def foto_exibida(self):
+        """A foto escolhida; se não houver, a do Google; se não houver, None (avatar padrão)."""
+        if self.tem_foto_propria:
+            return self.foto_url
+        # Contas de antes de foto_google_url guardavam a foto do Google em foto_url.
+        return self.foto_google_url or self.foto_url or None
 
 
 class IdentidadeUsuaria(db.Model):
