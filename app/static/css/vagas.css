@@ -1,0 +1,269 @@
+/* Vagas afirmativas: avisos, selos, pílulas de filtro, cartões de vaga e comprovação de edital. */
+
+.abertura--vagas {
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.aviso-edital {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px clamp(18px, 2.5vw, 28px);
+  background: var(--postit-amarelo);
+  border-left: 6px solid var(--pin-ambar);
+  box-shadow: var(--sombra-papel);
+  transform: rotate(0.7deg);
+}
+
+.aviso-edital__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.08rem;
+  color: var(--tinta);
+}
+
+.aviso-edital__cabecalho .icone {
+  width: 24px;
+  height: 24px;
+  color: var(--magenta-escuro);
+}
+
+.aviso-edital__texto {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--tinta);
+}
+
+@media (max-width: 860px) {
+  .abertura--vagas {
+    grid-template-columns: 1fr;
+  }
+
+  .aviso-edital {
+    transform: rotate(-0.4deg);
+  }
+}
+
+/* ---------- Topo dos filtros e pílulas de recorte ---------- */
+
+.filtros__topo-vagas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 240px);
+  gap: 14px 16px;
+  align-items: end;
+}
+
+@media (max-width: 640px) {
+  .filtros__topo-vagas {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filtros__recortes {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin: 4px 0 0;
+  padding: 12px 0 0;
+  border: 0;
+  border-top: 1px dashed var(--papel-borda);
+}
+
+.pilula-filtro {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 8px 14px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.9rem !important;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+
+.pilula-filtro:hover {
+  border-color: var(--tinta-suave);
+  background: #fffaf2;
+}
+
+.pilula-filtro input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--magenta);
+  cursor: pointer;
+}
+
+.pilula-filtro:has(input:checked) {
+  border-color: var(--magenta);
+  background: var(--rosa-claro);
+  color: var(--tinta);
+}
+
+.pilula-filtro--trans:has(input:checked) {
+  border-color: var(--pin-violeta);
+  background: #ece0fa;
+}
+
+/* ---------- Selos afirmativos ---------- */
+
+.selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.selo--mulheres {
+  background: var(--rosa-claro);
+  border: 1.5px solid var(--magenta);
+  color: var(--magenta-escuro);
+}
+
+.selo--trans {
+  background: #e8dbfa;
+  border: 1.5px solid var(--pin-violeta);
+  color: #4a1c75;
+}
+
+/* ---------- Cartão de vaga ---------- */
+
+.grade--vagas {
+  grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+}
+
+.cartao--vaga {
+  min-height: 240px;
+  justify-content: space-between;
+}
+
+.cartao__cabecalho-vaga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.cartao__cabecalho-vaga .cartao__tipo {
+  margin-bottom: 0;
+}
+
+.cartao__prazo {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--postit-verde);
+  color: var(--tinta);
+}
+
+.cartao__prazo--urgente {
+  background: var(--postit-amarelo);
+}
+
+.cartao__prazo--encerrado {
+  background: #e9e1d2;
+  color: var(--tinta-suave);
+}
+
+.cartao__organizacao {
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.cartao__meta-vaga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--papel-borda);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.cartao__badge-modalidade {
+  padding: 1px 8px;
+  border-radius: 4px;
+  background: #f3ece0;
+  color: var(--tinta);
+}
+
+/* ---------- Detalhe da vaga ---------- */
+
+.detalhe__organizacao {
+  margin: 4px 0 12px;
+  font-family: var(--fonte-mao);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.detalhe__fonte-afirmacao {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-left: 5px solid var(--pin-violeta);
+  border-radius: 4px;
+  background: #f6f0fc;
+}
+
+.detalhe__fonte-afirmacao strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: #4a1c75;
+}
+
+.detalhe__fonte-afirmacao p {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  color: var(--tinta);
+}
+
+.detalhe__coleta {
+  margin: 0 0 18px;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+.detalhe__aviso-fixo {
+  margin: 18px 0 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fff8e1;
+  border: 1px solid var(--papel-borda);
+  font-size: 0.88rem;
+  color: var(--tinta-suave);
+}
