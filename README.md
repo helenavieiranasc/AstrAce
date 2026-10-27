@@ -20,6 +20,9 @@ flask --app run run --debug     # abre em http://127.0.0.1:5000
 Sem `DATABASE_URL`, o banco é um SQLite em `instance/`. Para MySQL, copie `.env.example` para `.env` e preencha.
 `flask --app run seed-mural --limpar` apaga tudo e recria os exemplos.
 
+**Testes:** `pip install -r requirements-dev.txt` e depois `pytest`. O CI (GitHub Actions) roda os testes e confere
+se os `.js` compilados estão em dia em todo PR.
+
 **TypeScript:** o código fica em `frontend/src/` e compila para `app/static/js/`.
 Rode `npm run watch` enquanto mexe no front. Os `.js` compilados vão para o git, então quem só mexe no backend não precisa do Node.
 
