@@ -10,7 +10,7 @@ import {
 } from "./comum.js";
 
 interface SeloVaga {
-  valor: "mulheres" | "trans";
+  valor: "mulheres" | "negras" | "trans";
   rotulo: string;
 }
 
@@ -43,6 +43,7 @@ interface CartaoVaga {
   prazo_aberto: boolean;
   dias_restantes: number | null;
   afirmativa_mulheres: boolean;
+  afirmativa_negras: boolean;
   afirmativa_trans: boolean;
   selos: SeloVaga[];
   descricao_curta: string;
@@ -72,6 +73,7 @@ const CAMPOS_FILTRO = [
   "cidade",
   "prazo_aberto",
   "afirmativa_mulheres",
+  "afirmativa_negras",
   "afirmativa_trans",
   "ordem",
 ] as const;

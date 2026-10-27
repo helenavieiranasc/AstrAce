@@ -1,4 +1,4 @@
-"""Testes da frente de Vagas afirmativas (Pessoa 4)."""
+"""Testes da frente de Vagas afirmativas e Descobertas/Notícias (Pessoa 4)."""
 from datetime import date, timedelta
 
 import pytest
@@ -22,6 +22,8 @@ def app(tmp_path):
         assert r_mural.exit_code == 0, r_mural.output
         r_vagas = app.test_cli_runner().invoke(args=["seed-vagas"])
         assert r_vagas.exit_code == 0, r_vagas.output
+        r_noticias = app.test_cli_runner().invoke(args=["seed-noticias"])
+        assert r_noticias.exit_code == 0, r_noticias.output
     return app
 
 
@@ -35,6 +37,7 @@ def test_pagina_vagas_abre_com_aviso_oficial(cliente):
     assert resposta.status_code == 200
     html = resposta.get_data(as_text=True)
     assert "Confira sempre o edital oficial. Prazos e regras podem mudar." in html
+    assert "Afirmativa para mulheres negras" in html
 
 
 def test_api_opcoes_e_curadoria_entre_15_e_20_vagas(cliente):
@@ -62,6 +65,7 @@ def test_selos_so_aparecem_quando_ha_fonte_afirmacao(app, cliente):
             modalidade="remoto",
             link_original="https://exemplo.org/edital",
             afirmativa_mulheres=True,
+            afirmativa_negras=True,
             afirmativa_trans=True,
             fonte_afirmacao=None,
         )
@@ -71,6 +75,7 @@ def test_selos_so_aparecem_quando_ha_fonte_afirmacao(app, cliente):
 
     detalhe = cliente.get(f"/api/vagas/{vaga_id}").get_json()
     assert detalhe["afirmativa_mulheres"] is False
+    assert detalhe["afirmativa_negras"] is False
     assert detalhe["afirmativa_trans"] is False
     assert detalhe["selos"] == []
 
@@ -80,6 +85,12 @@ def test_filtros_e_ordenacao_de_vagas(cliente):
     ic = cliente.get("/api/vagas?tipo=ic").get_json()
     assert ic["itens"]
     assert all(v["tipo"] == "ic" for v in ic["itens"])
+
+    # Filtro afirmativa para mulheres negras
+    negras = cliente.get("/api/vagas?afirmativa_negras=1").get_json()
+    assert negras["itens"]
+    assert all(v["afirmativa_negras"] is True for v in negras["itens"])
+    assert any(s["valor"] == "negras" for s in negras["itens"][0]["selos"])
 
     # Filtro afirmativa para mulheres trans
     trans = cliente.get("/api/vagas?afirmativa_trans=1").get_json()
@@ -105,7 +116,7 @@ def test_filtros_e_ordenacao_de_vagas(cliente):
 
 
 def test_validacao_exige_fonte_afirmacao_quando_afirmativa(cliente):
-    # Admin (primeira usuária via LOGIN_DEV=1) tenta criar vaga afirmativa sem fonte_afirmacao
+    # Admin (primeira usuária via LOGIN_DEV=1) tenta criar vaga afirmativa para mulheres negras sem fonte_afirmacao
     resposta = cliente.post(
         "/api/vagas",
         json={
@@ -117,9 +128,25 @@ def test_validacao_exige_fonte_afirmacao_quando_afirmativa(cliente):
             "modalidade": "remoto",
             "prazo": (date.today() + timedelta(days=10)).isoformat(),
             "link_original": "https://exemplo.org/vaga",
-            "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "fonte_afirmacao": "",
         },
     )
     assert resposta.status_code == 422
     assert "fonte_afirmacao" in resposta.get_json()["erros"]
+
+
+def test_pagina_e_api_de_noticias(cliente):
+    assert cliente.get("/noticias").status_code == 200
+    assert cliente.get("/api/noticias/opcoes").status_code == 200
+
+    destaques = cliente.get("/api/noticias/destaques").get_json()
+    assert len(destaques) == 3
+
+    lista = cliente.get("/api/noticias?cientista_negra=1").get_json()
+    assert lista["itens"]
+    assert all(n["cientista_negra"] is True for n in lista["itens"])
+
+    detalhe = cliente.get(f"/api/noticias/{lista['itens'][0]['id']}").get_json()
+    assert detalhe["link_fonte"].startswith("https://")
+    assert detalhe["cientista"]

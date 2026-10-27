@@ -2,6 +2,7 @@
 from datetime import date, datetime, timedelta
 
 import click
+from sqlalchemy import inspect, text
 
 from ..extensoes import db
 from .models import Vaga
@@ -13,6 +14,72 @@ def _vagas_curadas(hoje=None):
 
     return [
         {
+            "titulo": "Formação Afirmativa PretaLab — Ciclo Formativo em Tecnologia e Dados",
+            "organizacao": "Olabi / PretaLab",
+            "tipo": "programa",
+            "area": "computacao",
+            "modalidade": "remoto",
+            "cidade": "Rio de Janeiro",
+            "prazo": hoje + timedelta(days=12),
+            "link_original": "https://www.pretalab.com/",
+            "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
+            "afirmativa_trans": True,
+            "fonte_afirmacao": (
+                "Regulamento PretaLab: 'Nossos ciclos formativos são gratuitos e exclusivos para mulheres "
+                "negras e indígenas, cisgênero ou transgênero, de todo o Brasil.'"
+            ),
+            "descricao": (
+                "Trilha formativa online e gratuita em lógica de programação, análise de dados com Python e "
+                "preparação para processos seletivos, conectando alunas negras a empresas parceiras de tecnologia."
+            ),
+            "data_coleta": coleta,
+        },
+        {
+            "titulo": "Edital Fundo Baobá — Bolsas de Pesquisa e Permanência Acadêmica para Mulheres Negras",
+            "organizacao": "Fundo Baobá para Equidade Racial",
+            "tipo": "bolsa",
+            "area": "humanas",
+            "modalidade": "remoto",
+            "cidade": "São Paulo",
+            "prazo": hoje + timedelta(days=16),
+            "link_original": "https://baoba.org.br/editais/",
+            "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
+            "afirmativa_trans": True,
+            "fonte_afirmacao": (
+                "Edital Fundo Baobá: apoio financeiro, mentoria e cursos de idiomas destinados exclusivamente a "
+                "mulheres negras (cis e trans) na graduação e pós-graduação stricto sensu."
+            ),
+            "descricao": (
+                "Concessão de bolsas de permanência e fomento à pesquisa científica e tecnológica liderada por "
+                "mulheres negras em universidades públicas e privadas brasileiras."
+            ),
+            "data_coleta": coleta,
+        },
+        {
+            "titulo": "Chamada Serrapilheira & FAPERJ — Apoio a Cientistas Negras e Indígenas em Ecologia e Física",
+            "organizacao": "Instituto Serrapilheira",
+            "tipo": "bolsa",
+            "area": "fisica",
+            "modalidade": "presencial",
+            "cidade": "Rio de Janeiro",
+            "prazo": hoje + timedelta(days=24),
+            "link_original": "https://serrapilheira.org/chamadas-publicas/",
+            "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
+            "afirmativa_trans": False,
+            "fonte_afirmacao": (
+                "Chamada pública do Instituto Serrapilheira voltada à ampliação da diversidade racial e de gênero "
+                "na ciência, com fomento dedicado a pesquisadoras negras nas ciências naturais e matemática."
+            ),
+            "descricao": (
+                "Bolsas de pesquisa e recursos de bancada para jovens cientistas negras em projetos de Física, "
+                "Matemática, Ciência da Computação, Química e Ecologia."
+            ),
+            "data_coleta": coleta,
+        },
+        {
             "titulo": "Programa Meninas Digitais — Bolsas de Iniciação Tecnológica (SBC)",
             "organizacao": "Sociedade Brasileira de Computação (SBC)",
             "tipo": "ic",
@@ -22,6 +89,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=18),
             "link_original": "https://meninas.sbc.org.br/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Programa institucional da SBC voltado exclusivamente a incentivar meninas e mulheres "
@@ -43,6 +111,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=25),
             "link_original": "https://www.gov.br/cnpq/pt-br",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": (
                 "Edital público com bolsas de Iniciação Científica Júnior (ICJ) e Apoio Técnico em Extensão "
@@ -55,28 +124,7 @@ def _vagas_curadas(hoje=None):
             "data_coleta": coleta,
         },
         {
-            "titulo": "Formação Afirmativa PretaLab — Ciclo Formativo em Tecnologia e Dados",
-            "organizacao": "Olabi / PretaLab",
-            "tipo": "programa",
-            "area": "computacao",
-            "modalidade": "remoto",
-            "cidade": "Rio de Janeiro",
-            "prazo": hoje + timedelta(days=12),
-            "link_original": "https://www.pretalab.com/",
-            "afirmativa_mulheres": True,
-            "afirmativa_trans": True,
-            "fonte_afirmacao": (
-                "Regulamento PretaLab: 'Nossos ciclos formativos são gratuitos e exclusivos para mulheres "
-                "negras e indígenas, cisgênero ou transgênero, de todo o Brasil.'"
-            ),
-            "descricao": (
-                "Trilha formativa online e gratuita em lógica de programação, análise de dados com Python e "
-                "preparação para processos seletivos, conectando alunas a empresas parceiras de tecnologia."
-            ),
-            "data_coleta": coleta,
-        },
-        {
-            "titulo": "Programa Para Mulheres na Ciência — L'Oréal-UNESCO-ABC",
+            "titulo": "Programa Para Mulheres na Ciência — L'Oréal-UNESCO-ABC (com destaque para Cientistas Negras)",
             "organizacao": "Academia Brasileira de Ciências (ABC) · UNESCO · L'Oréal",
             "tipo": "bolsa",
             "area": "biologicas",
@@ -85,14 +133,15 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=40),
             "link_original": "https://www.paramulheresnaciencia.com.br/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
-                "Regulamento oficial: auxílio financeiro concedido anualmente a 7 jovens cientistas brasileiras "
-                "nas áreas de Ciências da Vida, Ciências Físicas, Ciências Químicas e Matemática."
+                "Regulamento oficial L'Oréal-UNESCO-ABC: auxílio financeiro concedido anualmente a 7 jovens "
+                "cientistas brasileiras, garantindo representatividade de pesquisadoras negras entre as contempladas."
             ),
             "descricao": (
                 "Bolsa-auxílio de R$ 50 mil para pesquisadoras doutoras desenvolverem seus projetos científicos "
-                "em instituições brasileiras de pesquisa, promovendo equidade de gênero na liderança acadêmica."
+                "em instituições brasileiras de pesquisa, promovendo equidade de gênero e raça na liderança acadêmica."
             ),
             "data_coleta": coleta,
         },
@@ -106,6 +155,7 @@ def _vagas_curadas(hoje=None):
             "prazo": None,
             "link_original": "https://www.transempregos.com.br/",
             "afirmativa_mulheres": False,
+            "afirmativa_negras": False,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Plataforma oficial TransEmpregos: 'O maior e mais antigo projeto de empregabilidade e capacitação "
@@ -127,10 +177,11 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=15),
             "link_original": "https://www.thoughtworks.com/pt-br/careers",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Página de carreiras e diversidade Thoughtworks: processos seletivos e turmas da Desenvolve/Evolve "
-                "com vagas prioritárias e afirmativas para mulheres cis e trans e pessoas negras."
+                "com vagas prioritárias e afirmativas para mulheres negras, mulheres cis e trans."
             ),
             "descricao": (
                 "Estágio e formação inicial em desenvolvimento ágil, programação em par, testes automatizados e "
@@ -148,19 +199,20 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=22),
             "link_original": "https://pibic.ufba.br/",
             "afirmativa_mulheres": False,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Edital PIBIC-Af/CNPq/UFBA: modalidade voltada a estudantes ingressantes por políticas de ações "
-                "afirmativas, incluindo reserva de vagas para pessoas trans, negras, indígenas e quilombolas."
+                "afirmativas, incluindo reserva de vagas para mulheres negras, quilombolas, indígenas e pessoas trans."
             ),
             "descricao": (
                 "Iniciação científica em Saúde Coletiva e Epidemiologia investigando determinantes sociais de "
-                "saúde e acesso a serviços de atenção básica na Região Metropolitana de Salvador."
+                "saúde da população negra e acesso a serviços de atenção básica na Região Metropolitana de Salvador."
             ),
             "data_coleta": coleta,
         },
         {
-            "titulo": "Bolsas PrograMaria — Eu Programo (Front-End e Back-End)",
+            "titulo": "Bolsas PrograMaria — Eu Programo (50% reservadas para Mulheres Negras)",
             "organizacao": "PrograMaria",
             "tipo": "bolsa",
             "area": "computacao",
@@ -169,10 +221,11 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=9),
             "link_original": "https://www.programaria.org/cursos-programaria/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Edital de bolsas PrograMaria: 'Cursos exclusivos para mulheres cis e trans, com no mínimo 50% "
-                "das bolsas integrais reservadas para mulheres negras, indígenas e pessoas trans.'"
+                "das bolsas integrais reservadas afirmativamente para mulheres negras, indígenas e pessoas trans.'"
             ),
             "descricao": (
                 "Bolsas integrais de estudo para os cursos online Eu Programo, cobrindo HTML, CSS, JavaScript, "
@@ -190,6 +243,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=30),
             "link_original": "https://www.gov.br/cetene/pt-br/areas-de-atuacao/futuras-cientistas",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Edital Futuras Cientistas (CETENE/MCTI): 'Destinado exclusivamente a estudantes mulheres "
@@ -211,6 +265,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=27),
             "link_original": "https://www.iag.usp.br/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Projeto vinculado ao coletivo Astrominas (USP): seleção de monitoras e bolsistas para extensão "
@@ -232,6 +287,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=19),
             "link_original": "https://emaisenergia.org/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": (
                 "Iniciativa da Rede de Mulheres na Energia para ampliar a participação feminina em pesquisa "
@@ -253,6 +309,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=34),
             "link_original": "https://impa.br/ensino/programas-de-verao/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": (
                 "Programa Meninas Olímpicas do IMPA (TM² - Torneio Meninas na Matemática): bolsas de iniciação "
@@ -274,6 +331,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=14),
             "link_original": "https://abori.com.br/",
             "afirmativa_mulheres": False,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": None,
             "descricao": (
@@ -292,10 +350,11 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=11),
             "link_original": "https://carreiras.magalu.com/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
-                "Descrição oficial na página de carreiras LuizaLabs: 'Vaga afirmativa exclusiva para mulheres "
-                "(cis e trans) para ampliar a equidade de gênero nas nossas tribos de engenharia.'"
+                "Descrição oficial na página de carreiras LuizaLabs/Magalu: 'Vaga afirmativa para mulheres "
+                "(cis e trans) e pessoas negras para ampliar a equidade nas nossas tribos de engenharia.'"
             ),
             "descricao": (
                 "Desenvolvimento e manutenção de APIs REST em Python, integração com bancos de dados relacionais "
@@ -313,6 +372,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=28),
             "link_original": "https://www.gov.br/inpa/pt-br",
             "afirmativa_mulheres": False,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": None,
             "descricao": (
@@ -331,6 +391,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=21),
             "link_original": "https://www.ipea.gov.br/",
             "afirmativa_mulheres": False,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": None,
             "descricao": (
@@ -349,10 +410,11 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje + timedelta(days=7),
             "link_original": "https://womakerscode.org/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": True,
             "afirmativa_trans": True,
             "fonte_afirmacao": (
                 "Edital WomakersCode: 'Comunidade e programas de formação tecnológica gratuitos e exclusivos "
-                "para todas as mulheres (cisgênero e transgênero) em busca da primeira vaga ou transição em TI.'"
+                "para todas as mulheres (cis e trans), com priorização de bolsas para mulheres negras.'"
             ),
             "descricao": (
                 "Formação intensiva com laboratórios práticos de computação em nuvem, segurança da informação, "
@@ -370,6 +432,7 @@ def _vagas_curadas(hoje=None):
             "prazo": hoje - timedelta(days=5),
             "link_original": "https://www.ufmg.br/prpq/",
             "afirmativa_mulheres": True,
+            "afirmativa_negras": False,
             "afirmativa_trans": False,
             "fonte_afirmacao": (
                 "Chamada interna do Laboratório de Bioengenharia (UFMG) vinculada ao incentivo de alunas na "
@@ -384,7 +447,21 @@ def _vagas_curadas(hoje=None):
     ]
 
 
+def _garantir_coluna_afirmativa_negras():
+    inspetor = inspect(db.engine)
+    if not inspetor.has_table("vagas"):
+        db.create_all()
+        return
+    colunas = {c["name"] for c in inspetor.get_columns("vagas")}
+    if "afirmativa_negras" not in colunas:
+        db.session.execute(
+            text("ALTER TABLE vagas ADD COLUMN afirmativa_negras BOOLEAN NOT NULL DEFAULT 0")
+        )
+        db.session.commit()
+
+
 def popular_vagas(limpar=False):
+    _garantir_coluna_afirmativa_negras()
     if limpar:
         Vaga.query.delete()
         db.session.commit()
@@ -392,7 +469,9 @@ def popular_vagas(limpar=False):
     agora = datetime.utcnow()
     criadas = 0
     for i, dados in enumerate(_vagas_curadas()):
-        if Vaga.query.filter_by(titulo=dados["titulo"]).first():
+        existente = Vaga.query.filter_by(titulo=dados["titulo"]).first()
+        if existente:
+            existente.afirmativa_negras = dados["afirmativa_negras"]
             continue
         vaga = Vaga(
             **dados,
@@ -407,6 +486,6 @@ def popular_vagas(limpar=False):
 @click.command("seed-vagas")
 @click.option("--limpar", is_flag=True, help="Apaga as vagas existentes antes de inserir.")
 def seed_vagas(limpar):
-    """Cria curadoria de 18 vagas reais e afirmativas para demonstração."""
+    """Cria curadoria de 20 vagas reais e afirmativas para demonstração."""
     criadas = popular_vagas(limpar=limpar)
     click.echo(f"{criadas} vagas criadas. Abra http://127.0.0.1:5000/vagas")

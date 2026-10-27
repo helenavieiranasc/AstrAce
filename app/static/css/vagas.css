@@ -110,6 +110,11 @@
   color: var(--tinta);
 }
 
+.pilula-filtro--negras:has(input:checked) {
+  border-color: #9e5400;
+  background: #fde5b4;
+}
+
 .pilula-filtro--trans:has(input:checked) {
   border-color: var(--pin-violeta);
   background: #ece0fa;
@@ -142,6 +147,12 @@
   background: var(--rosa-claro);
   border: 1.5px solid var(--magenta);
   color: var(--magenta-escuro);
+}
+
+.selo--negras {
+  background: #fde5b4;
+  border: 1.5px solid #9e5400;
+  color: #522900;
 }
 
 .selo--trans {
