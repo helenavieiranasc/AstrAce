@@ -8,6 +8,7 @@ const CAMPOS_FILTRO = [
     "cidade",
     "prazo_aberto",
     "afirmativa_mulheres",
+    "afirmativa_negras",
     "afirmativa_trans",
     "ordem",
 ];
