@@ -18,6 +18,7 @@ class Vaga(db.Model):
     link_original = db.Column(db.String(500), nullable=False)
 
     afirmativa_mulheres = db.Column(db.Boolean, nullable=False, default=False, index=True)
+    afirmativa_negras = db.Column(db.Boolean, nullable=False, default=False, index=True)
     afirmativa_trans = db.Column(db.Boolean, nullable=False, default=False, index=True)
     fonte_afirmacao = db.Column(db.Text)
 

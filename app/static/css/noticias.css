@@ -1,0 +1,168 @@
+/* Notícias e descobertas científicas: recortes de jornal/revista presos no quadro de cortiça. */
+
+.abertura--noticias {
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.destaques-noticias {
+  min-width: 0;
+}
+
+.destaques-noticias__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 28px 22px;
+  margin: 0;
+  padding: 6px 0 0;
+  list-style: none;
+}
+
+@media (max-width: 860px) {
+  .abertura--noticias {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pilula-filtro--brasileira:has(input:checked) {
+  border-color: var(--pin-verde);
+  background: var(--postit-verde);
+}
+
+.selo--brasileira {
+  background: var(--postit-verde);
+  border: 1.5px solid var(--pin-verde);
+  color: #0e4f45;
+}
+
+/* ---------- Cartão estilo Recorte de Jornal Científico ---------- */
+
+.grade--noticias {
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+}
+
+.cartao--recorte {
+  min-height: 255px;
+  padding: 18px 18px 14px;
+  background:
+    linear-gradient(180deg, #fffdf6 0%, #f8f1e1 100%);
+  border: 1px solid var(--papel-borda);
+  border-top: 5px solid var(--cor-ficha, var(--magenta));
+  justify-content: space-between;
+}
+
+.cartao--recorte-destaque {
+  padding-top: 22px;
+  border-top-width: 0;
+  background: #fffef8;
+}
+
+.cartao--recorte-destaque::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 3;
+  width: 100px;
+  height: 26px;
+  margin-left: -50px;
+  background: rgb(250 242 214 / 0.85);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  transform: rotate(var(--rot-fita, -3deg));
+  clip-path: polygon(0 10%, 4% 0, 8% 12%, 12% 0, 88% 0, 92% 10%, 96% 0, 100% 12%, 100% 88%, 96% 100%, 92% 90%, 88% 100%, 12% 100%, 8% 88%, 4% 100%, 0 90%);
+}
+
+.recorte__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1.5px double var(--papel-borda);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.recorte__categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--magenta-escuro);
+}
+
+.recorte__categoria .icone {
+  width: 16px;
+  height: 16px;
+}
+
+.recorte__protagonista {
+  margin: 6px 0 2px;
+  font-family: var(--fonte-mao);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--magenta-escuro);
+}
+
+.recorte__instituicao {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.recorte__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--papel-borda);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.recorte__area {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #efe6d5;
+  color: var(--tinta);
+}
+
+/* ---------- Ponte "Ver leva a agir" no Detalhe ---------- */
+
+.detalhe__ponte {
+  margin: 20px 0;
+  padding: 16px 18px;
+  background: var(--postit-amarelo);
+  border-left: 5px solid var(--magenta);
+  box-shadow: var(--sombra-papel);
+  transform: rotate(-0.4deg);
+}
+
+.detalhe__ponte h3 {
+  margin: 0 0 6px;
+  font-family: var(--fonte-mao);
+  font-size: 1.65rem;
+  line-height: 1.1;
+  color: var(--tinta);
+}
+
+.detalhe__ponte p {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  color: var(--tinta);
+}
+
+.detalhe__ponte-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

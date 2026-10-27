@@ -35,6 +35,7 @@ FILTROS = (
     "cidade",
     "prazo_aberto",
     "afirmativa_mulheres",
+    "afirmativa_negras",
     "afirmativa_trans",
     "ordem",
 )
@@ -67,6 +68,13 @@ def consultar(filtros, pagina=1, por_pagina=12, hoje=None):
     if _ativo(filtros.get("afirmativa_mulheres")):
         q = q.filter(
             Vaga.afirmativa_mulheres.is_(True),
+            Vaga.fonte_afirmacao.isnot(None),
+            Vaga.fonte_afirmacao != "",
+        )
+
+    if _ativo(filtros.get("afirmativa_negras")):
+        q = q.filter(
+            Vaga.afirmativa_negras.is_(True),
             Vaga.fonte_afirmacao.isnot(None),
             Vaga.fonte_afirmacao != "",
         )
@@ -126,11 +134,14 @@ def cartao(v, hoje=None):
     descricao = v.descricao or ""
     tem_fonte = bool((v.fonte_afirmacao or "").strip())
     afirmativa_mulheres = bool(v.afirmativa_mulheres and tem_fonte)
+    afirmativa_negras = bool(v.afirmativa_negras and tem_fonte)
     afirmativa_trans = bool(v.afirmativa_trans and tem_fonte)
 
     selos = []
     if afirmativa_mulheres:
         selos.append({"valor": "mulheres", "rotulo": "Afirmativa para mulheres"})
+    if afirmativa_negras:
+        selos.append({"valor": "negras", "rotulo": "Afirmativa para mulheres negras"})
     if afirmativa_trans:
         selos.append({"valor": "trans", "rotulo": "Afirmativa para mulheres trans"})
 
@@ -161,6 +172,7 @@ def cartao(v, hoje=None):
         "prazo_aberto": prazo_aberto,
         "dias_restantes": dias_restantes,
         "afirmativa_mulheres": afirmativa_mulheres,
+        "afirmativa_negras": afirmativa_negras,
         "afirmativa_trans": afirmativa_trans,
         "selos": selos,
         "descricao_curta": descricao if len(descricao) <= 150 else descricao[:147].rsplit(" ", 1)[0] + "…",
@@ -254,10 +266,13 @@ def validar(dados):
         erros["link_original"] = "Cole o link oficial do edital ou da vaga, começando com https://."
 
     limpo["afirmativa_mulheres"] = _ativo(dados.get("afirmativa_mulheres"))
+    limpo["afirmativa_negras"] = _ativo(dados.get("afirmativa_negras"))
     limpo["afirmativa_trans"] = _ativo(dados.get("afirmativa_trans"))
     limpo["fonte_afirmacao"] = _texto(dados, "fonte_afirmacao", 1000) or None
 
-    if (limpo["afirmativa_mulheres"] or limpo["afirmativa_trans"]) and not limpo["fonte_afirmacao"]:
+    if (
+        limpo["afirmativa_mulheres"] or limpo["afirmativa_negras"] or limpo["afirmativa_trans"]
+    ) and not limpo["fonte_afirmacao"]:
         erros["fonte_afirmacao"] = (
             "Para marcar um selo afirmativo, informe o trecho do edital ou link que comprova a reserva/foco da vaga."
         )
