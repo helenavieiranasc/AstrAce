@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22183b"/>
+      <stop offset="55%" stop-color="#5a2d82"/>
+      <stop offset="100%" stop-color="#b8135c"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <rect x="210" y="85" width="220" height="200" rx="18" fill="none" stroke="#ffe873" stroke-width="3.5" stroke-dasharray="16 8"/>
+  <circle cx="285" cy="155" r="10" fill="#cdefb0"/><circle cx="355" cy="155" r="10" fill="#cdefb0"/>
+  <path d="M285 215 Q320 240 355 215" fill="none" stroke="#ffc4dc" stroke-width="4" stroke-linecap="round"/>
+  <rect x="24" y="24" width="245" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">JUSTIÇA ALGORÍTMICA · IA</text>
+</svg>

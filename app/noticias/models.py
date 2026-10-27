@@ -15,6 +15,7 @@ class Noticia(db.Model):
     categoria = db.Column(db.String(40), nullable=False, index=True)
     fonte_nome = db.Column(db.String(120), nullable=False)
     link_fonte = db.Column(db.String(500), nullable=False)
+    imagem_url = db.Column(db.String(500))
     data_publicacao = db.Column(db.Date, nullable=False, default=date.today, index=True)
 
     cientista_brasileira = db.Column(db.Boolean, nullable=False, default=True, index=True)

@@ -112,6 +112,7 @@ def cartao(n):
         "categoria_rotulo": cat.get("rotulo", n.categoria),
         "icone": cat.get("icone", "ic"),
         "fonte_nome": n.fonte_nome,
+        "imagem_url": n.imagem_url,
         "data_publicacao": n.data_publicacao.isoformat() if n.data_publicacao else None,
         "data_publicacao_rotulo": _formatar_data(n.data_publicacao),
         "cientista_brasileira": bool(n.cientista_brasileira),
@@ -134,7 +135,11 @@ def detalhe(n):
 
 
 def _url_valida(valor):
-    partes = urlparse(valor or "")
+    if not valor:
+        return False
+    if valor.startswith(("/uploads/", "/static/")):
+        return True
+    partes = urlparse(valor)
     return partes.scheme in ("http", "https") and bool(partes.netloc)
 
 
@@ -194,6 +199,10 @@ def validar(dados):
     limpo["link_fonte"] = _texto(dados, "link_fonte", 500)
     if not limpo["link_fonte"] or not _url_valida(limpo["link_fonte"]):
         erros["link_fonte"] = "Cole o link completo da matéria ou artigo original (https://...)."
+
+    limpo["imagem_url"] = _texto(dados, "imagem_url", 500) or None
+    if limpo["imagem_url"] and not _url_valida(limpo["imagem_url"]):
+        erros["imagem_url"] = "Cole um link válido de imagem (https://... ou /uploads/...)."
 
     try:
         limpo["data_publicacao"] = _converter_data(dados.get("data_publicacao")) or date.today()

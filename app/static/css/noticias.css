@@ -43,7 +43,7 @@
 
 .cartao--recorte {
   min-height: 255px;
-  padding: 18px 18px 14px;
+  padding: 16px 16px 14px;
   background:
     linear-gradient(180deg, #fffdf6 0%, #f8f1e1 100%);
   border: 1px solid var(--papel-borda);
@@ -52,7 +52,7 @@
 }
 
 .cartao--recorte-destaque {
-  padding-top: 22px;
+  padding-top: 20px;
   border-top-width: 0;
   background: #fffef8;
 }
@@ -70,6 +70,23 @@
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
   transform: rotate(var(--rot-fita, -3deg));
   clip-path: polygon(0 10%, 4% 0, 8% 12%, 12% 0, 88% 0, 92% 10%, 96% 0, 100% 12%, 100% 88%, 96% 100%, 92% 90%, 88% 100%, 12% 100%, 8% 88%, 4% 100%, 0 90%);
+}
+
+.recorte__foto {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 10px;
+  border: 4px solid #fff;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #e9e1d2;
+  box-shadow: 0 2px 6px rgb(42 28 21 / 0.18);
+}
+
+.recorte__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .recorte__topo {

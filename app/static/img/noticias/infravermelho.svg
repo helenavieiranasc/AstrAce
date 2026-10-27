@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a1025"/>
+      <stop offset="50%" stop-color="#7e3fb4"/>
+      <stop offset="100%" stop-color="#d81b60"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <circle cx="320" cy="190" r="105" fill="#1b0c1e" stroke="#ffe873" stroke-width="4"/>
+  <g stroke="#ffe873" stroke-opacity="0.35" stroke-width="1.5">
+    <line x1="215" y1="150" x2="425" y2="150"/><line x1="215" y1="190" x2="425" y2="190"/><line x1="215" y1="230" x2="425" y2="230"/>
+    <line x1="280" y1="85" x2="280" y2="295"/><line x1="320" y1="85" x2="320" y2="295"/><line x1="360" y1="85" x2="360" y2="295"/>
+  </g>
+  <path d="M70 190 Q115 130, 160 190 T250 190 T340 190 T430 190 T520 190 T610 190" fill="none" stroke="#ffc4dc" stroke-width="4.5"/>
+  <rect x="24" y="24" width="265" height="34" rx="17" fill="#fffdf7" fill-opacity="0.92"/>
+  <text x="42" y="46" font-family="sans-serif" font-size="14" font-weight="700" fill="#2a1c15">FÍSICA APLICADA · SÔNIA GUIMARÃES</text>
+</svg>

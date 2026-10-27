@@ -35,6 +35,7 @@ interface CartaoNoticia {
   categoria_rotulo: string;
   icone: string;
   fonte_nome: string;
+  imagem_url: string | null;
   data_publicacao: string | null;
   data_publicacao_rotulo: string;
   cientista_brasileira: boolean;
@@ -54,6 +55,12 @@ interface PaginaNoticias {
   total: number;
   pagina: number;
   tem_mais: boolean;
+}
+
+function urlImagemSegura(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("/static/")) return url;
+  return urlSegura(url);
 }
 
 const POR_PAGINA = 12;
@@ -169,6 +176,11 @@ function htmlSelos(selos: SeloNoticia[]): string {
 
 function htmlCartao(n: CartaoNoticia, variante: "grade" | "destaque"): string {
   const pin = PINS[n.id % PINS.length];
+  const imagem = urlImagemSegura(n.imagem_url);
+  const foto = imagem
+    ? `<div class="recorte__foto"><img src="${esc(imagem)}" alt="" loading="lazy"></div>`
+    : "";
+
   const classes = ["cartao", "cartao--recorte"];
   if (variante === "destaque") classes.push("cartao--recorte-destaque");
 
@@ -183,6 +195,7 @@ function htmlCartao(n: CartaoNoticia, variante: "grade" | "destaque"): string {
         style="--rot: ${rotacao(n.id, variante === "destaque" ? 1.2 : 1)}deg; --rot-fita: ${rotacao(n.id + 5, 2)}deg; --cor-ficha: var(${pin})">
         ${enfeite}
         <div>
+          ${foto}
           <div class="recorte__topo">
             <span class="recorte__categoria">${icone(n.icone)}${esc(n.categoria_rotulo)}</span>
             <span>${esc(n.data_publicacao_rotulo)}</span>
@@ -315,6 +328,10 @@ function itemFicha(rotulo: string, valor: string | number | null | undefined): s
 
 function htmlDetalhe(n: DetalheNoticia): string {
   const link = urlSegura(n.link_fonte);
+  const imagem = urlImagemSegura(n.imagem_url);
+  const foto = imagem
+    ? `<figure class="detalhe__foto"><img src="${esc(imagem)}" alt="Ilustração: ${esc(n.titulo)}"></figure>`
+    : "";
   const urlVagasArea = `/vagas?area=${encodeURIComponent(n.area)}`;
   const urlMuralArea = `/mural?area=${encodeURIComponent(n.area)}`;
 
@@ -323,6 +340,7 @@ function htmlDetalhe(n: DetalheNoticia): string {
     <h2 id="detalhe-titulo">${esc(n.titulo)}</h2>
     <p class="detalhe__organizacao">${esc(n.cientista)}</p>
     ${htmlSelos(n.selos)}
+    ${foto}
     <p class="detalhe__resumo">${esc(n.resumo)}</p>
     <dl class="ficha-dados">
       ${itemFicha("Cientista / Protagonista", n.cientista)}
