@@ -37,6 +37,32 @@ class Usuaria(db.Model):
         return self.papel == "admin"
 
 
+class ContaUsuaria(db.Model):
+    """Login com Google e estado do cadastro inicial, um para um com Usuaria.
+
+    Fica numa tabela própria porque db.create_all() não acrescenta colunas
+    em tabelas que já existem: assim ninguém precisa apagar o banco.
+    """
+
+    __tablename__ = "contas_usuaria"
+
+    usuaria_id = db.Column(db.Integer, db.ForeignKey("usuarias.id"), primary_key=True)
+    google_sub = db.Column(db.String(64), unique=True)  # id fixo da conta Google
+    foto_url = db.Column(db.String(500))  # /uploads/... ou a foto do Google
+    data_nascimento = db.Column(db.Date)
+    estado = db.Column(db.String(2))  # sigla, de catalogos.ESTADOS
+    # [{"curso", "instituicao"}]; a primeira também fica em Usuaria.curso/instituicao.
+    formacoes = db.Column(db.JSON)
+    cadastro_concluido_em = db.Column(db.DateTime)
+    ultimo_acesso_em = db.Column(db.DateTime)
+
+    usuaria = db.relationship("Usuaria", backref=db.backref("conta", uselist=False))
+
+    @property
+    def cadastro_completo(self):
+        return self.cadastro_concluido_em is not None
+
+
 class IdentidadeUsuaria(db.Model):
     __tablename__ = "identidades_usuaria"
     __table_args__ = (db.UniqueConstraint("usuaria_id", "identidade"),)

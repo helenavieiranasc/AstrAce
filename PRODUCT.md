@@ -36,7 +36,8 @@ Um lugar só para o trabalho científico de mulheres e meninas, de todos os nív
 
 ## Brand Commitments
 
-- Nome: **Ciência Delas**.
+- Nome do sistema: **AstrAce**. Logo em `app/static/img/logo-astrace*.png` (cabeçalho: `logo-astrace-topo.png`).
+- Mascote: a estrela rosa da logo, andando com um notebook (`app/static/img/logo-estrela-*.png`), que também é a estrela 3D da landing.
 - Voz: direta, calorosa, no feminino, chamando para a ação ("Publique o seu e inspire a próxima").
 
 ## Evidence on Hand

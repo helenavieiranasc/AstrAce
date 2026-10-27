@@ -15,6 +15,12 @@ class Config:
     # Enquanto o login (Pessoa 2) não fica pronto, usa a primeira usuária do banco.
     LOGIN_DEV = os.environ.get("LOGIN_DEV", "1") == "1"
 
+    # Login com Google (OAuth). Sem os dois, o botão avisa que o login não está disponível.
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+    # Opcional: força o endereço de retorno (ex.: atrás de proxy com https).
+    GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "")
+
     # Com essa quantidade de denúncias, o projeto sai do mural até a equipe revisar.
     LIMITE_DENUNCIAS = 3
 

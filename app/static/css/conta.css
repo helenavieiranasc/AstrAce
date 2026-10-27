@@ -1,0 +1,667 @@
+/* AstrAce: landing page, login com Google e cadastro do perfil.
+   Usa o quadro, os pins e os post-its de mural.css; aqui só o que é destas telas. */
+
+/* ---------- Apresentação (landing) ---------- */
+
+.apresentacao {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-areas:
+    "folha palco"
+    "notas notas";
+  align-items: center;
+  gap: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px);
+  padding: clamp(8px, 2vw, 24px) 0 clamp(4px, 1vw, 12px);
+}
+
+.apresentacao ::selection,
+.folha-perfil ::selection {
+  background: var(--rosa-claro);
+  color: var(--tinta);
+}
+
+.folha-entrada {
+  grid-area: folha;
+  position: relative;
+  justify-self: end;
+  width: 100%;
+  max-width: 600px;
+  padding: clamp(30px, 4vw, 52px) clamp(22px, 4vw, 52px) clamp(28px, 3.4vw, 44px);
+  background: var(--papel);
+  box-shadow: var(--sombra-papel-alta);
+  transform: rotate(-0.8deg);
+}
+
+.folha-entrada__logo {
+  width: clamp(190px, 22vw, 260px);
+  height: auto;
+  margin: 0 0 clamp(18px, 2.6vw, 28px) -6px;
+}
+
+.folha-entrada h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.folha-entrada__texto {
+  max-width: 44ch;
+  margin: 0 0 clamp(24px, 3vw, 32px);
+  font-size: clamp(1.02rem, 1.3vw, 1.15rem);
+  color: var(--tinta-suave);
+  text-wrap: pretty;
+}
+
+/* ---------- Botão do Google (estilo claro das diretrizes do Google) ---------- */
+
+.entrar {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.botao-google {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 24px 10px 18px;
+  border: 1px solid #747775;
+  border-radius: 12px;
+  background: #fff;
+  color: #1f1f1f;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 1px 1px rgb(42 28 21 / 0.14), 0 6px 12px -6px rgb(42 28 21 / 0.35);
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.botao-google:hover {
+  border-color: var(--magenta);
+  background: #fff6fa;
+  box-shadow: 0 2px 2px rgb(42 28 21 / 0.14), 0 12px 18px -8px rgb(184 19 92 / 0.4);
+  transform: translateY(-1px);
+}
+
+.botao-google:active {
+  transform: translateY(0);
+}
+
+.botao-google__g {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.botao-google[aria-disabled="true"] {
+  pointer-events: none;
+  cursor: progress;
+  color: #5f5f5f;
+}
+
+.botao-google[aria-disabled="true"] .botao-google__g {
+  visibility: hidden;
+}
+
+.botao-google[aria-disabled="true"]::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-left: 1px;
+  border: 3px solid var(--rosa-claro);
+  border-top-color: var(--magenta);
+  border-radius: 50%;
+  animation: conta-girar 0.8s linear infinite;
+}
+
+@keyframes conta-girar {
+  to { transform: rotate(360deg); }
+}
+
+.entrar__erro {
+  max-width: 44ch;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fff0f6;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--magenta) 35%, transparent);
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.entrar__dica {
+  max-width: 48ch;
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+.entrar__dica code {
+  font-size: 0.82rem;
+}
+
+.entrar__nota {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Estrela 3D ---------- */
+
+.palco-estrela {
+  grid-area: palco;
+  position: relative;
+  justify-self: center;
+  width: min(100%, 440px);
+  aspect-ratio: 1;
+}
+
+.palco-estrela canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.palco-estrela__reserva {
+  position: absolute;
+  inset: 14%;
+  width: 72%;
+  height: auto;
+  opacity: 0.9;
+  filter: drop-shadow(3px 6px 4px rgb(0 0 0 / 0.25));
+  transform: rotate(4deg);
+  transition: opacity 0.5s ease;
+}
+
+.palco-estrela--3d canvas {
+  opacity: 1;
+}
+
+.palco-estrela--3d .palco-estrela__reserva {
+  opacity: 0;
+}
+
+/* ---------- O que dá para fazer ---------- */
+
+.o-que-fazer {
+  grid-area: notas;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px clamp(20px, 3vw, 40px);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 10px 0 0;
+  list-style: none;
+}
+
+.o-que-fazer__item {
+  padding: 24px 22px 22px;
+}
+
+.o-que-fazer__item:nth-child(1) { transform: rotate(-1.6deg); }
+.o-que-fazer__item:nth-child(2) { transform: rotate(1.2deg) translateY(10px); }
+.o-que-fazer__item:nth-child(3) { transform: rotate(-0.6deg); }
+
+.o-que-fazer h2 {
+  margin: 0 0 4px;
+  font-family: var(--fonte-mao);
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.o-que-fazer p {
+  margin: 0;
+  max-width: 34ch;
+}
+
+@media (max-width: 980px) {
+  .apresentacao {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .apresentacao {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "folha"
+      "palco"
+      "notas";
+    gap: 20px;
+  }
+
+  .folha-entrada {
+    justify-self: stretch;
+    max-width: none;
+    transform: rotate(-0.5deg);
+  }
+
+  .palco-estrela {
+    width: min(70%, 280px);
+  }
+
+  .o-que-fazer {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .o-que-fazer__item:nth-child(2) {
+    transform: rotate(1deg);
+  }
+}
+
+@media (max-width: 420px) {
+  .botao-google {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .entrar {
+    justify-items: stretch;
+  }
+}
+
+/* ---------- Cadastro do perfil ---------- */
+
+/* A folha ocupa quase a tela toda, de cima a baixo; fica só uma borda de cortiça aparecendo. */
+.quadro--perfil {
+  margin-bottom: 14px;
+}
+
+.cortica--perfil {
+  padding: clamp(12px, 2.2vw, 30px);
+}
+
+.folha-perfil {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
+  padding: clamp(30px, 4vw, 56px) clamp(20px, 4.5vw, 64px) clamp(24px, 3vw, 40px);
+}
+
+.folha-perfil__cabecalho .folha-form__intro {
+  max-width: 62ch;
+  margin-right: 0; /* o mural.css reserva espaço à direita no formulário de projetos */
+}
+
+.folha-perfil__corpo {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-content: start;
+  gap: 0 clamp(24px, 3.5vw, 52px);
+}
+
+.folha-perfil__coluna--voce {
+  padding-right: clamp(24px, 3.5vw, 52px);
+  border-right: 1px dashed var(--papel-borda);
+}
+
+.folha-perfil__acoes {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--papel-borda);
+}
+
+.data-nascimento {
+  min-width: 0;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.data-nascimento legend {
+  margin-bottom: 4px;
+  padding: 0;
+  font-weight: 700;
+}
+
+.data-nascimento__partes {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr) 6rem; /* dia e ano com largura certa para os números */
+  gap: 10px;
+  max-width: 380px;
+}
+
+.folha-perfil .data-nascimento select {
+  padding-inline: 10px 4px;
+}
+
+/* Lista aberta das caixas de seleção com o estilo do site (Chrome e Edge 135+).
+   Nos outros navegadores fica a lista padrão do sistema, que continua funcionando. */
+@supports (appearance: base-select) {
+  .folha-perfil select,
+  .folha-perfil select::picker(select) {
+    appearance: base-select;
+  }
+
+  .folha-perfil select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-inline: 12px 14px;
+    cursor: pointer;
+  }
+
+  .folha-perfil select:has(option[value=""]:checked) {
+    color: var(--tinta-suave);
+  }
+
+  .folha-perfil select::picker-icon {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-top: -4px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: 45deg;
+    transition: rotate 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s ease;
+  }
+
+  .folha-perfil select:open::picker-icon {
+    margin-top: 4px;
+    rotate: 225deg;
+  }
+
+  .folha-perfil select:open {
+    border-color: var(--magenta);
+  }
+
+  .folha-perfil select::picker(select) {
+    min-width: anchor-size(width);
+    max-height: min(320px, 50vh);
+    margin-block: 6px;
+    padding: 6px;
+    overflow-y: auto;
+    border: 2px solid var(--papel-borda);
+    border-radius: 10px;
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: var(--sombra-papel-alta);
+    scrollbar-width: thin;
+    scrollbar-color: var(--postit-rosa) transparent;
+  }
+
+  .folha-perfil option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .folha-perfil option::checkmark {
+    display: none;
+  }
+
+  .folha-perfil option[value=""] {
+    color: var(--tinta-suave);
+  }
+
+  .folha-perfil option:hover,
+  .folha-perfil option:focus-visible {
+    outline: none;
+    background: var(--rosa-claro);
+  }
+
+  .folha-perfil option:checked {
+    background: #fff0f6;
+    font-weight: 700;
+    color: var(--magenta-escuro);
+  }
+
+  .folha-perfil option:checked:hover,
+  .folha-perfil option:checked:focus-visible {
+    background: var(--postit-rosa);
+  }
+}
+
+.folha-perfil .data-nascimento__partes label {
+  margin-bottom: 2px;
+  font-size: 0.84rem;
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+/* Graduações: curso + instituição, uma por linha. */
+.formacoes__lista {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.formacao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0 14px;
+}
+
+.formacao__remover {
+  margin-top: 28px;
+  padding-inline: 4px;
+}
+
+.formacoes__adicionar {
+  padding-inline: 0;
+  color: var(--magenta-escuro);
+}
+
+.formacoes__adicionar:hover {
+  color: var(--tinta);
+}
+
+.formacoes legend {
+  margin-bottom: 8px;
+}
+
+.folha-perfil input,
+.folha-perfil select {
+  caret-color: var(--magenta);
+}
+
+.perfil-foto {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 24px);
+  margin: 0 0 24px;
+}
+
+.perfil-foto__moldura {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 128px;
+  height: 128px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--rosa-claro);
+  box-shadow: 0 1px 2px rgb(42 28 21 / 0.2), 0 10px 16px -8px rgb(42 28 21 / 0.45);
+}
+
+.perfil-foto__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.perfil-foto__iniciais {
+  font-family: var(--fonte-mao);
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.perfil-foto--enviando .perfil-foto__moldura::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(255 253 247 / 0.7);
+}
+
+.perfil-foto--enviando .perfil-foto__moldura::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--rosa-claro);
+  border-top-color: var(--magenta);
+  border-radius: 50%;
+  animation: conta-girar 0.8s linear infinite;
+}
+
+.perfil-foto__acoes {
+  position: relative; /* segura o input de arquivo escondido aqui dentro */
+  min-width: 0;
+}
+
+.perfil-foto__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.folha-perfil .perfil-foto__botoes label {
+  margin: 0;
+}
+
+input:focus-visible + .perfil-foto__botoes label {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+.perfil-nota {
+  margin: -6px 0 28px;
+  font-size: 0.88rem;
+  color: var(--tinta-suave);
+}
+
+.opcional {
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+.identidades__regra {
+  max-width: 58ch;
+  margin: -4px 0 14px;
+  font-size: 0.92rem;
+  color: var(--tinta-suave);
+}
+
+.identidades__lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.identidade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.identidade:has(.identidade__marcar:checked) {
+  border-color: var(--magenta);
+  background: #fff6fa;
+}
+
+.folha-perfil .identidade label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.identidade input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--magenta);
+}
+
+.folha-perfil .identidade__publica {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+.perfil-status {
+  margin: 0;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.perfil-status--ok {
+  color: var(--pin-verde);
+}
+
+@media (max-width: 900px) {
+  .folha-perfil__corpo {
+    grid-template-columns: 1fr;
+  }
+
+  .folha-perfil__coluna--voce {
+    margin: 0 0 8px;
+    padding: 0 0 12px;
+    border-right: 0;
+    border-bottom: 1px dashed var(--papel-borda);
+  }
+}
+
+@media (max-width: 560px) {
+  .perfil-foto {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .formacao {
+    grid-template-columns: 1fr;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--papel-borda);
+  }
+
+  .formacao__remover {
+    justify-self: start;
+    margin: -8px 0 8px;
+  }
+
+  .folha-perfil .folha-form__acoes .botao {
+    width: 100%;
+  }
+}

@@ -29,10 +29,10 @@ def test_paginas_abrem(cliente, rota):
     assert cliente.get(rota).status_code == 200
 
 
-def test_inicio_redireciona_para_o_mural(cliente):
+def test_inicio_abre_a_landing(cliente):
     resposta = cliente.get("/")
-    assert resposta.status_code == 302
-    assert resposta.headers["Location"].endswith("/mural")
+    assert resposta.status_code == 200
+    assert "Entrar com Google" in resposta.get_data(as_text=True)
 
 
 def test_api_lista_e_detalhe(cliente):
