@@ -34,7 +34,8 @@ app/
   __init__.py        create_app: cada frente registra o próprio blueprint aqui
   auth.py            usuaria_atual(): quem está logada
   catalogos.py       áreas, níveis e identidades (use nos seus filtros e formulários)
-  usuarias/models.py Usuaria e IdentidadeUsuaria (modelo mínimo)
+  usuarias/models.py Usuaria, ContaUsuaria (login Google e cadastro) e IdentidadeUsuaria
+  conta/             landing page (/), login com Google e cadastro do perfil (AstrAce)
   mural/             Pessoa 1: mural, cadastro de projetos, denúncias
   eventos/           Pessoa 3: agenda de eventos, filtros e detalhe
   templates/         base.html (cabeçalho e menu) + páginas
@@ -98,11 +99,52 @@ Quando `token_qr` está preenchido, o evento mostra o selo "vale carimbo" e o av
 
 Os cadastros de projetos da parte B (software, social, aula e protótipo) estão em `app/mural/tipos.py`.
 
+## Landing, login com Google e perfil (AstrAce)
+
+`/` é a landing page. Quem já entrou vai direto para `/mural` (perfil completo) ou `/cadastro` (perfil por terminar).
+As outras páginas continuam abertas a todo mundo.
+
+**Para o login funcionar**, crie um cliente OAuth no Google e preencha o `.env`:
+
+1. No [Google Cloud Console](https://console.cloud.google.com/apis/credentials), crie um projeto e configure a
+   tela de consentimento OAuth (tipo "Externo"; os escopos são só `openid`, `email` e `profile`).
+2. Em **Credenciais → Criar credenciais → ID do cliente OAuth**, escolha **Aplicativo da Web**.
+3. Em **URIs de redirecionamento autorizados**, coloque o endereço de retorno de cada lugar onde o site roda, por exemplo
+   `http://127.0.0.1:5000/entrar/google/retorno` e o do servidor de produção (com `https`).
+   Abra o site pelo mesmo endereço cadastrado (`127.0.0.1` e `localhost` contam como diferentes).
+4. Copie o ID e a chave secreta para o `.env` como `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`.
+   Atrás de proxy, se o endereço de retorno sair errado, defina `GOOGLE_REDIRECT_URI` com ele completo.
+
+Sem essas variáveis, o botão "Entrar com Google" volta para a landing com um aviso (e, em modo debug, uma dica do `.env`).
+Não precisa instalar nada: o fluxo usa só a biblioteca padrão do Python (`app/conta/google.py`).
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /` | Landing. Com sessão, redireciona para `/mural` ou `/cadastro` |
+| `GET /entrar/google` | Vai para o Google (com `state` contra CSRF) |
+| `GET /entrar/google/retorno` | Volta do Google: acha a usuária pela conta Google ou pelo e-mail, ou cria uma nova |
+| `GET /cadastro` | Formulário do perfil (precisa estar logada) |
+| `GET /api/perfil` | Perfil da usuária logada e as opções de nível, área, identidade, estado e as cidades que já existem no site |
+| `POST /api/perfil` | Salva `apelido`, `data_nascimento` (`AAAA-MM-DD`), `nivel`, `area_interesse`, `estado` (sigla), `cidade`, `formacoes: [{curso, instituicao}]` (ou `instituicao` sozinha no ensino médio), `identidades: [{valor, publica}]`, `foto_id` ou `remover_foto` |
+| `POST /sair` | Encerra a sessão |
+
+O cadastro está completo quando `usuaria.conta.cadastro_concluido_em` está preenchido. A foto vai pelo `POST /api/uploads`
+(`finalidade=foto`) e fica em `conta.foto_url`; no primeiro login entra a foto do Google, que a pessoa pode trocar.
+A cidade é escolhida na lista de municípios do IBGE do estado (carregada pelo navegador); se o IBGE não responder,
+vira texto livre com as cidades do site como sugestão. A primeira graduação também fica em `usuaria.curso`/`instituicao`.
+Colunas novas em `contas_usuaria` entram sozinhas no banco ao subir o app (`conta.completar_colunas`).
+`ContaUsuaria` é uma tabela à parte porque o `db.create_all()` não acrescenta colunas em tabelas que já existem:
+assim ninguém precisa apagar o banco.
+
+A estrela 3D da landing (`frontend/src/estrela-3d.ts`) é a mascote da logo (`static/img/logo-estrela-original.png`)
+modelada em Three.js, que vem do CDN só quando o navegador tem WebGL. Sem ele, aparece o desenho da logo.
+
 ## Pontos de encaixe com as outras frentes
 
-- **Pessoa 2 (login e perfil):** no login, grave `session["usuaria_id"] = usuaria.id`; o mural já usa isso pelo `usuaria_atual()`.
-  Pode adicionar campos em `Usuaria` à vontade, só não renomeie os que existem.
-  Enquanto o login não fica pronto, `LOGIN_DEV=1` faz o site agir como a primeira usuária do banco. Desligue (`LOGIN_DEV=0`) quando o login funcionar.
+- **Pessoa 2 (login e perfil):** o login com Google e o cadastro inicial já existem (seção acima) e gravam `session["usuaria_id"]`,
+  que o mural usa pelo `usuaria_atual()`. Pode adicionar campos em `Usuaria` à vontade, só não renomeie os que existem.
+  `LOGIN_DEV=1` ainda faz o site agir como a primeira usuária do banco quando ninguém entrou. Desligue (`LOGIN_DEV=0`)
+  quando o login com Google estiver configurado.
 - **Pessoa 3 (tipos B e eventos):** os campos extras de `software`, `social`, `aula` e `prototipo` entram na lista `campos` desses tipos em
   `app/mural/tipos.py`, e o material exigido pode ser ajustado em `material`. O formulário e a validação se montam sozinhos a partir dali.
   O cartaz de eventos fica no topo do mural (`.cartaz-eventos` em `templates/mural.html`) e aponta para `/eventos`.

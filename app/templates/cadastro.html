@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block titulo %}Seu perfil · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conta.css') }}">
+{% endblock %}
+
+{% block acao_topo %}
+<form class="topo__acao" method="post" action="{{ url_for('conta.sair') }}">
+  <button class="botao botao--texto" type="submit">Sair</button>
+</form>
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro quadro--perfil">
+  <div class="cortica cortica--perfil">
+    <form class="folha-form folha-perfil" id="form-perfil" novalidate aria-busy="true">
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+
+      <header class="folha-perfil__cabecalho">
+        <h1>Seu perfil</h1>
+        <p class="folha-form__intro">Falta pouco. Conte quem você é para o mural mostrar seus projetos do jeito certo.
+          Campos com * são obrigatórios.</p>
+      </header>
+
+      <div class="resumo-erros" id="resumo-erros" role="alert" tabindex="-1" hidden></div>
+
+      <div class="folha-perfil__corpo">
+        <section class="folha-perfil__coluna folha-perfil__coluna--voce" aria-label="Você">
+          <div class="perfil-foto" id="campo-foto">
+            <div class="perfil-foto__moldura" id="foto-moldura">
+              <span class="perfil-foto__iniciais" id="foto-iniciais" aria-hidden="true"></span>
+            </div>
+            <div class="perfil-foto__acoes">
+              <p class="rotulo" id="foto-rotulo">Foto de perfil</p>
+              <input class="visualmente-oculto" id="foto" type="file" accept=".jpg,.jpeg,.png,.webp"
+                     aria-labelledby="foto-rotulo foto-escolher" aria-describedby="foto-ajuda erro-foto">
+              <div class="perfil-foto__botoes">
+                <label class="botao botao--secundario" for="foto" id="foto-escolher">Escolher foto</label>
+                <button class="botao botao--texto" type="button" id="foto-remover" hidden>Remover</button>
+              </div>
+              <small id="foto-ajuda">Opcional. jpg, png ou webp, até 10 MB.</small>
+              <p class="campo__erro" id="erro-foto" hidden></p>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="apelido">Como quer ser chamada *</label>
+            <input id="apelido" name="apelido" maxlength="60" required autocomplete="nickname"
+                   aria-describedby="apelido-ajuda erro-apelido">
+            <small id="apelido-ajuda">É o nome que aparece nos seus projetos.</small>
+            <p class="campo__erro" id="erro-apelido" hidden></p>
+          </div>
+
+          {# Três listas em vez do calendário do navegador, que não aceita o estilo do site. #}
+          <fieldset class="campo data-nascimento" aria-describedby="erro-data_nascimento">
+            <legend>Data de nascimento</legend>
+            <div class="data-nascimento__partes">
+              <div>
+                <label for="data_nascimento">Dia</label>
+                <select id="data_nascimento" autocomplete="bday-day"><option value="">Dia</option></select>
+              </div>
+              <div>
+                <label for="nascimento-mes">Mês</label>
+                <select id="nascimento-mes" autocomplete="bday-month"><option value="">Mês</option></select>
+              </div>
+              <div>
+                <label for="nascimento-ano">Ano</label>
+                <select id="nascimento-ano" autocomplete="bday-year"><option value="">Ano</option></select>
+              </div>
+            </div>
+            <p class="campo__erro" id="erro-data_nascimento" hidden></p>
+          </fieldset>
+
+          <div class="linha">
+            <div class="campo">
+              <label for="estado">Estado</label>
+              <select id="estado" name="estado" autocomplete="address-level1" aria-describedby="erro-estado">
+                <option value="">Escolha</option>
+              </select>
+              <p class="campo__erro" id="erro-estado" hidden></p>
+            </div>
+            <div class="campo" id="campo-cidade">
+              <label for="cidade">Cidade</label>
+              <select id="cidade" name="cidade" disabled aria-describedby="cidade-ajuda">
+                <option value="">Escolha o estado primeiro</option>
+              </select>
+              <small id="cidade-ajuda" hidden></small>
+            </div>
+          </div>
+        </section>
+
+        <section class="folha-perfil__coluna" aria-label="Estudos">
+          <div class="linha">
+            <div class="campo">
+              <label for="nivel">Fase dos estudos *</label>
+              <select id="nivel" name="nivel" required aria-describedby="erro-nivel">
+                <option value="">Escolha</option>
+              </select>
+              <p class="campo__erro" id="erro-nivel" hidden></p>
+            </div>
+            <div class="campo">
+              <label for="area_interesse">Área de interesse</label>
+              <select id="area_interesse" name="area_interesse" aria-describedby="erro-area_interesse">
+                <option value="">Escolha</option>
+              </select>
+              <p class="campo__erro" id="erro-area_interesse" hidden></p>
+            </div>
+          </div>
+
+          {# Ensino médio: só a escola. #}
+          <div class="campo" id="campo-escola" hidden>
+            <label for="escola">Escola</label>
+            <input id="escola" name="escola" maxlength="160" autocomplete="organization">
+          </div>
+
+          {# Os outros níveis: uma ou mais graduações (curso + instituição). #}
+          <fieldset class="bloco formacoes" id="campo-formacoes">
+            <legend>Onde você estuda ou estudou</legend>
+            <ol class="formacoes__lista" id="formacoes"></ol>
+            <button class="botao botao--texto formacoes__adicionar" type="button" id="formacao-adicionar">
+              + Adicionar outra graduação
+            </button>
+          </fieldset>
+          <p class="perfil-nota">Escola, cidade e fase dos estudos já vêm preenchidas quando você publicar um projeto.</p>
+
+          <fieldset class="bloco identidades">
+            <legend>Você faz parte de algum destes grupos? <span class="opcional">(opcional)</span></legend>
+            <p class="identidades__regra">Ninguém vê isso, a não ser que você marque “Mostrar no perfil”.
+              Quem mostra aparece no filtro de autoras do mural.</p>
+            <ul class="identidades__lista" id="identidades"></ul>
+          </fieldset>
+        </section>
+      </div>
+
+      <div class="folha-form__acoes folha-perfil__acoes">
+        <button class="botao botao--primario botao--grande" type="submit" id="salvar" disabled>Salvar e entrar</button>
+        <p class="perfil-status" id="status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/cadastro-perfil.js') }}"></script>
+{% endblock %}

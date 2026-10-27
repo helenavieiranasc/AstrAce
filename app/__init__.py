@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask
 
 from .config import PASTA_INSTANCE, Config
 from .extensoes import db
@@ -26,7 +26,9 @@ def create_app(config=Config):
     from .vagas.seed import seed_vagas
     from .noticias import bp as noticias_bp
     from .noticias.seed import seed_noticias
+    from .conta import bp as conta_bp, completar_colunas
 
+    app.register_blueprint(conta_bp)  # "/" é a landing page
     app.register_blueprint(mural_bp)
     app.register_blueprint(uploads_bp)
     app.register_blueprint(eventos_bp)
@@ -37,11 +39,8 @@ def create_app(config=Config):
     app.cli.add_command(seed_vagas)
     app.cli.add_command(seed_noticias)
 
-    @app.get("/")
-    def inicio():
-        return redirect(url_for("mural.pagina_mural"))
-
     with app.app_context():
         db.create_all()
+        completar_colunas(db)
 
     return app
