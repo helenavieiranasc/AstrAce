@@ -33,6 +33,20 @@ const CORES_CAPA: Record<string, string> = {
   educacao: "#fbe5a0",
 };
 
+// Nomes curtos para as etiquetas de área caberem numa linha (o nome completo fica no title e no aria-label).
+const AREAS_CURTAS: Record<string, string> = {
+  computacao: "Computação",
+  engenharias: "Engenharias",
+  matematica: "Matemática",
+  fisica: "Física",
+  quimica: "Química",
+  biologicas: "Biologia",
+  saude: "Saúde",
+  ambiental: "Meio ambiente",
+  humanas: "Humanas",
+  educacao: "Educação",
+};
+
 const form = el<HTMLFormElement>("filtros");
 const grade = el<HTMLUListElement>("grade");
 const estado = el("estado");
@@ -43,8 +57,9 @@ const destaquesLista = el<HTMLUListElement>("destaques-lista");
 const dialogo = el<HTMLDialogElement>("detalhe");
 const conteudoDetalhe = el("detalhe-conteudo");
 const aviso = el("aviso");
-const botaoAlternar = el<HTMLButtonElement>("filtros-alternar");
 const botaoLimpar = el<HTMLButtonElement>("filtros-limpar");
+const listaAreas = el("areas-lista");
+const selectOrdem = el<HTMLSelectElement>("ordem");
 
 let opcoes: OpcoesMural | null = null;
 let pagina = 1;
@@ -66,43 +81,52 @@ function temFiltro(filtros: Filtros): boolean {
   return CAMPOS_FILTRO.some((campo) => filtros[campo] !== "");
 }
 
+function ordemAtual(): string {
+  return selectOrdem.value === "estrelas" ? "estrelas" : "recentes";
+}
+
 function sincronizarUrl(filtros: Filtros): void {
   const params = new URLSearchParams();
   for (const campo of CAMPOS_FILTRO) {
     if (filtros[campo]) params.set(campo, filtros[campo]);
   }
+  if (ordemAtual() !== "recentes") params.set("ordem", ordemAtual());
   const busca = params.toString();
   history.replaceState(null, "", busca ? `?${busca}` : location.pathname);
 }
 
 function aplicarFiltrosDaUrl(): void {
   const params = new URLSearchParams(location.search);
-  let algumSelect = false;
   for (const campo of CAMPOS_FILTRO) {
     const valor = params.get(campo);
-    const controle = form.elements.namedItem(campo) as HTMLInputElement | HTMLSelectElement | null;
-    if (valor && controle) {
-      controle.value = valor;
-      if (campo !== "q") algumSelect = true;
-    }
+    // Para as áreas (rádio), namedItem devolve a lista de opções; definir .value marca a certa.
+    const controle = form.elements.namedItem(campo) as HTMLInputElement | HTMLSelectElement | RadioNodeList | null;
+    if (valor && controle) controle.value = valor;
   }
-  if (algumSelect) alternarFiltros(true);
+  if (params.get("ordem") === "estrelas") selectOrdem.value = "estrelas";
 }
 
 function preencherFiltros(o: OpcoesMural): void {
   const select = (nome: string) => form.elements.namedItem(nome) as HTMLSelectElement;
   preencherSelect(select("tipo"), o.tipos);
-  preencherSelect(select("area"), o.areas);
   preencherSelect(select("nivel"), o.niveis);
   preencherSelect(select("instituicao"), o.instituicoes);
   preencherSelect(select("cidade"), o.cidades);
   preencherSelect(select("identidade"), o.identidades);
-}
 
-function alternarFiltros(abrir?: boolean): void {
-  const aberto = abrir ?? botaoAlternar.getAttribute("aria-expanded") !== "true";
-  botaoAlternar.setAttribute("aria-expanded", String(aberto));
-  form.classList.toggle("filtros--aberto", aberto);
+  listaAreas.insertAdjacentHTML(
+    "beforeend",
+    o.areas
+      .map(
+        (a) => `
+        <label class="area-etiqueta" style="--cor-area: ${CORES_CAPA[a.valor] ?? "var(--rosa-claro)"}"
+          title="${esc(a.rotulo)}">
+          <input type="radio" name="area" value="${esc(a.valor)}" aria-label="${esc(a.rotulo)}">
+          <span>${esc(AREAS_CURTAS[a.valor] ?? a.rotulo)}</span>
+        </label>`,
+      )
+      .join(""),
+  );
 }
 
 function aoMudarFiltros(): void {
@@ -123,39 +147,90 @@ function rotacao(id: number, escala = 1): string {
 function htmlCartao(c: Cartao, variante: "grade" | "polaroid"): string {
   const pin = PINS[c.id % PINS.length];
   const imagem = urlSegura(c.imagem_url);
-  let foto = "";
-  if (imagem) {
-    foto = `<div class="cartao__foto"><img src="${esc(imagem)}" alt="" loading="lazy"></div>`;
-  } else if (variante === "polaroid") {
-    const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
-    foto = `<div class="cartao__foto"><div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div></div>`;
-  }
 
-  const classes = ["cartao"];
-  if (variante === "polaroid") classes.push("cartao--polaroid");
-  if (!foto) classes.push("cartao--ficha");
+  // Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área.
+  const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
+  const foto = imagem
+    ? `<img src="${esc(imagem)}" alt="" loading="lazy">`
+    : `<div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div>`;
 
-  const enfeite =
-    variante === "polaroid" ? "" : `<span class="pin" style="--cor-pin: var(${pin})" aria-hidden="true"></span>`;
-  const resumo = foto ? "" : `<p class="cartao__resumo">${esc(c.resumo_curto)}</p>`;
+  // Na grade, o cartão fica preso com pin; nos destaques, com fita adesiva.
+  const destaque = variante === "polaroid";
+  const enfeite = destaque ? "" : `<span class="pin" style="--cor-pin: var(${pin})" aria-hidden="true"></span>`;
+  const selo = c.novo ? '<span class="selo-novo">Novo!</span>' : "";
 
   return `
     <li>
-      <article class="${classes.join(" ")}"
-        style="--rot: ${rotacao(c.id, variante === "polaroid" ? 1.3 : 1)}deg; --rot-fita: ${rotacao(c.id + 7, 2)}deg; --cor-ficha: var(${pin})">
+      <article class="cartao${destaque ? " cartao--destaque" : ""}"
+        style="--rot: ${rotacao(c.id, destaque ? 1.3 : 1)}deg; --rot-fita: ${rotacao(c.id + 7, 2)}deg">
         ${enfeite}
-        ${foto}
+        <div class="cartao__foto">${foto}${selo}</div>
         <p class="cartao__tipo">${icone(c.icone)}${esc(c.tipo_rotulo)}</p>
-        <div class="cartao__corpo">
-          <h3 class="cartao__titulo">
-            <a class="cartao__link" href="/mural?projeto=${c.id}" data-id="${c.id}">${esc(c.titulo)}</a>
-          </h3>
-          <p class="cartao__area">${esc(c.area_rotulo)}</p>
-          ${resumo}
-          <p class="cartao__autora">${esc(c.autora)}, ${esc(c.ano)}${htmlClipe(c.materiais)}</p>
+        <h3 class="cartao__titulo">
+          <a class="cartao__link" href="/mural?projeto=${c.id}" data-id="${c.id}">${esc(c.titulo)}</a>
+        </h3>
+        <p class="cartao__area">${esc(c.area_rotulo)}</p>
+        <div class="cartao__rodape">
+          <p class="cartao__autora">${esc(c.autora)}, ${esc(c.ano)}</p>
+          ${htmlClipe(c.materiais)}
+          ${htmlBotaoEstrela(c.id, c.estrelas, c.estrelado, c.titulo)}
         </div>
       </article>
     </li>`;
+}
+
+// ---------- Estrelas ----------
+
+function textoEstrelas(n: number): string {
+  return n === 1 ? "1 estrela" : `${n} estrelas`;
+}
+
+function rotuloEstrela(estrelas: number, estrelado: boolean, titulo: string): string {
+  const acao = estrelado ? "Tirar sua estrela de" : "Dar estrela para";
+  return `${acao} ${titulo} (${textoEstrelas(estrelas)})`;
+}
+
+/** Botão pequeno do cartão. Fica por cima do link do cartão, então clicar nele não abre o detalhe. */
+function htmlBotaoEstrela(id: number, estrelas: number, estrelado: boolean, titulo: string): string {
+  return `
+    <button class="estrela-botao" type="button" data-estrela="${id}" data-titulo="${esc(titulo)}"
+      aria-pressed="${estrelado}" aria-label="${esc(rotuloEstrela(estrelas, estrelado, titulo))}">
+      ${icone("estrela")}<span class="estrela-botao__total">${estrelas}</span>
+    </button>`;
+}
+
+/** Atualiza todos os botões desse projeto na página (grade, destaques e detalhe). */
+function atualizarEstrelas(id: number, estrelas: number, estrelado: boolean): void {
+  document.querySelectorAll<HTMLButtonElement>(`[data-estrela="${id}"]`).forEach((botao) => {
+    botao.setAttribute("aria-pressed", String(estrelado));
+    const titulo = botao.dataset.titulo ?? "";
+    if (botao.classList.contains("estrela-grande")) {
+      botao.querySelector(".estrela-grande__acao")!.textContent = estrelado ? "Estrela dada" : "Dar estrela";
+      botao.querySelector(".estrela-grande__total")!.textContent = textoEstrelas(estrelas);
+    } else {
+      botao.querySelector(".estrela-botao__total")!.textContent = String(estrelas);
+      botao.setAttribute("aria-label", rotuloEstrela(estrelas, estrelado, titulo));
+    }
+  });
+}
+
+async function alternarEstrela(botao: HTMLButtonElement): Promise<void> {
+  const id = Number(botao.dataset.estrela);
+  if (botao.dataset.ocupado) return;
+  botao.dataset.ocupado = "1";
+  try {
+    const r = await postJson<{ estrelas: number; estrelado: boolean }>(`/api/projetos/${id}/estrela`, {});
+    atualizarEstrelas(id, r.estrelas, r.estrelado);
+    if (r.estrelado) {
+      botao.classList.remove("estrela--pulo");
+      void botao.offsetWidth; // reinicia a animação
+      botao.classList.add("estrela--pulo");
+    }
+  } catch (erro) {
+    avisar(mensagemDeErro(erro));
+  } finally {
+    delete botao.dataset.ocupado;
+  }
 }
 
 function htmlClipe(quantidade: number): string {
@@ -236,6 +311,7 @@ function htmlVazio(comFiltro: boolean): string {
     return `
       <div class="postit postit--amarelo estado">
         <span class="pin" aria-hidden="true"></span>
+        <img class="estado__mascote" src="/static/img/logo-estrela-magenta-240.png" alt="" width="240" height="244">
         <h3>Nenhum projeto com esses filtros</h3>
         <p>Tente tirar um filtro ou buscar outra palavra.</p>
         <button class="botao botao--secundario" type="button" data-acao="limpar">Limpar filtros</button>
@@ -244,6 +320,7 @@ function htmlVazio(comFiltro: boolean): string {
   return `
     <div class="postit postit--amarelo estado">
       <span class="pin" aria-hidden="true"></span>
+      <img class="estado__mascote" src="/static/img/logo-estrela-magenta-240.png" alt="" width="240" height="244">
       <h3>O mural ainda está vazio</h3>
       <p>Publique o primeiro projeto e abra caminho para as próximas.</p>
       <a class="botao botao--primario" href="/mural/novo">Publicar projeto</a>
@@ -278,7 +355,7 @@ async function carregar(reiniciar: boolean): Promise<void> {
     botaoMais.textContent = "Carregando…";
   }
 
-  const params = new URLSearchParams({ pagina: String(pagina), por_pagina: String(POR_PAGINA) });
+  const params = new URLSearchParams({ pagina: String(pagina), por_pagina: String(POR_PAGINA), ordem: ordemAtual() });
   for (const campo of CAMPOS_FILTRO) {
     if (filtros[campo]) params.set(campo, filtros[campo]);
   }
@@ -367,6 +444,12 @@ function htmlDetalhe(p: Detalhe): string {
       ${p.detalhes.map((d) => itemFicha(d.rotulo, d.valor, d.e_link)).join("")}
     </dl>
     <div class="detalhe__acoes">
+      <button class="estrela-grande" type="button" data-estrela="${p.id}" data-titulo="${esc(p.titulo)}"
+        aria-pressed="${p.estrelado}">
+        ${icone("estrela")}
+        <span class="estrela-grande__acao">${p.estrelado ? "Estrela dada" : "Dar estrela"}</span>
+        <span class="estrela-grande__total">${textoEstrelas(p.estrelas)}</span>
+      </button>
       ${
         link
           ? `<a class="botao botao--primario" href="${esc(link)}" target="_blank" rel="noopener noreferrer">
@@ -374,6 +457,10 @@ function htmlDetalhe(p: Detalhe): string {
              </a>`
           : ""
       }
+      <button class="botao botao--secundario" type="button" id="compartilhar" data-id="${p.id}"
+        data-titulo="${esc(p.titulo)}">
+        ${icone("compartilhar")}<span id="compartilhar-texto">Compartilhar</span>
+      </button>
       <button class="denunciar" type="button" id="denunciar" aria-expanded="false" aria-controls="denuncia">
         Denunciar projeto
       </button>
@@ -437,6 +524,32 @@ async function enviarDenuncia(formDenuncia: HTMLFormElement): Promise<void> {
   }
 }
 
+/** No celular abre o menu de compartilhar do sistema; no computador copia o link. */
+async function compartilhar(botao: HTMLButtonElement): Promise<void> {
+  const url = `${location.origin}/mural?projeto=${botao.dataset.id}`;
+  const titulo = botao.dataset.titulo ?? "Projeto no AstrAce";
+  const texto = el("compartilhar-texto");
+
+  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+    try {
+      await navigator.share({ title: titulo, text: `${titulo} no mural do AstrAce`, url });
+    } catch {
+      // A pessoa fechou o menu de compartilhar: nada a fazer.
+    }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    texto.textContent = "Link copiado!";
+  } catch {
+    texto.textContent = "Não deu para copiar";
+    avisar(`Copie o link: ${url}`);
+  }
+  window.setTimeout(() => {
+    if (document.body.contains(texto)) texto.textContent = "Compartilhar";
+  }, 2500);
+}
+
 // ---------- Aviso ----------
 
 function avisar(texto: string): void {
@@ -451,6 +564,11 @@ function avisar(texto: string): void {
 // ---------- Eventos ----------
 
 function abrirAoClicar(evento: MouseEvent): void {
+  const estrela = (evento.target as HTMLElement).closest<HTMLButtonElement>("[data-estrela]");
+  if (estrela) {
+    void alternarEstrela(estrela);
+    return;
+  }
   const link = (evento.target as HTMLElement).closest<HTMLAnchorElement>(".cartao__link");
   if (!link) return;
   if (evento.button !== 0 || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
@@ -465,7 +583,8 @@ function ligarEventos(): void {
     aoMudarFiltros();
   });
   form.addEventListener("change", (e) => {
-    if ((e.target as HTMLElement).tagName === "SELECT") aoMudarFiltros();
+    const alvo = e.target as HTMLInputElement;
+    if (alvo.tagName === "SELECT" || alvo.type === "radio") aoMudarFiltros();
   });
   form.addEventListener("input", (e) => {
     if ((e.target as HTMLInputElement).name !== "q") return;
@@ -473,9 +592,13 @@ function ligarEventos(): void {
     temporizadorBusca = window.setTimeout(aoMudarFiltros, 300);
   });
   form.addEventListener("reset", () => {
-    window.setTimeout(aoMudarFiltros, 0);
+    // "Limpar filtros" limpa os filtros, mas mantém a ordenação escolhida.
+    const ordem = selectOrdem.value;
+    window.setTimeout(() => {
+      selectOrdem.value = ordem;
+      aoMudarFiltros();
+    }, 0);
   });
-  botaoAlternar.addEventListener("click", () => alternarFiltros());
 
   grade.addEventListener("click", abrirAoClicar);
   destaquesLista.addEventListener("click", abrirAoClicar);
@@ -496,6 +619,17 @@ function ligarEventos(): void {
 
   conteudoDetalhe.addEventListener("click", (e) => {
     const alvo = e.target as HTMLElement;
+
+    const estrela = alvo.closest<HTMLButtonElement>("[data-estrela]");
+    if (estrela) {
+      void alternarEstrela(estrela);
+      return;
+    }
+    const botaoCompartilhar = alvo.closest<HTMLButtonElement>("#compartilhar");
+    if (botaoCompartilhar) {
+      void compartilhar(botaoCompartilhar);
+      return;
+    }
 
     const miniatura = alvo.closest<HTMLButtonElement>(".galeria__miniatura");
     if (miniatura) {

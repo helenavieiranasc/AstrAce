@@ -60,11 +60,15 @@ def api_listar():
     filtros = {campo: request.args.get(campo, "").strip() for campo in (*servico.FILTROS, "q")}
     pagina = max(request.args.get("pagina", 1, type=int), 1)
     por_pagina = min(max(request.args.get("por_pagina", 12, type=int), 1), 48)
+    ordem = request.args.get("ordem", "recentes")
+    if ordem not in servico.ORDENS:
+        ordem = "recentes"
 
-    itens, total = servico.consultar(filtros, pagina, por_pagina)
+    itens, total = servico.consultar(filtros, pagina, por_pagina, ordem)
+    estrelados = servico.estrelados_por(usuaria_atual(), itens)
     return jsonify(
         {
-            "itens": [servico.cartao(p) for p in itens],
+            "itens": [servico.cartao(p, estrelados) for p in itens],
             "total": total,
             "pagina": pagina,
             "tem_mais": pagina * por_pagina < total,
@@ -74,12 +78,26 @@ def api_listar():
 
 @bp.get("/api/projetos/destaques")
 def api_destaques():
-    return jsonify([servico.cartao(p) for p in servico.destaques_da_semana()])
+    itens = servico.destaques_da_semana()
+    estrelados = servico.estrelados_por(usuaria_atual(), itens)
+    return jsonify([servico.cartao(p, estrelados) for p in itens])
 
 
 @bp.get("/api/projetos/<int:projeto_id>")
 def api_detalhe(projeto_id):
-    return jsonify(servico.detalhe(_projeto_visivel(projeto_id)))
+    projeto = _projeto_visivel(projeto_id)
+    return jsonify(servico.detalhe(projeto, servico.estrelados_por(usuaria_atual(), [projeto])))
+
+
+@bp.post("/api/projetos/<int:projeto_id>/estrela")
+def api_estrela(projeto_id):
+    """Dá ou tira a estrela da usuária logada nesse projeto."""
+    usuaria = usuaria_atual()
+    if not usuaria:
+        return _erro("Entre na sua conta para dar estrelas.", 401)
+    projeto = _projeto_visivel(projeto_id)
+    estrelado = servico.alternar_estrela(projeto, usuaria)
+    return jsonify({"estrelas": projeto.total_estrelas or 0, "estrelado": estrelado})
 
 
 @bp.post("/api/projetos")

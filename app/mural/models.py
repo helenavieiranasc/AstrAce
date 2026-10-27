@@ -1,6 +1,11 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+
+from sqlalchemy import func, select
+from sqlalchemy.orm import column_property
 
 from ..extensoes import db
+
+DIAS_NOVO = 7  # projetos publicados há menos que isso ganham a etiqueta "Novo!"
 
 
 def semana_atual(dia=None):
@@ -45,6 +50,10 @@ class Projeto(db.Model):
     def fotos(self):
         return [a for a in self.arquivos if a.finalidade == "foto"]
 
+    @property
+    def novo(self):
+        return self.criado_em >= datetime.utcnow() - timedelta(days=DIAS_NOVO)
+
 
 class Denuncia(db.Model):
     __tablename__ = "denuncias"
@@ -57,3 +66,21 @@ class Denuncia(db.Model):
     criada_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     projeto = db.relationship("Projeto", back_populates="denuncias")
+
+
+class Estrela(db.Model):
+    """Uma usuária dá no máximo uma estrela por projeto."""
+
+    __tablename__ = "estrelas"
+    __table_args__ = (db.UniqueConstraint("projeto_id", "usuaria_id"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    projeto_id = db.Column(db.Integer, db.ForeignKey("projetos.id", ondelete="CASCADE"), nullable=False, index=True)
+    usuaria_id = db.Column(db.Integer, db.ForeignKey("usuarias.id"), nullable=False, index=True)
+    criada_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+# Total de estrelas calculado pelo banco junto com o projeto (serve para mostrar e para ordenar).
+Projeto.total_estrelas = column_property(
+    select(func.count(Estrela.id)).where(Estrela.projeto_id == Projeto.id).correlate_except(Estrela).scalar_subquery()
+)

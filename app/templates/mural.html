@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Mural de projetos · Ciência Delas{% endblock %}
+{% block titulo %}Mural de projetos · AstrAce{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
@@ -16,7 +16,11 @@
           <span class="pin" style="--cor-pin: var(--pin-violeta)" aria-hidden="true"></span>
           <h1>Mural de projetos</h1>
           <p>Pesquisas, apps, pôsteres e ideias de mulheres e meninas na ciência. Publique o seu e inspire a próxima.</p>
-          <a class="link-mao" href="/mural/novo">Publicar meu projeto</a>
+          <div class="abertura__rodape">
+            <a class="link-mao" href="/mural/novo">Publicar meu projeto</a>
+            <img class="abertura__mascote" src="{{ url_for('static', filename='img/logo-estrela-magenta-240.png') }}"
+                 alt="" width="240" height="244">
+          </div>
         </div>
 
         {# Espaço do canto de eventos (Pessoa 3): pode trocar o conteúdo, mantendo a classe cartaz-eventos. #}
@@ -41,46 +45,50 @@
       <span class="pin pin--canto-esq" style="--cor-pin: var(--pin-ambar)" aria-hidden="true"></span>
       <span class="pin pin--canto-dir" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
 
-      <div class="filtros__busca">
-        <label for="f-q">Buscar</label>
-        <div class="campo-busca">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
-          <input id="f-q" name="q" type="search" placeholder="Título ou resumo, ex.: astronomia" autocomplete="off">
+      <div class="filtros__linha">
+        <div class="filtros__busca">
+          <label class="visualmente-oculto" for="f-q">Buscar projetos</label>
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input id="f-q" name="q" type="search" placeholder="Buscar por título ou resumo, ex.: astronomia" autocomplete="off">
+          </div>
+        </div>
+        <div class="ordem">
+          <label for="ordem">Ordenar por</label>
+          <select id="ordem" name="ordem">
+            <option value="recentes">Mais recentes</option>
+            <option value="estrelas">Mais estrelados</option>
+          </select>
         </div>
       </div>
 
-      <button class="filtros__alternar" type="button" id="filtros-alternar" aria-expanded="false" aria-controls="filtros-campos">
-        Mais filtros
-      </button>
+      {# Áreas como etiquetas clicáveis: só uma marcada por vez (rádio). #}
+      <fieldset class="areas">
+        <legend class="visualmente-oculto">Área</legend>
+        <div class="areas__lista" id="areas-lista">
+          <label class="area-etiqueta">
+            <input type="radio" name="area" value="" checked aria-label="Todas as áreas">
+            <span>Todas</span>
+          </label>
+        </div>
+      </fieldset>
 
+      {# Os títulos ficam só para leitores de tela: a primeira opção de cada campo já diz o que ele filtra. #}
       <div class="filtros__campos" id="filtros-campos">
-        <div class="campo">
-          <label for="f-tipo">Tipo</label>
-          <select id="f-tipo" name="tipo"><option value="">Todos os tipos</option></select>
-        </div>
-        <div class="campo">
-          <label for="f-area">Área</label>
-          <select id="f-area" name="area"><option value="">Todas as áreas</option></select>
-        </div>
-        <div class="campo">
-          <label for="f-nivel">Nível</label>
-          <select id="f-nivel" name="nivel"><option value="">Todos os níveis</option></select>
-        </div>
-        <div class="campo">
-          <label for="f-instituicao">Instituição</label>
-          <select id="f-instituicao" name="instituicao"><option value="">Todas as instituições</option></select>
-        </div>
-        <div class="campo">
-          <label for="f-cidade">Cidade</label>
-          <select id="f-cidade" name="cidade"><option value="">Todas as cidades</option></select>
-        </div>
-        <div class="campo">
-          <label for="f-identidade">Autoras</label>
-          <select id="f-identidade" name="identidade" aria-describedby="f-identidade-ajuda">
-            <option value="">Todas as autoras</option>
-          </select>
-          <small id="f-identidade-ajuda">Inclui só quem escolheu mostrar isso no perfil.</small>
-        </div>
+        <label class="visualmente-oculto" for="f-tipo">Tipo</label>
+        <select id="f-tipo" name="tipo"><option value="">Todos os tipos</option></select>
+        <label class="visualmente-oculto" for="f-nivel">Nível</label>
+        <select id="f-nivel" name="nivel"><option value="">Todos os níveis</option></select>
+        <label class="visualmente-oculto" for="f-instituicao">Instituição</label>
+        <select id="f-instituicao" name="instituicao"><option value="">Todas as instituições</option></select>
+        <label class="visualmente-oculto" for="f-cidade">Cidade</label>
+        <select id="f-cidade" name="cidade"><option value="">Todas as cidades</option></select>
+        <label class="visualmente-oculto" for="f-identidade">Autoras</label>
+        <select id="f-identidade" name="identidade" aria-describedby="f-identidade-ajuda"
+                title="Inclui só quem escolheu mostrar isso no perfil.">
+          <option value="">Todas as autoras</option>
+        </select>
+        <span class="visualmente-oculto" id="f-identidade-ajuda">Inclui só quem escolheu mostrar isso no perfil.</span>
       </div>
 
       <button class="filtros__limpar" type="reset" id="filtros-limpar" hidden>Limpar filtros</button>

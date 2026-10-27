@@ -119,12 +119,20 @@ textarea {
 }
 
 .topo__marca {
-  font-family: var(--fonte-mao);
-  font-size: 2.1rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--magenta);
-  text-decoration: none;
+  display: block;
+  flex: none;
+  border-radius: 6px;
+}
+
+.topo__marca img {
+  width: auto;
+  height: 46px;
+}
+
+@media (max-width: 720px) {
+  .topo__marca img {
+    height: 38px;
+  }
 }
 
 .topo__nav ul {

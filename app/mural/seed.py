@@ -12,7 +12,7 @@ from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..uploads.routes import pasta_uploads
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
-from .models import Denuncia, Projeto, semana_atual
+from .models import Denuncia, Estrela, Projeto, semana_atual
 
 NOME_DO_PDF = {
     "monografia": "monografia.pdf",
@@ -61,7 +61,7 @@ def _pdf_simples(titulo, linhas):
 
 def _pdf_de_exemplo(autora, tipo, titulo, resumo):
     linhas = [f"{autora.nome} - {autora.instituicao}", ""] + textwrap.wrap(resumo, 80)
-    linhas += ["", "Documento de exemplo gerado para a demonstração do Ciência Delas."]
+    linhas += ["", "Documento de exemplo gerado para a demonstração do AstrAce."]
     conteudo = _pdf_simples(titulo, linhas)
     nome_salvo = f"{uuid4().hex}.pdf"
     (pasta_uploads() / nome_salvo).write_bytes(conteudo)
@@ -72,7 +72,7 @@ def _pdf_de_exemplo(autora, tipo, titulo, resumo):
 
 USUARIAS = [
     # nome, apelido, email, instituicao, cidade, nivel, identidades públicas, papel
-    ("Equipe Ciência Delas", None, "equipe@cienciadelas.dev", "Ciência Delas", "São Paulo", "formada", [], "admin"),
+    ("Equipe AstrAce", None, "equipe@astrace.dev", "AstrAce", "São Paulo", "formada", [], "admin"),
     ("Ana Beatriz Santos", "Bia Santos", "bia@exemplo.com", "UFPE", "Recife", "graduacao", ["mulher_negra"], "usuaria"),
     ("Luana Ferreira", None, "luana@exemplo.com", "IFBA", "Salvador", "tecnico", ["mulher_negra", "lgbtqia"], "usuaria"),
     ("Marina Okamoto", None, "marina@exemplo.com", "USP", "São Paulo", "pos", [], "usuaria"),
@@ -240,6 +240,7 @@ def seed_mural(limpar):
         for arquivo in Arquivo.query.all():
             (pasta / arquivo.nome_salvo).unlink(missing_ok=True)
         Arquivo.query.delete()
+        Estrela.query.delete()
         Denuncia.query.delete()
         Projeto.query.delete()
         IdentidadeUsuaria.query.delete()
@@ -261,6 +262,7 @@ def seed_mural(limpar):
 
     agora = datetime.utcnow()
     criados = 0
+    todas = list(por_email.values())
     for i, (email, tipo, titulo, area, ano, resumo, detalhes, destaque) in enumerate(PROJETOS):
         if Projeto.query.filter_by(titulo=titulo).first():
             continue
@@ -272,12 +274,18 @@ def seed_mural(limpar):
             instituicao=autora.instituicao, cidade=autora.cidade, nivel=autora.nivel,
             link_externo=link, detalhes=detalhes, destaque=destaque,
             destaque_semana=semana_atual() if destaque else None,
-            criado_em=agora - timedelta(hours=6 * i),
+            # Um dia e meio entre cada projeto: só os mais recentes ganham a etiqueta "Novo!".
+            criado_em=agora - timedelta(hours=36 * i),
         )
         # Todo projeto mostra algo concreto: software tem link, os outros ganham um PDF.
         if tipo != "software":
             projeto.arquivos = [_pdf_de_exemplo(autora, tipo, titulo, resumo)]
         db.session.add(projeto)
+        db.session.flush()
+        # Algumas estrelas de outras usuárias, em quantidades variadas, para a demo.
+        quantidade = (i * 5 + 3) % len(todas)
+        for fa in [u for u in todas if u.id != autora.id][:quantidade]:
+            db.session.add(Estrela(projeto_id=projeto.id, usuaria_id=fa.id))
         criados += 1
     db.session.commit()
     click.echo(f"{criados} projetos criados. Abra http://127.0.0.1:5000/mural")

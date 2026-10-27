@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Publicar projeto · Ciência Delas{% endblock %}
+{% block titulo %}Publicar projeto · AstrAce{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
@@ -14,6 +14,8 @@
     <form class="folha-form" id="form-projeto" novalidate>
       <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
 
+      <img class="folha-form__mascote" src="{{ url_for('static', filename='img/logo-estrela-original-240.png') }}"
+           alt="" width="240" height="244">
       <a class="folha-form__voltar" href="/mural">Voltar ao mural</a>
       <h1>Publicar projeto</h1>
       <p class="folha-form__intro">Seu projeto aparece no mural assim que você publicar. Campos com * são obrigatórios.</p>
@@ -116,7 +118,7 @@
             </li>
           </ul>
           <small id="fotos-ajuda">Até 5 fotos em jpg, png ou webp, com até 10 MB cada. A primeira vira a capa no mural.
-            Sem fotos, o projeto aparece como uma ficha pautada.</small>
+            Sem fotos, o projeto ganha uma capa ilustrada com o ícone do tipo.</small>
           <p class="campo__erro" id="erro-fotos" hidden></p>
         </div>
       </fieldset>
