@@ -11,6 +11,7 @@ import {
   urlSegura,
   type Cartao,
   type Detalhe,
+  type FraseBilhete,
   type OpcoesMural,
   type PaginaProjetos,
 } from "./comum.js";
@@ -228,6 +229,72 @@ async function alternarEstrela(botao: HTMLButtonElement): Promise<void> {
       botao.classList.remove("estrela--pulo");
       void botao.offsetWidth; // reinicia a animação
       botao.classList.add("estrela--pulo");
+    }
+  } catch (erro) {
+    avisar(mensagemDeErro(erro));
+  } finally {
+    delete botao.dataset.ocupado;
+  }
+}
+
+// ---------- Bilhetes de incentivo ----------
+
+function htmlTotalBilhete(total: number): string {
+  return `${total}<span class="visualmente-oculto"> ${total === 1 ? "pessoa deixou" : "pessoas deixaram"}</span>`;
+}
+
+function htmlBilhetes(p: Detalhe): string {
+  const lista = p.bilhetes ?? [];
+  if (lista.length === 0) return "";
+  const recebidos = lista.reduce((soma, b) => soma + b.total, 0);
+  const ajuda = p.minha
+    ? recebidos
+      ? "Os bilhetes que seu projeto recebeu."
+      : "Seu projeto ainda não recebeu bilhetes."
+    : `Cole um bilhete para incentivar ${esc(p.autora)}. Pode escolher mais de um, e clicar de novo tira.`;
+
+  const itens = lista
+    .map((b, i) => {
+      const classes = `bilhete bilhete--${esc(b.cor)}${b.total || b.meu ? "" : " bilhete--vazio"}`;
+      const estilo = `--rot: ${rotacao(p.id + i * 3, 1.2)}deg`;
+      const conteudo = `<span class="bilhete__frase">${esc(b.rotulo)}</span>
+        <span class="bilhete__total">${htmlTotalBilhete(b.total)}</span>`;
+      // A autora só vê os bilhetes; quem visita clica para colar ou tirar.
+      return p.minha
+        ? `<li><span class="${classes}" style="${estilo}">${conteudo}</span></li>`
+        : `<li><button type="button" class="${classes}" style="${estilo}" data-bilhete="${esc(b.valor)}"
+             data-projeto="${p.id}" aria-pressed="${b.meu}">${conteudo}</button></li>`;
+    })
+    .join("");
+
+  return `
+    <section class="bilhetes" aria-labelledby="bilhetes-titulo">
+      <h3 id="bilhetes-titulo">Bilhetes de incentivo</h3>
+      <p class="bilhetes__ajuda">${ajuda}</p>
+      <ul class="bilhetes__lista">${itens}</ul>
+    </section>`;
+}
+
+async function alternarBilhete(botao: HTMLButtonElement): Promise<void> {
+  if (botao.dataset.ocupado) return;
+  botao.dataset.ocupado = "1";
+  const id = Number(botao.dataset.projeto);
+  try {
+    const r = await postJson<{ bilhetes: FraseBilhete[] }>(`/api/projetos/${id}/bilhetes`, {
+      frase: botao.dataset.bilhete,
+    });
+    // Atualiza só os post-its (sem redesenhar a seção), para o foco continuar no botão.
+    for (const b of r.bilhetes) {
+      const alvo = conteudoDetalhe.querySelector<HTMLButtonElement>(`[data-bilhete="${b.valor}"]`);
+      if (!alvo) continue;
+      alvo.setAttribute("aria-pressed", String(b.meu));
+      alvo.classList.toggle("bilhete--vazio", !b.total && !b.meu);
+      alvo.querySelector(".bilhete__total")!.innerHTML = htmlTotalBilhete(b.total);
+    }
+    if (botao.getAttribute("aria-pressed") === "true") {
+      botao.classList.remove("bilhete--colando");
+      void botao.offsetWidth; // reinicia a animação
+      botao.classList.add("bilhete--colando");
     }
   } catch (erro) {
     avisar(mensagemDeErro(erro));
@@ -472,6 +539,7 @@ function htmlDetalhe(p: Detalhe): string {
       ${itemFicha("Cidade", p.cidade)}
       ${p.detalhes.map((d) => itemFicha(d.rotulo, d.valor, d.e_link)).join("")}
     </dl>
+    ${htmlBilhetes(p)}
     <div class="detalhe__acoes">
       <button class="estrela-grande" type="button" data-estrela="${p.id}" data-titulo="${esc(p.titulo)}"
         aria-pressed="${p.estrelado}">
@@ -659,6 +727,12 @@ function ligarEventos(): void {
 
   conteudoDetalhe.addEventListener("click", (e) => {
     const alvo = e.target as HTMLElement;
+
+    const bilhete = alvo.closest<HTMLButtonElement>("[data-bilhete]");
+    if (bilhete) {
+      void alternarBilhete(bilhete);
+      return;
+    }
 
     const parecido = alvo.closest<HTMLAnchorElement>("[data-parecido]");
     if (parecido) {

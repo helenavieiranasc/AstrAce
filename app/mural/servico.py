@@ -9,8 +9,8 @@ from .. import catalogos
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
-from .models import Estrela, Projeto, semana_atual
-from .tipos import TIPOS_POR_VALOR
+from .models import Bilhete, Estrela, Projeto, semana_atual
+from .tipos import FRASES_BILHETE, FRASES_POR_VALOR, TIPOS_POR_VALOR
 
 FILTROS = ("tipo", "area", "instituicao", "cidade", "nivel", "identidade")
 ORDENS = ("recentes", "estrelas")
@@ -131,6 +131,37 @@ def alternar_estrela(projeto, usuaria):
     db.session.commit()
     db.session.refresh(projeto)
     return existente is None
+
+
+def bilhetes(projeto, usuaria):
+    """Todas as frases, com quantas vezes o projeto recebeu cada uma e se a usuária já deixou."""
+    contagem = dict(
+        db.session.query(Bilhete.frase, func.count(Bilhete.id))
+        .filter(Bilhete.projeto_id == projeto.id)
+        .group_by(Bilhete.frase)
+        .all()
+    )
+    meus = set()
+    if usuaria:
+        linhas = Bilhete.query.with_entities(Bilhete.frase).filter_by(projeto_id=projeto.id, usuaria_id=usuaria.id)
+        meus = {linha[0] for linha in linhas}
+    return [
+        {**f, "total": contagem.get(f["valor"], 0), "meu": f["valor"] in meus}
+        for f in FRASES_BILHETE
+    ]
+
+
+def alternar_bilhete(projeto, usuaria, frase):
+    """Deixa o bilhete se ainda não deixou; tira se já deixou. A frase precisa existir no catálogo."""
+    if frase not in FRASES_POR_VALOR:
+        raise ValueError(frase)
+    existente = Bilhete.query.filter_by(projeto_id=projeto.id, usuaria_id=usuaria.id, frase=frase).first()
+    if existente:
+        db.session.delete(existente)
+    else:
+        db.session.add(Bilhete(projeto_id=projeto.id, usuaria_id=usuaria.id, frase=frase))
+    db.session.commit()
+    db.session.refresh(projeto)
 
 
 # ---------- JSON ----------

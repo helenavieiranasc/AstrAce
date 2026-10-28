@@ -85,6 +85,16 @@ export interface Detalhe extends Cartao {
   arquivos: ArquivoEnviado[];
   fotos: ArquivoEnviado[];
   parecidos?: Cartao[];
+  bilhetes?: FraseBilhete[];
+  minha?: boolean;
+}
+
+export interface FraseBilhete {
+  valor: string;
+  rotulo: string;
+  cor: string;
+  total: number;
+  meu: boolean;
 }
 
 export interface PaginaProjetos {

@@ -86,11 +86,32 @@ def api_destaques():
 @bp.get("/api/projetos/<int:projeto_id>")
 def api_detalhe(projeto_id):
     projeto = _projeto_visivel(projeto_id)
+    usuaria = usuaria_atual()
     parecidos = servico.parecidos(projeto)
-    estrelados = servico.estrelados_por(usuaria_atual(), [projeto, *parecidos])
+    estrelados = servico.estrelados_por(usuaria, [projeto, *parecidos])
     dados = servico.detalhe(projeto, estrelados)
     dados["parecidos"] = [servico.cartao(p, estrelados) for p in parecidos]
+    dados["bilhetes"] = servico.bilhetes(projeto, usuaria)
+    # A autora vê os bilhetes que recebeu, mas não deixa bilhete no próprio projeto.
+    dados["minha"] = bool(usuaria and usuaria.id == projeto.usuaria_id)
     return jsonify(dados)
+
+
+@bp.post("/api/projetos/<int:projeto_id>/bilhetes")
+def api_bilhete(projeto_id):
+    """{"frase": "inspirador"}: deixa ou tira esse bilhete da usuária logada."""
+    usuaria = usuaria_atual()
+    if not usuaria:
+        return _erro("Entre na sua conta para deixar bilhetes.", 401)
+    projeto = _projeto_visivel(projeto_id)
+    if projeto.usuaria_id == usuaria.id:
+        return _erro("Bilhetes são para incentivar outras pessoas: não dá para deixar no próprio projeto.", 403)
+    frase = (request.get_json(silent=True) or {}).get("frase")
+    try:
+        servico.alternar_bilhete(projeto, usuaria, frase)
+    except ValueError:
+        return _erro("Escolha um dos bilhetes da lista.", 422)
+    return jsonify({"bilhetes": servico.bilhetes(projeto, usuaria), "total": projeto.total_bilhetes or 0})
 
 
 @bp.post("/api/projetos/<int:projeto_id>/estrela")
