@@ -182,6 +182,25 @@ O Passaporte ainda não tem página, então aparece como decoração, sem link, 
 (`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho). Quando `/passaporte` existir,
 é só trocar a `div.inicio-passaporte` por um link.
 
+## Passaporte
+
+`/passaporte` (precisa de login e cadastro completo) mostra o passaporte 3D da usuária: capa de couro rosa com a
+logo em metalizado, que abre na lombada; folhas que viram de verdade (com curvatura) clicando ou arrastando; e,
+na primeira vez, um carimbo 3D que desce, imprime o carimbo de boas-vindas e sobe. No celular em pé, aberto,
+mostra uma página de cada vez. Os botões "Página anterior / Próxima página" fazem o mesmo pelo teclado.
+Sem WebGL (ou sem internet para o Three.js), aparece a versão em texto, que é também a que o leitor de tela lê.
+
+| Arquivo | O que tem |
+| --- | --- |
+| `app/passaporte/` | Rota, modelo `Carimbo` (tabela `carimbos`) e `servico.conceder()` |
+| `frontend/src/passaporte-3d.ts` | Cena Three.js: capa, folhas, carimbo e animações |
+| `frontend/src/passaporte-paginas.ts` | As páginas desenhadas em canvas (identidade, carimbos, impressão da tinta) |
+
+O carimbo de boas-vindas é concedido no login (e, para quem já tinha conta, ao abrir o passaporte). Cada
+`codigo` vale uma vez por usuária. `visto_em` guarda que a animação já passou
+(`POST /api/passaporte/carimbos/<codigo>/visto`), então ela não se repete nem em outro dispositivo.
+Para os carimbos de eventos (check-in por QR), use `servico.conceder(usuaria, f"evento-{id}", titulo)`.
+
 ## Perfil
 
 O cabeçalho tem o botão "Menu" (abre a barra lateral com os links e a ação da página, `{% block acao_topo %}`), a logo e,

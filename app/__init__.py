@@ -17,6 +17,7 @@ def create_app(config=Config):
     from .eventos import models as _eventos  # noqa: F401
     from .vagas import models as _vagas  # noqa: F401
     from .noticias import models as _noticias  # noqa: F401
+    from .passaporte import models as _passaporte  # noqa: F401
     from .mural import bp as mural_bp, completar_colunas as completar_colunas_mural
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
@@ -27,6 +28,7 @@ def create_app(config=Config):
     from .noticias import bp as noticias_bp, completar_colunas as completar_colunas_noticias
     from .noticias.seed import seed_noticias
     from .quiz import bp as quiz_bp
+    from .passaporte import bp as passaporte_bp
     from .conta import bp as conta_bp, completar_colunas
 
     app.register_blueprint(conta_bp)  # "/" é a landing page
@@ -36,6 +38,7 @@ def create_app(config=Config):
     app.register_blueprint(vagas_bp)
     app.register_blueprint(noticias_bp)
     app.register_blueprint(quiz_bp)
+    app.register_blueprint(passaporte_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)
     app.cli.add_command(seed_vagas)
