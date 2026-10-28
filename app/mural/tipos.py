@@ -272,6 +272,17 @@ TIPOS = [
 
 TIPOS_POR_VALOR = {t["valor"]: t for t in TIPOS}
 
+# Bilhetes de incentivo: só frases prontas, sem texto livre, então não precisam de moderação.
+# A cor é a do post-it (classes .bilhete--<cor> em mural.css).
+FRASES_BILHETE = [
+    {"valor": "inspirador", "rotulo": "Que inspirador!", "cor": "rosa"},
+    {"valor": "parabens", "rotulo": "Parabéns pelo trabalho!", "cor": "amarelo"},
+    {"valor": "saber_mais", "rotulo": "Quero saber mais!", "cor": "verde"},
+    {"valor": "ideia", "rotulo": "Que ideia incrível!", "cor": "azul"},
+    {"valor": "continue", "rotulo": "Continue assim!", "cor": "lilas"},
+]
+FRASES_POR_VALOR = {f["valor"]: f for f in FRASES_BILHETE}
+
 MOTIVOS_DENUNCIA = [
     {"valor": "ofensivo", "rotulo": "Conteúdo ofensivo ou discriminatório"},
     {"valor": "falso", "rotulo": "Informação falsa"},

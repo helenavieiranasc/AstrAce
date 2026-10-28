@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block titulo %}Onde elas brilham · AstrAce{% endblock %}
+{% block descricao %}Veja no mapa do Brasil onde meninas e mulheres estão fazendo ciência e tecnologia.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mapa.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica">
+
+    <section class="mapa-pagina">
+      <div class="mapa-lateral">
+        <div class="postit postit--verde mapa-nota">
+          <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+          <h1>Onde elas brilham</h1>
+          <p id="mapa-resumo" aria-live="polite">Procurando os projetos no mapa…</p>
+          <a class="link-mao" href="/mural">Voltar para o mural</a>
+        </div>
+
+        <nav class="mapa-cidades" id="mapa-cidades" aria-labelledby="mapa-cidades-titulo" hidden>
+          <span class="pin" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
+          <h2 id="mapa-cidades-titulo">Cidades</h2>
+          <ol class="mapa-cidades__lista" id="mapa-lista"></ol>
+          <p class="mapa-cidades__fora" id="mapa-sem-local" hidden></p>
+        </nav>
+      </div>
+
+      <figure class="mapa-folha">
+        <span class="fita-canto fita-canto--esq" aria-hidden="true"></span>
+        <span class="fita-canto fita-canto--dir" aria-hidden="true"></span>
+        {# Os pins são botões posicionados por cima do desenho (mapa.ts). #}
+        <div class="mapa-area" id="mapa-area">
+          <img class="mapa-area__desenho" src="{{ url_for('static', filename='img/mapa-brasil.svg') }}"
+               alt="" width="1000" height="1026">
+        </div>
+        <figcaption class="visualmente-oculto">Mapa do Brasil com um pin em cada cidade que tem projeto no mural.
+          A mesma informação está na lista de cidades.</figcaption>
+      </figure>
+    </section>
+
+    <section class="mapa-projetos" id="mapa-projetos" aria-labelledby="mapa-projetos-titulo" hidden>
+      <h2 class="fita" id="mapa-projetos-titulo" tabindex="-1"></h2>
+      <ul class="mapa-projetos__lista" id="mapa-projetos-lista"></ul>
+    </section>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/mapa.js') }}"></script>
+{% endblock %}

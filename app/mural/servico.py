@@ -1,19 +1,21 @@
 """Regras do mural: consulta com filtros, validação e formato do JSON."""
-from datetime import date
+from datetime import date, datetime, timedelta
 from urllib.parse import urlparse
 
 from flask import current_app
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, func, or_
 
-from .. import catalogos
+from .. import catalogos, municipios
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
-from .models import Estrela, Projeto, semana_atual
-from .tipos import TIPOS_POR_VALOR
+from . import mapa
+from .models import Bilhete, Estrela, Projeto, semana_atual
+from .tipos import FRASES_BILHETE, FRASES_POR_VALOR, TIPOS_POR_VALOR
 
 FILTROS = ("tipo", "area", "instituicao", "cidade", "nivel", "identidade")
 ORDENS = ("recentes", "estrelas")
+DIAS_EM_ALTA = 7  # sem destaques escolhidos, a faixa mostra os mais estrelados desse período
 
 
 def consultar(filtros, pagina=1, por_pagina=12, ordem="recentes"):
@@ -55,7 +57,8 @@ def consultar(filtros, pagina=1, por_pagina=12, ordem="recentes"):
 
 
 def destaques_da_semana(limite=5):
-    return (
+    """Os escolhidos pela admin nesta semana. Sem nenhum escolhido, os que estão em alta."""
+    escolhidos = (
         Projeto.query.filter(
             Projeto.oculto.is_(False),
             Projeto.destaque.is_(True),
@@ -65,6 +68,62 @@ def destaques_da_semana(limite=5):
         .limit(limite)
         .all()
     )
+    return escolhidos or em_alta(limite)
+
+
+def em_alta(limite=5):
+    """Projetos que mais ganharam estrelas nos últimos DIAS_EM_ALTA dias (só quem ganhou alguma)."""
+    desde = datetime.utcnow() - timedelta(days=DIAS_EM_ALTA)
+    estrelas_recentes = func.count(Estrela.id)
+    return (
+        Projeto.query.join(Estrela, Estrela.projeto_id == Projeto.id)
+        .filter(Projeto.oculto.is_(False), Estrela.criada_em >= desde)
+        .group_by(Projeto.id)
+        .order_by(estrelas_recentes.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+        .limit(limite)
+        .all()
+    )
+
+
+def parecidos(projeto, limite=3):
+    """Até `limite` projetos da mesma área; se faltar, completa com os do mesmo tipo."""
+    base = Projeto.query.filter(Projeto.oculto.is_(False), Projeto.id != projeto.id)
+    ordem = (Projeto.total_estrelas.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+    itens = base.filter(Projeto.area == projeto.area).order_by(*ordem).limit(limite).all()
+    if len(itens) < limite:
+        itens += (
+            base.filter(Projeto.tipo == projeto.tipo, Projeto.area != projeto.area)
+            .order_by(*ordem)
+            .limit(limite - len(itens))
+            .all()
+        )
+    return itens
+
+
+def projetos_no_mapa():
+    """Projetos visíveis agrupados por cidade, com a posição de cada cidade no desenho do mapa."""
+    projetos = (
+        Projeto.query.filter(Projeto.oculto.is_(False))
+        .order_by(Projeto.total_estrelas.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+        .all()
+    )
+    cidades, sem_local = {}, 0
+    for p in projetos:
+        local = mapa.localizar(p.cidade, p.uf)
+        if not local:
+            sem_local += 1
+            continue
+        nome, uf, x, y = local
+        grupo = cidades.setdefault(
+            (nome, uf), {"cidade": nome, "uf": uf, "x": x, "y": y, "total": 0, "projetos": []}
+        )
+        grupo["total"] += 1
+        grupo["projetos"].append(cartao(p))
+    return {
+        "cidades": sorted(cidades.values(), key=lambda c: (-c["total"], c["cidade"])),
+        "total": len(projetos),
+        "sem_local": sem_local,
+    }
 
 
 def valores_distintos(coluna):
@@ -99,6 +158,37 @@ def alternar_estrela(projeto, usuaria):
     db.session.commit()
     db.session.refresh(projeto)
     return existente is None
+
+
+def bilhetes(projeto, usuaria):
+    """Todas as frases, com quantas vezes o projeto recebeu cada uma e se a usuária já deixou."""
+    contagem = dict(
+        db.session.query(Bilhete.frase, func.count(Bilhete.id))
+        .filter(Bilhete.projeto_id == projeto.id)
+        .group_by(Bilhete.frase)
+        .all()
+    )
+    meus = set()
+    if usuaria:
+        linhas = Bilhete.query.with_entities(Bilhete.frase).filter_by(projeto_id=projeto.id, usuaria_id=usuaria.id)
+        meus = {linha[0] for linha in linhas}
+    return [
+        {**f, "total": contagem.get(f["valor"], 0), "meu": f["valor"] in meus}
+        for f in FRASES_BILHETE
+    ]
+
+
+def alternar_bilhete(projeto, usuaria, frase):
+    """Deixa o bilhete se ainda não deixou; tira se já deixou. A frase precisa existir no catálogo."""
+    if frase not in FRASES_POR_VALOR:
+        raise ValueError(frase)
+    existente = Bilhete.query.filter_by(projeto_id=projeto.id, usuaria_id=usuaria.id, frase=frase).first()
+    if existente:
+        db.session.delete(existente)
+    else:
+        db.session.add(Bilhete(projeto_id=projeto.id, usuaria_id=usuaria.id, frase=frase))
+    db.session.commit()
+    db.session.refresh(projeto)
 
 
 # ---------- JSON ----------
@@ -200,6 +290,44 @@ def _lista_enviada(dados, chave, finalidade, limite, autora, erros):
     return [encontrados[i] for i in dict.fromkeys(ids)]
 
 
+def local_do_perfil(autora):
+    """(cidade, uf) do perfil, se for um município de verdade; senão (cidade como está, None)."""
+    if not autora or not autora.cidade:
+        return None, None
+    uf = autora.conta.estado if getattr(autora, "conta", None) else None
+    achado = municipios.buscar(autora.cidade, uf) if uf else municipios.buscar_sem_uf(autora.cidade)
+    return (achado[0], achado[1]) if achado else (autora.cidade, None)
+
+
+def _local(dados, autora, erros):
+    """Devolve (cidade, uf).
+
+    Com estado (formulário novo): a cidade precisa existir nele e fica com o nome oficial.
+    Sem estado (quem ainda manda só o texto, como a edição pelo perfil): aceita o texto e
+    completa o estado quando o nome existe em um único estado do Brasil.
+    Os dois vazios: usa o local do perfil da autora."""
+    cidade = _texto(dados, "cidade", 120)
+    uf = _texto(dados, "uf", 2).upper()
+
+    if uf:
+        if uf not in municipios.ufs():
+            erros["uf"] = "Escolha o estado da lista."
+            return cidade or None, None
+        if not cidade:
+            erros["cidade"] = "Escolha a cidade."
+            return None, uf
+        achado = municipios.buscar(cidade, uf)
+        if not achado:
+            erros["cidade"] = "Escolha uma cidade da lista."
+            return cidade, uf
+        return achado[0], achado[1]
+
+    if not cidade:
+        return local_do_perfil(autora)
+    achado = municipios.buscar_sem_uf(cidade)
+    return (achado[0], achado[1]) if achado else (cidade, None)
+
+
 def validar(dados, autora):
     """Devolve (campos_limpos, erros, arquivos). erros é {campo: mensagem}."""
     erros = {}
@@ -234,7 +362,7 @@ def validar(dados, autora):
         erros["nivel"] = "Escolha um nível da lista."
 
     limpo["instituicao"] = _texto(dados, "instituicao", 160) or (autora.instituicao if autora else None)
-    limpo["cidade"] = _texto(dados, "cidade", 120) or (autora.cidade if autora else None)
+    limpo["cidade"], limpo["uf"] = _local(dados, autora, erros)
 
     for nome in ("link_externo", "imagem_url"):
         limpo[nome] = _texto(dados, nome, 500) or None

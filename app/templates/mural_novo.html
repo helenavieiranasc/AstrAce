@@ -130,9 +130,22 @@
             <label for="instituicao">Instituição</label>
             <input id="instituicao" name="instituicao" maxlength="160" placeholder="A do seu perfil, se vazio">
           </div>
+        </div>
+        {# Estado e cidade vêm da lista de municípios (/api/cidades). Já começam com o local do perfil. #}
+        <div class="linha">
+          <div class="campo">
+            <label for="uf">Estado</label>
+            <select id="uf" name="uf" autocomplete="address-level1" aria-describedby="erro-uf">
+              <option value="">Escolha</option>
+            </select>
+            <p class="campo__erro" id="erro-uf" hidden></p>
+          </div>
           <div class="campo">
             <label for="cidade">Cidade</label>
-            <input id="cidade" name="cidade" maxlength="120" placeholder="A do seu perfil, se vazio">
+            <select id="cidade" name="cidade" autocomplete="address-level2" disabled aria-describedby="erro-cidade">
+              <option value="">Escolha o estado primeiro</option>
+            </select>
+            <p class="campo__erro" id="erro-cidade" hidden></p>
           </div>
         </div>
       </fieldset>

@@ -8,11 +8,13 @@ from uuid import uuid4
 
 import click
 
+from .. import municipios
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..uploads.routes import pasta_uploads
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
-from .models import Denuncia, Estrela, Projeto, semana_atual
+from .models import Bilhete, Denuncia, Estrela, Projeto, semana_atual
+from .tipos import FRASES_BILHETE
 
 NOME_DO_PDF = {
     "monografia": "monografia.pdf",
@@ -231,6 +233,17 @@ PROJETOS = [
 ]
 
 
+def _bilhetes_de_exemplo(projeto, i, todas):
+    """Alguns bilhetes variados, se o projeto ainda não tem nenhum. A primeira usuária
+    (a do LOGIN_DEV) fica de fora para poder testar deixando os seus."""
+    if Bilhete.query.filter_by(projeto_id=projeto.id).first():
+        return
+    outras = [u for u in todas[1:] if u.id != projeto.usuaria_id]
+    for j, fa in enumerate(outras[: (i * 3 + 2) % 6]):
+        frase = FRASES_BILHETE[(i + j // 2) % len(FRASES_BILHETE)]["valor"]  # em pares: totais variados
+        db.session.add(Bilhete(projeto_id=projeto.id, usuaria_id=fa.id, frase=frase))
+
+
 @click.command("seed-mural")
 @click.option("--limpar", is_flag=True, help="Apaga projetos e usuárias antes de inserir.")
 def seed_mural(limpar):
@@ -241,6 +254,7 @@ def seed_mural(limpar):
             (pasta / arquivo.nome_salvo).unlink(missing_ok=True)
         Arquivo.query.delete()
         Estrela.query.delete()
+        Bilhete.query.delete()
         Denuncia.query.delete()
         Projeto.query.delete()
         IdentidadeUsuaria.query.delete()
@@ -264,14 +278,18 @@ def seed_mural(limpar):
     criados = 0
     todas = list(por_email.values())
     for i, (email, tipo, titulo, area, ano, resumo, detalhes, destaque) in enumerate(PROJETOS):
-        if Projeto.query.filter_by(titulo=titulo).first():
+        existente = Projeto.query.filter_by(titulo=titulo).first()
+        if existente:
+            _bilhetes_de_exemplo(existente, i, todas)  # bancos de antes dos bilhetes também ganham alguns
             continue
         autora = por_email[email]
         detalhes = dict(detalhes)
         link = detalhes.pop("link", None) or ("https://github.com/" if tipo == "software" else None)
+        local = municipios.buscar_sem_uf(autora.cidade)
         projeto = Projeto(
             usuaria_id=autora.id, tipo=tipo, titulo=titulo, resumo=resumo, area=area, ano=ano,
-            instituicao=autora.instituicao, cidade=autora.cidade, nivel=autora.nivel,
+            instituicao=autora.instituicao, cidade=autora.cidade, uf=local[1] if local else None,
+            nivel=autora.nivel,
             link_externo=link, detalhes=detalhes, destaque=destaque,
             destaque_semana=semana_atual() if destaque else None,
             # Um dia e meio entre cada projeto: só os mais recentes ganham a etiqueta "Novo!".
@@ -286,6 +304,7 @@ def seed_mural(limpar):
         quantidade = (i * 5 + 3) % len(todas)
         for fa in [u for u in todas if u.id != autora.id][:quantidade]:
             db.session.add(Estrela(projeto_id=projeto.id, usuaria_id=fa.id))
+        _bilhetes_de_exemplo(projeto, i, todas)
         criados += 1
     db.session.commit()
     click.echo(f"{criados} projetos criados. Abra http://127.0.0.1:5000/mural")

@@ -26,6 +26,7 @@ class Projeto(db.Model):
     ano = db.Column(db.Integer, nullable=False)
     instituicao = db.Column(db.String(160), index=True)
     cidade = db.Column(db.String(120), index=True)
+    uf = db.Column(db.String(2))  # sigla do estado; com ela, a cidade é um município de verdade (app/municipios.py)
     nivel = db.Column(db.String(40), index=True)
     link_externo = db.Column(db.String(500))
     imagem_url = db.Column(db.String(500))
@@ -41,6 +42,8 @@ class Projeto(db.Model):
     arquivos = db.relationship(
         "Arquivo", back_populates="projeto", cascade="all, delete-orphan", order_by="Arquivo.id"
     )
+    # Só para os bilhetes saírem junto quando o projeto é excluído.
+    bilhetes = db.relationship("Bilhete", cascade="all, delete-orphan", lazy="select")
 
     @property
     def materiais(self):
@@ -80,7 +83,23 @@ class Estrela(db.Model):
     criada_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
-# Total de estrelas calculado pelo banco junto com o projeto (serve para mostrar e para ordenar).
+class Bilhete(db.Model):
+    """Bilhete de incentivo: uma usuária deixa no máximo um de cada frase por projeto."""
+
+    __tablename__ = "bilhetes"
+    __table_args__ = (db.UniqueConstraint("projeto_id", "usuaria_id", "frase"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    projeto_id = db.Column(db.Integer, db.ForeignKey("projetos.id", ondelete="CASCADE"), nullable=False, index=True)
+    usuaria_id = db.Column(db.Integer, db.ForeignKey("usuarias.id"), nullable=False, index=True)
+    frase = db.Column(db.String(30), nullable=False)  # valor de tipos.FRASES_BILHETE
+    criado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+# Totais calculados pelo banco junto com o projeto (servem para mostrar e, as estrelas, para ordenar).
 Projeto.total_estrelas = column_property(
     select(func.count(Estrela.id)).where(Estrela.projeto_id == Projeto.id).correlate_except(Estrela).scalar_subquery()
+)
+Projeto.total_bilhetes = column_property(
+    select(func.count(Bilhete.id)).where(Bilhete.projeto_id == Projeto.id).correlate_except(Bilhete).scalar_subquery()
 )
