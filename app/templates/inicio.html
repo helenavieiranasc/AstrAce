@@ -114,12 +114,18 @@
         </span>
       </a>
 
-      {# ---------- Recado: só decoração ---------- #}
-      <div class="postit postit--amarelo inicio-recado" style="--rot: 3deg; --i: 6" aria-hidden="true">
-        <span class="pin" style="--cor-pin: var(--pin-magenta)"></span>
-        <p>não esquecer: publicar aquele projeto!</p>
-        <svg class="inicio-rabisco inicio-rabisco--coracao" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.1a4.3 4.3 0 0 1 7.5 2.7C19.5 15.4 12 20 12 20z"/></svg>
-      </div>
+      {# ---------- Quiz: teste de revista num post-it (antes era um recado só de decoração) ---------- #}
+      <a class="postit postit--rosa inicio-link inicio-quiz" href="/quiz" style="--rot: 3deg; --i: 6">
+        <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+        <span class="inicio-quiz__selo" aria-hidden="true">quiz</span>
+        <span class="inicio-quiz__titulo">Que cientista você seria?</span>
+        <span class="inicio-quiz__opcoes" aria-hidden="true">
+          <span><i></i>Sonia Guimarães</span>
+          <span><i class="marcado"></i>Bertha Lutz</span>
+          <span><i></i>Nina da Hora</span>
+        </span>
+        <span class="inicio-abrir">fazer o quiz {{ seta }}</span>
+      </a>
 
     </div>
   </div>

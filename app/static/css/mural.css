@@ -1292,6 +1292,94 @@
   color: var(--magenta-escuro);
 }
 
+/* ---------- Citar: ficha com a referência ABNT ---------- */
+
+.citacao {
+  margin-top: 20px;
+  padding: 18px 20px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 27px, rgb(46 107 214 / 0.1) 27px 28px),
+    #fff;
+  border: 1px solid var(--papel-borda);
+  box-shadow: var(--sombra-papel);
+}
+
+.citacao h3 {
+  margin: 0 0 12px;
+  font-family: var(--fonte-mao);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.citacao__bloco + .citacao__bloco {
+  margin-top: 16px;
+}
+
+.citacao__rotulo {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.citacao__rotulo span {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--rosa-claro);
+  font-size: 0.78rem;
+}
+
+.citacao__texto {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--magenta);
+  background: var(--papel);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.citacao__curtas {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.citacao__curtas li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.citacao__curtas code {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--papel);
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.citacao__copiar {
+  padding-inline: 4px;
+}
+
+.citacao__aviso {
+  margin: 14px 0 0;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+.citacao__resultado {
+  margin: 6px 0 0;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.citacao__resultado:empty {
+  display: none;
+}
+
 .denuncia {
   margin-top: 20px;
   padding: 18px;

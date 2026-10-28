@@ -466,6 +466,66 @@ function htmlParecidos(lista) {
       <ul class="parecidos__lista">${itens}</ul>
     </section>`;
 }
+// ---------- Citar (ABNT) ----------
+function htmlCitacao(p) {
+    const c = p.citacao;
+    if (!c)
+        return "";
+    return `
+    <section class="citacao" id="citacao" aria-labelledby="citacao-titulo" hidden>
+      <h3 id="citacao-titulo">Como citar este projeto</h3>
+
+      <div class="citacao__bloco">
+        <p class="citacao__rotulo">Referência <span>ABNT NBR 6023:2025</span></p>
+        <p class="citacao__texto" id="citacao-referencia">${c.referencia_html}</p>
+        <button class="botao botao--texto citacao__copiar" type="button" data-copiar="referencia">Copiar referência</button>
+      </div>
+
+      <div class="citacao__bloco">
+        <p class="citacao__rotulo">Citação no texto <span>ABNT NBR 10520:2023</span></p>
+        <ul class="citacao__curtas">
+          <li><code>${esc(c.citacao_parentetica)}</code>
+            <button class="botao botao--texto citacao__copiar" type="button" data-copiar="parentetica">Copiar</button></li>
+          <li><code>${esc(c.citacao_narrativa)}</code>
+            <button class="botao botao--texto citacao__copiar" type="button" data-copiar="narrativa">Copiar</button></li>
+        </ul>
+      </div>
+
+      <p class="citacao__aviso">Gerada com os dados do projeto. Confira antes de usar e, se o trabalho foi publicado
+        em revista, anais ou repositório, cite a publicação original.</p>
+      <p class="citacao__resultado" id="citacao-resultado" role="status"></p>
+    </section>`;
+}
+let citacaoAtual;
+/** Copia com o negrito do título (HTML) quando o navegador deixa; senão, só o texto. */
+async function copiarCitacao(qual) {
+    const c = citacaoAtual;
+    if (!c)
+        return;
+    const resultado = el("citacao-resultado");
+    const texto = qual === "referencia" ? c.referencia_texto : qual === "parentetica" ? c.citacao_parentetica : c.citacao_narrativa;
+    try {
+        if (qual === "referencia" && "ClipboardItem" in window) {
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    "text/html": new Blob([c.referencia_html], { type: "text/html" }),
+                    "text/plain": new Blob([texto], { type: "text/plain" }),
+                }),
+            ]);
+        }
+        else {
+            await navigator.clipboard.writeText(texto);
+        }
+        resultado.textContent = qual === "referencia" ? "Referência copiada, com o título em negrito." : "Citação copiada.";
+    }
+    catch {
+        // Sem permissão para a área de transferência: seleciona o texto para copiar com Ctrl+C.
+        const alvo = qual === "referencia" ? el("citacao-referencia") : null;
+        if (alvo)
+            window.getSelection()?.selectAllChildren(alvo);
+        resultado.textContent = "Não deu para copiar sozinho. Selecione o texto e use Ctrl+C.";
+    }
+}
 function htmlDetalhe(p) {
     const imagem = urlSegura(p.imagem_url);
     const link = urlSegura(p.link_externo);
@@ -504,10 +564,16 @@ function htmlDetalhe(p) {
         data-titulo="${esc(p.titulo)}">
         ${icone("compartilhar")}<span id="compartilhar-texto">Compartilhar</span>
       </button>
+      ${p.citacao
+        ? `<button class="botao botao--secundario" type="button" id="citar" aria-expanded="false" aria-controls="citacao">
+               ${icone("citar")}<span>Citar</span>
+             </button>`
+        : ""}
       <button class="denunciar" type="button" id="denunciar" aria-expanded="false" aria-controls="denuncia">
         Denunciar projeto
       </button>
     </div>
+    ${htmlCitacao(p)}
     <form class="denuncia" id="denuncia" data-id="${p.id}" novalidate hidden>
       <h3>Denunciar projeto</h3>
       <p>A equipe revisa toda denúncia. Projetos com várias denúncias saem do mural até a revisão.</p>
@@ -537,6 +603,7 @@ async function abrirDetalhe(id, origem, mensagem, trocando = false) {
         const projeto = await api(`/api/projetos/${id}`);
         const aviso = mensagem ? `<p class="detalhe__aviso" role="status">${esc(mensagem)}</p>` : "";
         conteudoDetalhe.innerHTML = aviso + htmlDetalhe(projeto);
+        citacaoAtual = projeto.citacao;
         if (trocando) {
             // Outro projeto na mesma janela: volta ao topo e leva o foco ao título.
             conteudoDetalhe.closest(".detalhe__folha")?.scrollTo({ top: 0 });
@@ -689,6 +756,21 @@ function ligarEventos() {
         const estrela = alvo.closest("[data-estrela]");
         if (estrela) {
             void alternarEstrela(estrela);
+            return;
+        }
+        const botaoCitar = alvo.closest("#citar");
+        if (botaoCitar) {
+            const painel = el("citacao");
+            const abrir = painel.hidden;
+            painel.hidden = !abrir;
+            botaoCitar.setAttribute("aria-expanded", String(abrir));
+            if (abrir)
+                painel.scrollIntoView({ block: "nearest" });
+            return;
+        }
+        const copiar = alvo.closest("[data-copiar]");
+        if (copiar) {
+            void copiarCitacao(copiar.dataset.copiar);
             return;
         }
         const botaoCompartilhar = alvo.closest("#compartilhar");

@@ -89,6 +89,14 @@ export interface Detalhe extends Cartao {
   parecidos?: Cartao[];
   bilhetes?: FraseBilhete[];
   minha?: boolean;
+  citacao?: Citacao;
+}
+
+export interface Citacao {
+  referencia_texto: string;
+  referencia_html: string; // montado e escapado pelo servidor (título em <strong>)
+  citacao_parentetica: string;
+  citacao_narrativa: string;
 }
 
 export interface FraseBilhete {
@@ -267,6 +275,7 @@ const ICONES: Record<string, string> = {
   enviar: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/>',
   baixar: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/>',
   estrela: '<path d="m12 3.3 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>',
+  citar: '<path d="M10 7H6.5A1.5 1.5 0 0 0 5 8.5V12h4v5H5M19 7h-3.5A1.5 1.5 0 0 0 14 8.5V12h4v5h-4"/>',
   compartilhar: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/>',
 };
 

@@ -57,7 +57,7 @@ Páginas: `/mural`, `/mural/novo` e `/mural/mapa` (mapa "Onde elas brilham").
 | `GET /api/mural/mapa` | Projetos visíveis agrupados por cidade: `{cidades: [{cidade, uf, x, y, total, projetos}], total, sem_local}`. `x` e `y` são a posição (em %) no desenho `static/img/mapa-brasil.svg` |
 | `GET /api/projetos` | Lista com filtros `q`, `tipo`, `area`, `nivel`, `instituicao`, `cidade`, `identidade`, mais `pagina`, `por_pagina` e `ordem` (`recentes` ou `estrelas`) |
 | `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`). Sem nenhum escolhido, os que mais ganharam estrelas nos últimos 7 dias (o mural mostra "Em alta na semana") |
-| `GET /api/projetos/<id>` | Detalhe, com `parecidos` (até 3 cartões da mesma área, completando com os do mesmo tipo), `bilhetes` (cada frase com `total` e `meu`) e `minha` (se quem vê é a autora) |
+| `GET /api/projetos/<id>` | Detalhe, com `parecidos` (até 3 cartões da mesma área, completando com os do mesmo tipo), `bilhetes` (cada frase com `total` e `meu`), `minha` (se quem vê é a autora) e `citacao` (referência ABNT e citações no texto) |
 | `POST /api/projetos/<id>/bilhetes` | `{"frase": "inspirador"}` cola ou tira esse bilhete da usuária logada. Só frases de `FRASES_BILHETE` (`tipos.py`); a autora não cola no próprio projeto (`403`). Devolve `{bilhetes, total}` |
 | `POST /api/projetos/<id>/estrela` | Dá ou tira a estrela da usuária logada. Devolve `{estrelas, estrelado}` |
 | `POST /api/projetos` | Cria um projeto (JSON, com `uf` e `cidade`, `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
@@ -72,6 +72,11 @@ com os códigos do IBGE). O servidor confere se a cidade existe naquele estado e
 Quem manda só `cidade`, sem `uf` (como a edição pelo perfil), continua funcionando: o estado é completado quando o nome existe em um só estado.
 `app/municipios.py` serve para qualquer frente: `buscar("Recife", "PE")`, `nomes_da_uf("PE")`.
 A coluna `uf` entra sozinha em bancos antigos ao subir o app (`mural.completar_colunas`).
+
+**Citar:** o botão "Citar" do detalhe mostra a referência segundo a ABNT NBR 6023:2025 e a citação no texto segundo
+a NBR 10520:2023 (sobrenome só com a inicial maiúscula). A referência é montada em `app/mural/citacao.py` com os dados
+do projeto (nome público da autora, título, tipo, curso, evento, instituição, cidade e ano) e aponta para a página do
+projeto, ou para o link, no caso de software. O painel avisa para citar a publicação original quando ela existir.
 
 **Mapa:** as coordenadas vêm da mesma base de municípios, então qualquer cidade aparece. Projetos antigos sem `uf` entram quando o nome
 é único no Brasil; os outros ficam em `sem_local`. O desenho dos estados vem da malha do IBGE e fica no projeto, então o mapa funciona sem internet.
@@ -91,6 +96,20 @@ Além disso, cada projeto pode ter até 5 fotos (opcional). A primeira vira a ca
 Em extensão, social e protótipo, as fotos também contam como material (`fotos_contam` em `tipos.py`).
 O servidor confere os primeiros bytes de cada arquivo, então um `.exe` renomeado para `.pdf` é recusado.
 Os arquivos ficam em `instance/uploads/`, fora do git.
+
+## Quiz "Que cientista você seria?"
+
+Página: `/quiz`, com um papel na página inicial e um item no menu lateral. São 6 perguntas; cada resposta dá pontos para áreas e a área
+com mais pontos define uma cientista brasileira de referência. O resultado leva para projetos, eventos e vagas
+da área (`?area=` em `/mural`, `/eventos` e `/vagas`) e gera uma imagem para o story (1080x1920, desenhada no navegador).
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/quiz` | Perguntas e opções (sem os pontos) |
+| `POST /api/quiz/resultado` | `{"respostas": [0, 2, 1, 3, 0, 1]}` (índice da opção em cada pergunta). Devolve `{area, area_rotulo, cientista, sobre, perfil}` |
+| `GET /api/quiz/resultado/<area>` | O resultado de uma área, para o link compartilhado (`/quiz?resultado=fisica`) |
+
+Perguntas, pontos e cientistas ficam em `app/quiz/dados.py`. Um teste confere que toda área pode sair como resultado.
 
 ## Eventos (Pessoa 3)
 
