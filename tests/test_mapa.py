@@ -1,10 +1,11 @@
-"""Onde elas brilham: cidades reconhecidas, agrupamento e página."""
+"""Mapa de Inspiração: cidades reconhecidas, pins rosas (dados reais) e páginas."""
+from datetime import datetime
 import pytest
 
 from app import create_app
 from app.config import Config
 from app.extensoes import db
-from app.mural.mapa import localizar
+from app.mural.mapa import coordenadas, localizar
 from app.mural.models import Projeto
 
 
@@ -92,7 +93,62 @@ def test_projeto_oculto_sai_do_mapa(app, cliente):
     assert cliente.get("/api/mural/mapa").get_json()["total"] == antes - 1
 
 
-def test_pagina_do_mapa_e_link_no_mural(cliente):
-    assert cliente.get("/mural/mapa").status_code == 200
-    assert 'href="/mural/mapa"' in cliente.get("/mural").get_data(as_text=True)
-    assert cliente.get("/static/img/mapa-brasil.svg").status_code == 200
+def test_pins_rosas_ganharam_latitude_e_longitude_sem_perder_o_resto(cliente):
+    cidades = cliente.get("/api/mural/mapa").get_json()["cidades"]
+    assert cidades
+    for c in cidades:
+        assert -34 < c["lat"] < 6 and -75 < c["lon"] < -32  # dentro do Brasil
+        assert {"cidade", "uf", "x", "y", "total", "projetos"} <= c.keys()  # o que já existia continua
+
+
+def test_coordenadas_so_de_cidade_conhecida():
+    lat, lon = coordenadas("Manaus", "AM")
+    assert lat < 0 and lon < -55
+    assert coordenadas("Cidade Inventada") is None
+
+
+def test_mapa_de_inspiracao_e_aba_propria(cliente):
+    pagina = cliente.get("/mapa")
+    assert pagina.status_code == 200
+    html = pagina.get_data(as_text=True)
+    assert "Mapa de Inspiração" in html and "js/mapa-inspiracao.js" in html
+    # O mural não carrega mais o convite do mapa antigo.
+    mural = cliente.get("/mural").get_data(as_text=True)
+    assert "vitrine-mapa" not in mural and 'href="/mural/mapa"' not in mural
+
+
+def test_endereco_antigo_redireciona_mantendo_a_cidade(cliente):
+    r = cliente.get("/mural/mapa?cidade=Recife-PE")
+    assert r.status_code == 301
+    assert r.headers["Location"].endswith("/mapa?cidade=Recife-PE")
+
+
+def test_menu_e_pagina_inicial_levam_ao_mapa(cliente):
+    assert 'href="/mapa"' in cliente.get("/eventos").get_data(as_text=True)  # menu lateral
+    assert 'href="/mapa"' in cliente.get("/").get_data(as_text=True)  # post-it "Inspire-se"
+
+
+def test_nomes_so_de_quem_ja_tem_projeto_visivel(app, cliente):
+    from app.extensoes import db
+    from app.mural.models import Projeto
+    from app.usuarias.models import ContaUsuaria, Usuaria
+
+    with app.app_context():
+        com = Usuaria(nome="Com Projeto", email="com@teste.local", cidade="Recife")
+        sem = Usuaria(nome="Sem Projeto", email="sem@teste.local", cidade="Recife")
+        db.session.add_all([com, sem])
+        db.session.flush()
+        for u in (com, sem):
+            db.session.add(ContaUsuaria(usuaria_id=u.id, estado="PE", cadastro_concluido_em=datetime.utcnow()))
+        projeto = Projeto.query.first()
+        projeto_da_com = Projeto(
+            usuaria_id=com.id, tipo=projeto.tipo, area=projeto.area, titulo="Teste", resumo="Resumo", ano=2026, cidade="Recife", uf="PE",
+        )
+        db.session.add(projeto_da_com)
+        db.session.commit()
+    dados = cliente.get("/api/mapa/mulheres-astrace").get_json()
+    recife = [c for c in dados["cidades"] if c["cidade"] == "Recife"][0]
+    assert recife["total"] >= 2  # a contagem inclui todas as cadastradas
+    assert "Com Projeto" in recife["nomes"]
+    assert "Sem Projeto" not in recife["nomes"]  # quem não publicou não tem nome exposto
+    assert set(recife) == {"cidade", "uf", "x", "y", "lat", "lon", "total", "nomes"}

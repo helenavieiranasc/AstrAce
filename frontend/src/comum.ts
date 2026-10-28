@@ -112,6 +112,8 @@ export interface CidadeNoMapa {
   uf: string;
   x: number; // porcentagem da largura do desenho
   y: number; // porcentagem da altura
+  lat: number; // latitude e longitude do município (para o globo do Mapa de Inspiração)
+  lon: number;
   total: number;
   projetos: Cartao[];
 }

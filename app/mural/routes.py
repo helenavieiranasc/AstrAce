@@ -1,4 +1,4 @@
-from flask import abort, current_app, jsonify, render_template, request
+from flask import abort, current_app, jsonify, redirect, render_template, request, url_for
 
 from .. import catalogos, municipios
 from ..auth import usuaria_atual
@@ -35,7 +35,8 @@ def pagina_mural():
 
 @bp.get("/mural/mapa")
 def pagina_mapa():
-    return render_template("mapa.html")
+    """O mapa saiu do mural e virou a aba Mapa de Inspiração; o endereço antigo continua funcionando."""
+    return redirect(url_for("mapa.pagina_mapa", **request.args), code=301)
 
 
 @bp.get("/mural/novo")

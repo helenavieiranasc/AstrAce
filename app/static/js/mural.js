@@ -416,26 +416,6 @@ async function carregarDestaques() {
         // A faixa de destaques é opcional: sem ela, o mural continua funcionando.
     }
 }
-// ---------- Convite para o mapa ----------
-async function carregarVitrineMapa() {
-    try {
-        const mapa = await api("/api/mural/mapa");
-        if (mapa.cidades.length === 0)
-            return; // fica o texto padrão
-        const desenho = el("vitrine-mapa-desenho");
-        desenho.insertAdjacentHTML("beforeend", mapa.cidades
-            .map((c) => `<span class="vitrine-mapa__ponto" style="left: ${c.x}%; top: ${c.y}%"></span>`)
-            .join(""));
-        const projetos = mapa.cidades.reduce((soma, c) => soma + c.total, 0);
-        const n = mapa.cidades.length;
-        el("vitrine-mapa-resumo").textContent =
-            `${projetos} ${projetos === 1 ? "projeto" : "projetos"} em ${n} ${n === 1 ? "cidade" : "cidades"}. ` +
-                "Veja onde elas estão fazendo ciência pelo Brasil.";
-    }
-    catch {
-        // Sem os dados, o convite continua funcionando com o texto padrão.
-    }
-}
 // ---------- Detalhe ----------
 function itemFicha(rotulo, valor, link = false) {
     if (valor === null || valor === undefined || valor === "")
@@ -829,7 +809,6 @@ async function iniciar() {
     botaoLimpar.hidden = !temFiltro(filtros);
     sincronizarUrl(filtros); // tira ?projeto= e ?publicado= da barra de endereço
     void carregarDestaques();
-    void carregarVitrineMapa();
     await carregar(true);
     const publicado = Number(params.get("publicado"));
     const projeto = Number(params.get("projeto"));

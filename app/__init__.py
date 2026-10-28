@@ -30,6 +30,7 @@ def create_app(config=Config):
     from .noticias.seed import seed_noticias
     from .quiz import bp as quiz_bp
     from .passaporte import bp as passaporte_bp
+    from .mapa import bp as mapa_bp
     from .conta import bp as conta_bp, completar_colunas
     from .admin import bp as admin_bp, tornar_admin
 
@@ -41,6 +42,7 @@ def create_app(config=Config):
     app.register_blueprint(noticias_bp)
     app.register_blueprint(quiz_bp)
     app.register_blueprint(passaporte_bp)
+    app.register_blueprint(mapa_bp)
     app.register_blueprint(admin_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)

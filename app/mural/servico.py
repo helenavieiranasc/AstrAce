@@ -114,8 +114,9 @@ def projetos_no_mapa():
             sem_local += 1
             continue
         nome, uf, x, y = local
+        lat, lon = mapa.coordenadas(p.cidade, p.uf)
         grupo = cidades.setdefault(
-            (nome, uf), {"cidade": nome, "uf": uf, "x": x, "y": y, "total": 0, "projetos": []}
+            (nome, uf), {"cidade": nome, "uf": uf, "x": x, "y": y, "lat": lat, "lon": lon, "total": 0, "projetos": []}
         )
         grupo["total"] += 1
         grupo["projetos"].append(cartao(p))

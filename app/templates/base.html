@@ -40,16 +40,30 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
       </div>
+      {# Seções com nome: quem procura "onde ver quem veio antes" ou "o que fazer agora" acha pelo rótulo. #}
       <nav class="lateral__nav" aria-label="Principal">
-        <ul>
-          <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural</a></li>
+        <p class="lateral__grupo" id="menu-descobrir">Descobrir</p>
+        <ul aria-labelledby="menu-descobrir">
+          <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural de projetos</a></li>
+          <li><a href="/mapa" {% if request.path.startswith('/mapa') %}aria-current="page"{% endif %}>Mapa de Inspiração</a></li>
+          <li><a href="/noticias" {% if request.path.startswith('/noticias') %}aria-current="page"{% endif %}>Notícias</a></li>
+          <li><a href="/quiz" {% if request.path.startswith('/quiz') %}aria-current="page"{% endif %}>Quiz: que cientista você seria?</a></li>
+        </ul>
+        <p class="lateral__grupo" id="menu-oportunidades">Oportunidades</p>
+        <ul aria-labelledby="menu-oportunidades">
           <li><a href="/eventos" {% if request.path.startswith('/eventos') %}aria-current="page"{% endif %}>Eventos</a></li>
           <li><a href="/vagas" {% if request.path.startswith('/vagas') %}aria-current="page"{% endif %}>Vagas</a></li>
-          <li><a href="/noticias" {% if request.path.startswith('/noticias') %}aria-current="page"{% endif %}>Notícias</a></li>
-          <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
-          <li><a href="/quiz" {% if request.path.startswith('/quiz') %}aria-current="page"{% endif %}>Quiz: que cientista você seria?</a></li>
-          {% if menu_admin %}<li><a href="/admin" {% if request.path.startswith('/admin') %}aria-current="page"{% endif %}>Painel da equipe</a></li>{% endif %}
         </ul>
+        <p class="lateral__grupo" id="menu-jornada">Minha jornada</p>
+        <ul aria-labelledby="menu-jornada">
+          <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
+        </ul>
+        {% if menu_admin %}
+        <p class="lateral__grupo" id="menu-equipe">Equipe</p>
+        <ul aria-labelledby="menu-equipe">
+          <li><a href="/admin" {% if request.path.startswith('/admin') %}aria-current="page"{% endif %}>Painel da equipe</a></li>
+        </ul>
+        {% endif %}
       </nav>
       <div class="lateral__acao">
         {% block acao_topo %}

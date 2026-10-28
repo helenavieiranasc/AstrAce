@@ -622,69 +622,71 @@
   transform-origin: top center;
 }
 
-/* ---------- Quiz: post-it com cara de teste de revista ---------- */
+/* ---------- Inspire-se: um post-it com dois caminhos (mapa e quiz) ---------- */
 
 .inicio-quiz {
   justify-self: center;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: min(100%, 250px);
-  padding: 26px 20px 18px;
+  gap: 6px;
+  width: min(100%, 290px);
+  padding: 26px 18px 16px;
   color: var(--tinta);
-  text-decoration: none;
   transform: rotate(var(--rot));
   animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-.inicio-quiz__selo {
-  position: absolute;
-  top: -12px;
-  right: -10px;
-  padding: 3px 12px;
-  border-radius: 999px;
-  background: var(--magenta);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  transform: rotate(8deg);
-}
-
 .inicio-quiz__titulo {
+  margin: 0 0 2px;
   font-family: var(--fonte-mao);
-  font-size: 1.9rem;
+  font-size: 2.1rem;
   font-weight: 700;
   line-height: 1;
   color: var(--magenta-escuro);
 }
 
-.inicio-quiz__opcoes {
-  display: grid;
-  gap: 3px;
-  font-size: 0.92rem;
-}
-
-.inicio-quiz__opcoes span {
+.inicio-quiz__link {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Quadradinhos de marcar, um já marcado à mão. */
-.inicio-quiz__opcoes i {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--tinta);
-  border-radius: 3px;
+.inicio-quiz__link:hover,
+.inicio-quiz__link:focus-visible {
+  background: rgb(255 255 255 / 0.55);
+  transform: translateX(3px);
 }
 
-.inicio-quiz__opcoes i.marcado {
-  background:
-    linear-gradient(45deg, transparent 42%, var(--magenta) 42% 58%, transparent 58%),
-    linear-gradient(-45deg, transparent 42%, var(--magenta) 42% 58%, transparent 58%);
+.inicio-quiz__link svg {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: var(--magenta-escuro);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.inicio-quiz__link span {
+  display: grid;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.inicio-quiz__link b {
+  font-size: 1rem;
+  text-decoration: underline;
+  text-decoration-color: var(--magenta);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 /* ---------- Telas menores: o mural se reorganiza, sem só encolher ---------- */
