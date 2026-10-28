@@ -367,6 +367,95 @@
   background: #fff;
 }
 
+/* Lista aberta dos filtros com o estilo do site (Chrome e Edge 135+).
+   Nos outros navegadores fica a lista padrão do sistema, que continua funcionando. */
+@supports (appearance: base-select) {
+  .filtros select,
+  .filtros select::picker(select) {
+    appearance: base-select;
+  }
+
+  .filtros select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-inline: 12px 14px;
+    cursor: pointer;
+  }
+
+  .filtros select:has(option[value=""]:checked) {
+    color: var(--tinta-suave);
+  }
+
+  .filtros select::picker-icon {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-top: -4px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: 45deg;
+    transition: rotate 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s ease;
+  }
+
+  .filtros select:open::picker-icon {
+    margin-top: 4px;
+    rotate: 225deg;
+  }
+
+  .filtros select:open {
+    border-color: var(--magenta);
+  }
+
+  .filtros select::picker(select) {
+    min-width: anchor-size(width);
+    max-height: min(320px, 50vh);
+    margin-block: 6px;
+    padding: 6px;
+    overflow-y: auto;
+    border: 2px solid var(--papel-borda);
+    border-radius: 10px;
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: var(--sombra-papel-alta);
+    scrollbar-width: thin;
+    scrollbar-color: var(--postit-rosa) transparent;
+  }
+
+  .filtros option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .filtros option::checkmark {
+    display: none;
+  }
+
+  .filtros option[value=""] {
+    color: var(--tinta-suave);
+  }
+
+  .filtros option:hover,
+  .filtros option:focus-visible {
+    outline: none;
+    background: var(--rosa-claro);
+  }
+
+  .filtros option:checked {
+    background: #fff0f6;
+    font-weight: 700;
+    color: var(--magenta-escuro);
+  }
+
+  .filtros option:checked:hover,
+  .filtros option:checked:focus-visible {
+    background: var(--postit-rosa);
+  }
+}
+
 .filtros select:hover,
 .campo-busca input:hover,
 .folha-form input:hover,

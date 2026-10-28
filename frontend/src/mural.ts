@@ -847,14 +847,7 @@ function ligarEventos(): void {
   });
 }
 
-function preencherCartaz(): void {
-  const hoje = new Date();
-  el("cartaz-mes").textContent = hoje.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
-  el("cartaz-dia").textContent = String(hoje.getDate());
-}
-
 async function iniciar(): Promise<void> {
-  preencherCartaz();
   ligarEventos();
 
   try {

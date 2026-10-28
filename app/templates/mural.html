@@ -23,16 +23,6 @@
           </div>
         </div>
 
-        {# Espaço do canto de eventos (Pessoa 3): pode trocar o conteúdo, mantendo a classe cartaz-eventos. #}
-        <a class="cartaz-eventos" href="/eventos">
-          <span class="pin" style="--cor-pin: var(--pin-verde)" aria-hidden="true"></span>
-          <span class="cartaz-eventos__folha" aria-hidden="true">
-            <span class="cartaz-eventos__mes" id="cartaz-mes"></span>
-            <span class="cartaz-eventos__dia" id="cartaz-dia"></span>
-          </span>
-          <span class="cartaz-eventos__titulo">Eventos</span>
-          <span class="cartaz-eventos__texto">Veja a agenda perto de você e ganhe carimbos no passaporte.</span>
-        </a>
       </div>
 
       <div class="abertura__principal">
@@ -129,5 +119,4 @@
 
 {% block scripts %}
 <script type="module" src="{{ url_for('static', filename='js/mural.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/cartaz-eventos.js') }}"></script>
 {% endblock %}
