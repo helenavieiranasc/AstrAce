@@ -43,8 +43,13 @@ def create_app(config=Config):
     app.cli.add_command(seed_noticias)
     app.cli.add_command(tornar_admin)
 
+    from .servicos.banco import acrescentar_colunas
+    from .noticias.models import Noticia
+    from .vagas.models import Vaga
+
     with app.app_context():
         db.create_all()
         completar_colunas(db)
+        acrescentar_colunas(db, Vaga, Noticia)  # imagem_url das vagas e das notícias
 
     return app

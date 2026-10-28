@@ -1,26 +1,56 @@
 {% extends "base.html" %}
 
 {% block titulo %}Painel da equipe · AstrAce{% endblock %}
-{% block descricao %}Área da equipe: eventos, vagas, denúncias e destaques da semana.{% endblock %}
+{% block descricao %}Área da equipe: eventos, vagas, notícias, denúncias e destaques da semana.{% endblock %}
 
 {% block estilos %}
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/eventos.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vagas.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/noticias.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
 
 {% block acao_topo %}{% endblock %}
 
 {% block conteudo %}
+{# Campo de imagem dos formulários: escolher ou arrastar, recortar, trocar e remover (admin.ts). #}
+{% macro campo_foto(prefixo, legenda, ajuda, logo=false) %}
+<fieldset class="bloco">
+  <legend>{{ legenda }}</legend>
+  <input type="hidden" name="imagem_url">
+  <div class="campo foto-campo{% if logo %} foto-campo--logo{% endif %}">
+    <div class="foto-campo__quadro" id="{{ prefixo }}-foto-quadro">
+      <img id="{{ prefixo }}-foto-previa" alt="" hidden>
+      <span class="foto-campo__vazio" id="{{ prefixo }}-foto-vazio">
+        {{ "Sem logo" if logo else "Sem foto" }}
+        <small>Arraste uma imagem para cá</small>
+      </span>
+      <span class="foto-campo__enviando" id="{{ prefixo }}-foto-enviando" hidden>Enviando…</span>
+    </div>
+    <div class="foto-campo__lado">
+      <div class="foto-campo__acoes">
+        <label class="botao botao--secundario foto-campo__escolher">
+          <input class="visualmente-oculto" type="file" id="{{ prefixo }}-foto-arquivo" accept="image/*" data-erro-para="imagem_url" aria-describedby="{{ prefixo }}-foto-ajuda">
+          <span id="{{ prefixo }}-foto-escolher">Escolher imagem</span>
+        </label>
+        <button class="botao botao--texto" type="button" id="{{ prefixo }}-foto-ajustar" hidden>Ajustar recorte</button>
+        <button class="botao botao--texto" type="button" id="{{ prefixo }}-foto-remover" hidden>Remover</button>
+      </div>
+      <small id="{{ prefixo }}-foto-ajuda">{{ ajuda }}</small>
+    </div>
+  </div>
+</fieldset>
+{% endmacro %}
+
 <div class="quadro">
   <div class="cortica cortica--painel">
 
     <div class="postit postit--verde painel-nota">
       <span class="pin" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
       <h1>Painel da equipe</h1>
-      <p>Cadastre eventos e vagas, revise denúncias e escolha os destaques da semana. Tudo o que você salvar aqui aparece no site na hora.</p>
+      <p>Cadastre eventos, vagas e notícias, revise denúncias e escolha os destaques da semana. Tudo o que você salvar aqui aparece no site na hora.</p>
     </div>
 
     <div class="fichario">
@@ -28,6 +58,7 @@
         <button class="fichario__aba" type="button" role="tab" id="aba-geral" aria-controls="painel-geral" aria-selected="true" data-aba="geral">Visão geral</button>
         <button class="fichario__aba" type="button" role="tab" id="aba-eventos" aria-controls="painel-eventos" aria-selected="false" tabindex="-1" data-aba="eventos">Eventos</button>
         <button class="fichario__aba" type="button" role="tab" id="aba-vagas" aria-controls="painel-vagas" aria-selected="false" tabindex="-1" data-aba="vagas">Vagas</button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-noticias" aria-controls="painel-noticias" aria-selected="false" tabindex="-1" data-aba="noticias">Notícias</button>
         <button class="fichario__aba" type="button" role="tab" id="aba-moderacao" aria-controls="painel-moderacao" aria-selected="false" tabindex="-1" data-aba="moderacao">
           Denúncias <span class="fichario__contagem" id="contagem-denuncias" hidden></span>
         </button>
@@ -82,6 +113,25 @@
           </div>
         </div>
         <ul class="registros" id="lista-vagas" aria-busy="true" aria-live="polite"></ul>
+      </section>
+
+      {# ---------- Notícias ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-noticias" aria-labelledby="aba-noticias" tabindex="0" hidden>
+        <div class="painel-barra">
+          <h2 class="painel-titulo">Notícias</h2>
+          <button class="botao botao--primario" type="button" id="nova-noticia">Nova notícia</button>
+        </div>
+        <div class="painel-filtros">
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input type="search" id="busca-noticias" aria-label="Buscar notícias" placeholder="Manchete, cientista ou fonte" autocomplete="off">
+          </div>
+          <div class="segmentos" role="group" aria-label="Quais notícias mostrar" data-lista="noticias">
+            <button type="button" aria-pressed="true" data-estado="no_site">No site <span data-contagem="no_site"></span></button>
+            <button type="button" aria-pressed="false" data-estado="ocultas">Ocultas <span data-contagem="ocultas"></span></button>
+          </div>
+        </div>
+        <ul class="registros" id="lista-noticias" aria-busy="true" aria-live="polite"></ul>
       </section>
 
       {# ---------- Denúncias ---------- #}
@@ -209,18 +259,7 @@
           </label>
         </fieldset>
 
-        <fieldset class="bloco">
-          <legend>Imagem do evento (opcional)</legend>
-          <input type="hidden" name="imagem_url">
-          <div class="imagem-evento" id="ev-imagem">
-            <img id="ev-imagem-previa" alt="" hidden>
-            <div class="campo">
-              <label for="ev-imagem-arquivo">Cartaz ou foto (jpg, png ou webp, até 10 MB)</label>
-              <input id="ev-imagem-arquivo" type="file" accept=".jpg,.jpeg,.png,.webp">
-            </div>
-            <button class="botao botao--texto" type="button" id="ev-imagem-remover" hidden>Remover imagem</button>
-          </div>
-        </fieldset>
+        {{ campo_foto("ev", "Foto do evento (opcional)", "Aparece no alto da página do evento. Vale qualquer imagem do computador ou do celular: antes de enviar, você escolhe o recorte.") }}
 
         <fieldset class="bloco bloco--carimbo">
           <legend>Passaporte</legend>
@@ -286,6 +325,8 @@
           </div>
         </fieldset>
 
+        {{ campo_foto("vg", "Logo da instituição (opcional)", "Aparece ao lado do nome da instituição, no cartão e na página da vaga. Logo com fundo transparente continua transparente.", logo=true) }}
+
         <fieldset class="bloco">
           <legend>Onde e até quando</legend>
           <div class="linha">
@@ -341,6 +382,117 @@
         <p class="previa__rotulo">Assim vai aparecer em Vagas</p>
         <ul class="grade grade--vagas previa__lista" id="previa-vaga"></ul>
       </aside>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- Formulário de notícia (grava pelas rotas /api/noticias) ---------- #}
+<dialog class="detalhe painel-dialogo" id="dialogo-noticia" aria-labelledby="titulo-form-noticia">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="painel-dialogo__grade">
+      <form class="folha-form painel-form" id="form-noticia" novalidate>
+        <h2 class="painel-form__titulo" id="titulo-form-noticia">Nova notícia</h2>
+        <p class="painel-form__intro">Campos com * são obrigatórios. Resuma com as suas palavras e sempre aponte a fonte original.</p>
+        <div class="resumo-erros" id="erros-noticia" role="alert" tabindex="-1" hidden></div>
+
+        <fieldset class="bloco">
+          <legend>A notícia</legend>
+          <div class="campo">
+            <label for="nt-titulo">Manchete *</label>
+            <input id="nt-titulo" name="titulo" maxlength="180" required>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-cientista">Cientista ou equipe *</label>
+              <input id="nt-cientista" name="cientista" maxlength="140" required>
+            </div>
+            <div class="campo">
+              <label for="nt-instituicao">Instituição</label>
+              <input id="nt-instituicao" name="instituicao" maxlength="160">
+            </div>
+          </div>
+          <div class="campo">
+            <label for="nt-resumo">Resumo *</label>
+            <textarea id="nt-resumo" name="resumo" rows="5" maxlength="3000" required aria-describedby="nt-resumo-ajuda"></textarea>
+            <small id="nt-resumo-ajuda">O que ela descobriu e por que importa. As primeiras 170 letras aparecem no cartão.</small>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-categoria">Categoria *</label>
+              <select id="nt-categoria" name="categoria" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="nt-area">Área *</label>
+              <select id="nt-area" name="area" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="nt-data">Publicada em</label>
+              <input id="nt-data" name="data_publicacao" type="date">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Fonte</legend>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-fonte">Veículo ou instituição *</label>
+              <input id="nt-fonte" name="fonte_nome" maxlength="120" required placeholder="Ex.: Agência FAPESP">
+            </div>
+            <div class="campo">
+              <label for="nt-link">Link da matéria ou do artigo *</label>
+              <input id="nt-link" name="link_fonte" type="url" maxlength="500" placeholder="https://" required>
+            </div>
+          </div>
+        </fieldset>
+
+        {{ campo_foto("nt", "Foto da notícia (opcional)", "Aparece no alto do recorte e na página da notícia. Use foto com autorização ou de um banco de imagens livre.") }}
+
+        <fieldset class="bloco">
+          <legend>Recortes e destaque</legend>
+          <div class="escolhas escolhas--coluna">
+            <label class="caixa"><input type="checkbox" name="cientista_brasileira" checked><span>Cientista brasileira</span></label>
+            <label class="caixa"><input type="checkbox" name="cientista_negra"><span>Mulher negra na ciência</span></label>
+            <label class="caixa"><input type="checkbox" name="destaque"><span>Destaque no topo de Notícias</span></label>
+          </div>
+        </fieldset>
+
+        <div class="folha-form__acoes">
+          <button class="botao botao--primario botao--grande" type="submit">Salvar notícia</button>
+          <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+        </div>
+      </form>
+
+      <aside class="previa" aria-label="Prévia">
+        <p class="previa__rotulo">Assim vai aparecer em Notícias</p>
+        <ul class="grade grade--noticias previa__lista" id="previa-noticia"></ul>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- Recorte de imagem (abre por cima dos formulários) ---------- #}
+<dialog class="detalhe painel-dialogo painel-dialogo--foto" id="dialogo-foto" aria-labelledby="foto-titulo" aria-describedby="foto-dica">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 class="painel-form__titulo" id="foto-titulo">Ajustar a foto</h2>
+    <p class="painel-form__intro" id="foto-dica">Arraste a imagem para escolher a parte que aparece no site. O quadro tem o formato do cartão.</p>
+    <div class="recortador" id="foto-recortador" tabindex="0" role="group" aria-label="Recorte da imagem" aria-describedby="foto-teclas">
+      <img id="foto-recorte-imagem" alt="" draggable="false">
+    </div>
+    <p class="recortador__teclas" id="foto-teclas">No teclado: as setas movem a imagem (com Shift, mais rápido); + e − aproximam e afastam.</p>
+    <div class="recortador__zoom">
+      <label for="foto-zoom">Aproximar</label>
+      <input type="range" id="foto-zoom" min="1" max="4" step="0.01" value="1">
+    </div>
+    <div class="recortador__acoes">
+      <button class="botao botao--primario" type="button" id="foto-usar">Usar esta imagem</button>
+      <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
     </div>
   </div>
 </dialog>

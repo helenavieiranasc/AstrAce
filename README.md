@@ -172,7 +172,7 @@ Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem 
 ## Painel da equipe (Pessoa 5)
 
 Página: `/admin`, só para contas com `papel = "admin"` (o link "Painel da equipe" aparece no menu só para elas).
-Abas: visão geral (números do banco e pendências), eventos, vagas, denúncias e destaques da semana.
+Abas: visão geral (números do banco e pendências), eventos, vagas, notícias, denúncias e destaques da semana.
 
 Para dar acesso a alguém (a pessoa precisa ter entrado no site uma vez):
 
@@ -194,11 +194,18 @@ Toda rota que grava exige JSON (um formulário de outro site não consegue dispa
 | `GET /admin/eventos/<id>/cartaz` | Cartaz A4 de check-in para imprimir |
 | `GET /api/admin/vagas?estado=&q=` | Todas as vagas: `no_site`, `encerradas` ou `ocultas`. Gravar usa `POST/PUT /api/vagas` (Pessoa 4) |
 | `POST /api/admin/vagas/<id>/conferir` | A equipe conferiu o edital hoje: atualiza `data_coleta` |
+| `GET /api/admin/noticias?estado=&q=` | Todas as notícias: `no_site` ou `ocultas`. Gravar usa `POST/PUT /api/noticias` |
 | `GET /api/admin/denuncias` | Projetos denunciados depois da última decisão da equipe |
 | `POST /api/admin/projetos/<id>/moderar` | `{"decisao": "restaurar"}` (volta ao mural e zera as denúncias) ou `"fora_do_mural"` |
 | `GET /api/admin/destaques`, `POST /api/admin/destaques/<id>` | Vitrine da semana, com no máximo 5 projetos (`409` passando disso) |
 
 As decisões de moderação ficam na tabela `moderacoes`, como histórico.
+
+**Fotos:** eventos, notícias e vagas têm `imagem_url`. No painel, a imagem é escolhida ou arrastada, recortada
+no formato em que aparece no site (16:9 para evento e notícia; quadrado para o logo da vaga), reduzida e enviada
+como WebP por `POST /api/uploads` (finalidade `capa`). O botão "Trocar foto" de cada lista leva direto a esse campo.
+A coluna `vagas.imagem_url` é nova: `app/servicos/banco.py` a acrescenta sozinho em bancos que já existiam,
+sem apagar nada. A página `/vagas` mostra o logo ao lado do nome da instituição.
 
 **QR codes:** `app/servicos/qr.py` (biblioteca `segno`) gera SVG e PNG; `qr.endereco_publico("/checkin/<token>")`
 monta o link. Com o site no ar, defina `URL_PUBLICA` no `.env` com o endereço público (o celular de quem escaneia

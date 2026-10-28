@@ -1,13 +1,16 @@
 """Testes do painel de administração (Pessoa 5)."""
+import sqlite3
 from datetime import date, timedelta
 
 import pytest
+from sqlalchemy import inspect
 
 from app import create_app
 from app.config import Config
 from app.eventos.models import Evento
 from app.extensoes import db
 from app.mural.models import Denuncia, Projeto
+from app.noticias.models import Noticia
 from app.usuarias.models import Usuaria
 from app.vagas.models import Vaga
 
@@ -22,7 +25,7 @@ def app(tmp_path):
 
     app = create_app(ConfigTeste)
     with app.app_context():
-        for comando in ("seed-mural", "seed-eventos", "seed-vagas"):
+        for comando in ("seed-mural", "seed-eventos", "seed-vagas", "seed-noticias"):
             resultado = app.test_cli_runner().invoke(args=[comando])
             assert resultado.exit_code == 0, resultado.output
     return app
@@ -204,6 +207,96 @@ def test_lista_de_vagas_mostra_as_ocultas_e_reconferir(app, cliente):
     conferida = cliente.post(f"/api/admin/vagas/{vaga_id}/conferir", json={}).get_json()
     assert conferida["reconferir"] is False
     assert conferida["data_coleta"] == date.today().isoformat()
+
+
+def _vaga_valida(**mudancas):
+    dados = {
+        "titulo": "Bolsa de iniciação científica em IA",
+        "organizacao": "Instituto Teste",
+        "descricao": "Bolsa de 12 meses para estudantes de graduação em computação.",
+        "tipo": "ic",
+        "area": "computacao",
+        "modalidade": "remoto",
+        "link_original": "https://exemplo.org/edital",
+    }
+    dados.update(mudancas)
+    return dados
+
+
+def test_foto_da_vaga_aparece_no_site_e_pode_sair(cliente):
+    criada = cliente.post("/api/vagas", json=_vaga_valida(imagem_url="/uploads/logo.webp"))
+    assert criada.status_code == 201
+    vaga_id = criada.get_json()["id"]
+    assert cliente.get(f"/api/vagas/{vaga_id}").get_json()["imagem_url"] == "/uploads/logo.webp"
+    cartao = next(v for v in cliente.get("/api/vagas?por_pagina=48").get_json()["itens"] if v["id"] == vaga_id)
+    assert cartao["imagem_url"] == "/uploads/logo.webp"
+
+    sem_foto = cliente.put(f"/api/vagas/{vaga_id}", json=_vaga_valida(imagem_url=""))
+    assert sem_foto.get_json()["imagem_url"] is None
+
+
+def test_foto_da_vaga_so_aceita_envio_ou_link(cliente):
+    resposta = cliente.post("/api/vagas", json=_vaga_valida(imagem_url="javascript:alert(1)"))
+    assert resposta.status_code == 422
+    assert "imagem_url" in resposta.get_json()["erros"]
+
+
+def test_banco_antigo_ganha_a_coluna_de_imagem(tmp_path):
+    caminho = tmp_path / "antigo.db"
+    with sqlite3.connect(caminho) as conexao:
+        conexao.execute("CREATE TABLE vagas (id INTEGER PRIMARY KEY, titulo VARCHAR(160) NOT NULL)")
+        conexao.execute("INSERT INTO vagas (titulo) VALUES ('Vaga de antes da foto')")
+
+    class ConfigAntiga(Config):
+        TESTING = True
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{caminho.as_posix()}"
+        PASTA_UPLOADS = str(tmp_path / "uploads")
+
+    app = create_app(ConfigAntiga)
+    with app.app_context():
+        colunas = {c["name"] for c in inspect(db.engine).get_columns("vagas")}
+    assert "imagem_url" in colunas
+    with sqlite3.connect(caminho) as conexao:
+        assert conexao.execute("SELECT titulo, imagem_url FROM vagas").fetchall() == [("Vaga de antes da foto", None)]
+
+
+# ---------- Notícias ----------
+
+
+def test_lista_de_noticias_mostra_as_ocultas_e_busca(cliente):
+    itens = cliente.get("/api/admin/noticias").get_json()["itens"]
+    alvo = itens[0]
+    cliente.post(f"/api/noticias/{alvo['id']}/ocultar", json={"oculta": True})
+
+    dados = cliente.get("/api/admin/noticias?estado=ocultas").get_json()
+    assert [n["id"] for n in dados["itens"]] == [alvo["id"]]
+    assert dados["contagens"] == {"no_site": len(itens) - 1, "ocultas": 1}
+    assert cliente.get(f"/api/admin/noticias/{alvo['id']}").get_json()["oculta"] is True
+
+    palavra = alvo["cientista"].split()[0]
+    achadas = cliente.get(f"/api/admin/noticias?estado=ocultas&q={palavra}").get_json()["itens"]
+    assert alvo["id"] in [n["id"] for n in achadas]
+
+
+def test_trocar_e_remover_a_foto_da_noticia(app, cliente):
+    ficha = cliente.get("/api/admin/noticias").get_json()["itens"][0]
+    campos = ("titulo", "cientista", "instituicao", "resumo", "area", "categoria", "fonte_nome", "link_fonte",
+              "data_publicacao", "cientista_brasileira", "cientista_negra", "destaque")
+    dados = {campo: ficha[campo] for campo in campos}
+
+    trocada = cliente.put(f"/api/noticias/{ficha['id']}", json={**dados, "imagem_url": "/uploads/nova.jpg"})
+    assert trocada.status_code == 200
+    assert trocada.get_json()["imagem_url"] == "/uploads/nova.jpg"
+    assert trocada.get_json()["titulo"] == ficha["titulo"]  # o resto não muda
+
+    cliente.put(f"/api/noticias/{ficha['id']}", json={**dados, "imagem_url": ""})
+    with app.app_context():
+        assert db.session.get(Noticia, ficha["id"]).imagem_url is None
+
+
+def test_opcoes_do_painel_trazem_as_categorias_de_noticia(cliente):
+    opcoes = cliente.get("/api/admin/opcoes").get_json()
+    assert {c["valor"] for c in opcoes["noticias"]["categorias"]} >= {"descoberta", "premio"}
 
 
 # ---------- Moderação ----------

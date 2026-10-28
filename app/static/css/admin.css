@@ -330,6 +330,36 @@
   height: 26px;
 }
 
+.registro__lado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Foto do evento ou da notícia, no formato em que aparece no site. */
+.registro__foto {
+  width: 96px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 3px solid #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgb(42 28 21 / 0.25);
+}
+
+.registro__logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border: 1px solid var(--papel-borda);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.registro--apagado :is(.registro__foto, .registro__logo) {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
 .registro__titulo {
   margin: 0;
   font-size: 1.05rem;
@@ -533,13 +563,212 @@
   display: block;
 }
 
-.imagem-evento img {
-  width: auto;
-  max-width: 220px;
-  max-height: 160px;
-  margin-bottom: 10px;
+/* ---------- Campo de imagem (foto do evento, logo da vaga, foto da notícia) ---------- */
+
+.foto-campo {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px 18px;
+  align-items: center;
+}
+
+.foto-campo--logo {
+  grid-template-columns: 120px minmax(0, 1fr);
+}
+
+.foto-campo__quadro {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 2px dashed var(--papel-borda);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--tinta-suave);
+  text-align: center;
+  cursor: pointer;
+}
+
+.foto-campo--logo .foto-campo__quadro {
+  aspect-ratio: 1;
+  /* Xadrez claro: mostra onde o logo é transparente. */
+  background: repeating-conic-gradient(#f1ebe0 0 25%, #fff 0 50%) 0 0 / 16px 16px;
+}
+
+.foto-campo__quadro:has(img:not([hidden])) {
+  border-style: solid;
+}
+
+.foto-campo__quadro--soltar,
+.campo--erro .foto-campo__quadro {
+  border-color: var(--magenta);
+  background: #fff3f8;
+}
+
+.foto-campo__quadro img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foto-campo--logo .foto-campo__quadro img {
+  object-fit: contain;
+}
+
+.foto-campo__vazio {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  font-weight: 700;
+}
+
+.folha-form .foto-campo__vazio small {
+  margin: 0;
+  font-weight: 400;
+}
+
+.foto-campo__enviando {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(255 253 247 / 0.86);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.foto-campo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.folha-form .foto-campo__escolher {
+  position: relative;
+  display: inline-flex;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* O input de arquivo fica escondido dentro do botão; o foco aparece no botão. */
+.painel-form .foto-campo__escolher input {
+  width: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.foto-campo__escolher:focus-within {
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+.foto-campo__escolher:has(input:disabled) {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.foto-campo .campo__erro {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Recorte da imagem ---------- */
+
+.painel-dialogo--foto {
+  width: min(720px, calc(100vw - 32px));
+}
+
+.recortador {
+  --proporcao: 1.7778;
+  position: relative;
+  width: min(100%, calc(56vh * var(--proporcao)));
+  aspect-ratio: var(--proporcao);
+  margin: 0 auto;
+  overflow: hidden;
   border-radius: 6px;
-  box-shadow: var(--sombra-papel);
+  background: var(--tinta);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.recortador--logo {
+  background: repeating-conic-gradient(#e6ddcc 0 25%, #fff 0 50%) 0 0 / 20px 20px;
+}
+
+.recortador--arrastando {
+  cursor: grabbing;
+}
+
+.recortador:focus-visible {
+  outline: 3px solid var(--magenta);
+  outline-offset: 3px;
+}
+
+.recortador img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  max-height: none;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+/* Linhas dos terços e a borda do que vai aparecer no site. */
+.recortador::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, transparent calc(100% / 3 - 1px), rgb(255 255 255 / 0.5) 0 calc(100% / 3), transparent 0 calc(200% / 3 - 1px), rgb(255 255 255 / 0.5) 0 calc(200% / 3), transparent 0),
+    linear-gradient(to bottom, transparent calc(100% / 3 - 1px), rgb(255 255 255 / 0.5) 0 calc(100% / 3), transparent 0 calc(200% / 3 - 1px), rgb(255 255 255 / 0.5) 0 calc(200% / 3), transparent 0);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.8);
+}
+
+.recortador__teclas {
+  margin: 10px 0 14px;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+/* Na tela de toque a dica de teclado não serve; leitores de tela continuam lendo pela descrição. */
+@media (pointer: coarse) {
+  .recortador__teclas {
+    visibility: hidden;
+    height: 0;
+    margin: 0 0 14px;
+  }
+}
+
+.recortador__zoom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 420px;
+  margin: 0 auto 18px;
+}
+
+.recortador__zoom label {
+  font-weight: 700;
+}
+
+.recortador__zoom input {
+  flex: 1;
+  accent-color: var(--magenta);
+}
+
+.recortador__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 /* Prévia: um pedacinho de cortiça com o cartão como vai ficar no site. */
@@ -575,6 +804,31 @@
   font-weight: 700;
   box-shadow: var(--sombra-papel);
   list-style: none;
+}
+
+.previa__extra {
+  margin-top: 8px;
+  list-style: none;
+}
+
+.previa__nota {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 0 10px;
+  background: rgb(246 234 200 / 0.92);
+  font-family: var(--fonte-mao);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.previa__extra .detalhe__foto {
+  margin: 0;
+}
+
+.previa__extra .detalhe__foto img {
+  display: block;
+  aspect-ratio: 16 / 9;
+  max-height: none;
 }
 
 /* Os selos dos eventos e das vagas têm o mesmo nome de classe; no ingresso valem os dos eventos. */
@@ -857,6 +1111,19 @@
   .registro__acoes {
     grid-column: 1 / -1;
     justify-content: flex-start;
+  }
+
+  .registro__lado .registro__foto {
+    display: none;
+  }
+
+  .foto-campo,
+  .foto-campo--logo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foto-campo--logo .foto-campo__quadro {
+    width: 140px;
   }
 
   .fichario__abas {

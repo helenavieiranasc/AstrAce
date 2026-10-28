@@ -1,10 +1,11 @@
-// Painel da equipe (Pessoa 5): visão geral, eventos, vagas, denúncias e destaques da semana.
-import { ErroApi, EXTENSOES_IMAGEM, api, conferirArquivo, el, enviarArquivo, esc, icone, mensagemDeErro, postJson, preencherSelect, urlSegura, } from "./comum.js";
+// Painel da equipe (Pessoa 5): visão geral, eventos, vagas, notícias, denúncias e destaques da semana.
+import { ErroApi, EXTENSOES_IMAGEM, api, el, enviarArquivo, esc, icone, mensagemDeErro, postJson, preencherSelect, urlSegura, } from "./comum.js";
 // ---------- Elementos ----------
-const ABAS = ["geral", "eventos", "vagas", "moderacao", "destaques"];
+const ABAS = ["geral", "eventos", "vagas", "noticias", "moderacao", "destaques"];
 const avisoEl = el("aviso");
 const listaEventos = el("lista-eventos");
 const listaVagas = el("lista-vagas");
+const listaNoticias = el("lista-noticias");
 const listaDenuncias = el("lista-denuncias");
 const listaDestaques = el("lista-destaques");
 const listaCandidatos = el("lista-candidatos");
@@ -14,13 +15,19 @@ const errosEvento = el("erros-evento");
 const dialogoVaga = el("dialogo-vaga");
 const formVaga = el("form-vaga");
 const errosVaga = el("erros-vaga");
+const dialogoNoticia = el("dialogo-noticia");
+const formNoticia = el("form-noticia");
+const errosNoticia = el("erros-noticia");
 const dialogoQr = el("dialogo-qr");
+const dialogoFoto = el("dialogo-foto");
 let opcoes;
-const filtros = { eventos: "proximos", vagas: "no_site" };
+const filtros = { eventos: "proximos", vagas: "no_site", noticias: "no_site" };
 let eventos = new Map();
 let vagas = new Map();
+let noticias = new Map();
 let eventoEditando = null;
 let vagaEditando = null;
+let noticiaEditando = null;
 let eventoNoQr = null;
 let vitrineCheia = false;
 // ---------- Utilidades ----------
@@ -64,26 +71,38 @@ function debounce(acao, espera = 250) {
     };
 }
 // ---------- Erros nos formulários ----------
-// Campos escondidos apontam o erro para o que a pessoa vê.
-const ALVO_DO_ERRO = { imagem_url: "ev-imagem-arquivo" };
+/** Onde o erro de um campo aparece. Campos escondidos (imagem_url) apontam para o que a pessoa vê. */
+function alvoDoErro(form, nome) {
+    return form.querySelector(`[data-erro-para="${nome}"]`) ?? form.querySelector(`[name="${nome}"]`);
+}
+function desmarcarCampo(campo) {
+    campo.removeAttribute("aria-invalid");
+    const original = campo.dataset.descricao ?? "";
+    if (original)
+        campo.setAttribute("aria-describedby", original);
+    else
+        campo.removeAttribute("aria-describedby");
+}
+/** Tira o erro de um campo só (ex.: a foto, quando a pessoa escolhe outra). */
+function limparErroDe(form, nome) {
+    const p = form.querySelector(`[data-erro-de="${nome}"]`);
+    if (!p)
+        return;
+    p.closest(".campo--erro")?.classList.remove("campo--erro");
+    p.remove();
+    const alvo = alvoDoErro(form, nome);
+    if (alvo)
+        desmarcarCampo(alvo);
+}
 function limparErros(form, resumo) {
     resumo.hidden = true;
     resumo.innerHTML = "";
     form.querySelectorAll("[data-erro-de]").forEach((p) => p.remove());
     form.querySelectorAll(".campo--erro").forEach((c) => c.classList.remove("campo--erro"));
-    form.querySelectorAll("[aria-invalid]").forEach((campo) => {
-        campo.removeAttribute("aria-invalid");
-        const original = campo.dataset.descricao ?? "";
-        if (original)
-            campo.setAttribute("aria-describedby", original);
-        else
-            campo.removeAttribute("aria-describedby");
-    });
+    form.querySelectorAll("[aria-invalid]").forEach(desmarcarCampo);
 }
 function marcarErro(form, nome, mensagem) {
-    const alvo = ALVO_DO_ERRO[nome]
-        ? document.getElementById(ALVO_DO_ERRO[nome])
-        : form.querySelector(`[name="${nome}"]`);
+    const alvo = alvoDoErro(form, nome);
     if (!alvo)
         return null;
     const caixa = alvo.closest(".campo") ?? alvo.parentElement;
@@ -125,7 +144,7 @@ function mostrarErroGeral(form, resumo, erro) {
     resumo.focus();
 }
 // Os links do resumo levam o foco direto para o campo (dentro do <dialog>).
-for (const resumo of [errosEvento, errosVaga]) {
+for (const resumo of [errosEvento, errosVaga, errosNoticia]) {
     resumo.addEventListener("click", (evento) => {
         const link = evento.target.closest("a[href^='#']");
         if (!link)
@@ -142,7 +161,7 @@ function texto(dados, nome) {
 }
 // ---------- Diálogos ----------
 const formsSujos = new WeakSet();
-for (const dialogo of [dialogoEvento, dialogoVaga, dialogoQr]) {
+for (const dialogo of [dialogoEvento, dialogoVaga, dialogoNoticia, dialogoQr, dialogoFoto]) {
     dialogo.querySelectorAll("[data-fechar]").forEach((botao) => botao.addEventListener("click", () => fecharDialogo(dialogo)));
     // Esc: em formulário com mudanças, pergunta antes de jogar fora.
     dialogo.addEventListener("cancel", (evento) => {
@@ -154,7 +173,7 @@ dialogoQr.addEventListener("click", (evento) => {
     if (evento.target === dialogoQr)
         dialogoQr.close();
 });
-for (const form of [formEvento, formVaga]) {
+for (const form of [formEvento, formVaga, formNoticia]) {
     form.addEventListener("input", () => formsSujos.add(form));
 }
 function fecharDialogo(dialogo) {
@@ -165,6 +184,288 @@ function fecharDialogo(dialogo) {
         formsSujos.delete(form);
     dialogo.close();
 }
+// Eventos e notícias mostram a foto larga, cortada em 16:9; a vaga mostra o logo quadrado.
+const RECORTE_FOTO = { proporcao: 16 / 9, largura: 1600, logo: false };
+const RECORTE_LOGO = { proporcao: 1, largura: 800, logo: true };
+// A imagem é reduzida no navegador antes do envio, então dá para escolher a foto grande do celular.
+const MAIOR_ORIGINAL_MB = 40;
+/** Como urlSegura, mas aceita também as ilustrações das notícias de exemplo (/static/...). */
+function urlImagem(url) {
+    if (url?.startsWith("/static/"))
+        return url;
+    return urlSegura(url);
+}
+const recortador = el("foto-recortador");
+const imagemRecorte = el("foto-recorte-imagem");
+const zoomRecorte = el("foto-zoom");
+const recorteAtual = {
+    recorte: RECORTE_FOTO,
+    zoom: 1, // 1 = a imagem cobre o quadro inteiro
+    x: 0, // ponto da imagem (em pixels dela) que fica no centro do quadro
+    y: 0,
+    responder: null,
+};
+function escalaRecorte() {
+    const { width: largura, height: altura } = recortador.getBoundingClientRect();
+    const cobrir = Math.max(largura / imagemRecorte.naturalWidth, altura / imagemRecorte.naturalHeight);
+    return { escala: cobrir * recorteAtual.zoom, largura, altura };
+}
+function desenharRecorte() {
+    const { escala, largura, altura } = escalaRecorte();
+    // O centro só anda até a borda da imagem encostar na borda do quadro.
+    const limitar = (centro, lado, tamanho) => {
+        const a = lado / (2 * escala);
+        const b = tamanho - a;
+        return Math.min(Math.max(centro, Math.min(a, b)), Math.max(a, b));
+    };
+    recorteAtual.x = limitar(recorteAtual.x, largura, imagemRecorte.naturalWidth);
+    recorteAtual.y = limitar(recorteAtual.y, altura, imagemRecorte.naturalHeight);
+    const esquerda = largura / 2 - recorteAtual.x * escala;
+    const topo = altura / 2 - recorteAtual.y * escala;
+    imagemRecorte.style.transform = `translate(${esquerda}px, ${topo}px) scale(${escala})`;
+}
+function moverRecorte(dx, dy) {
+    const { escala } = escalaRecorte();
+    recorteAtual.x -= dx / escala;
+    recorteAtual.y -= dy / escala;
+    desenharRecorte();
+}
+function aproximarRecorte(zoom) {
+    recorteAtual.zoom = Math.min(Math.max(zoom, Number(zoomRecorte.min)), Number(zoomRecorte.max));
+    zoomRecorte.value = String(recorteAtual.zoom);
+    desenharRecorte();
+}
+/** Abre o recorte por cima do formulário. Devolve a imagem recortada, ou null se a pessoa desistir. */
+async function recortarImagem(endereco, recorte) {
+    recorteAtual.recorte = recorte;
+    recortador.style.setProperty("--proporcao", String(recorte.proporcao));
+    recortador.classList.toggle("recortador--logo", recorte.logo);
+    el("foto-titulo").textContent = recorte.logo ? "Ajustar o logo" : "Ajustar a foto";
+    el("foto-dica").textContent = recorte.logo
+        ? "O logo começa inteiro no quadro. Se ele for comprido, aproxime até o símbolo preencher o espaço; a sobra fica transparente."
+        : "Arraste a imagem para escolher a parte que aparece no site. O quadro tem o formato do cartão.";
+    imagemRecorte.src = endereco;
+    await imagemRecorte.decode(); // falha se o navegador não souber abrir o arquivo
+    const { naturalWidth: largura, naturalHeight: altura } = imagemRecorte;
+    if (!largura || !altura)
+        throw new Error("Imagem sem tamanho");
+    imagemRecorte.style.width = `${largura}px`;
+    imagemRecorte.style.height = `${altura}px`;
+    // O logo começa inteiro dentro do quadro; a foto começa cobrindo o quadro.
+    const menor = recorte.logo
+        ? Math.min(largura, recorte.proporcao * altura) / Math.max(largura, recorte.proporcao * altura)
+        : 1;
+    zoomRecorte.min = String(menor);
+    recorteAtual.x = largura / 2;
+    recorteAtual.y = altura / 2;
+    dialogoFoto.showModal();
+    aproximarRecorte(menor);
+    recortador.focus();
+    return new Promise((responder) => (recorteAtual.responder = responder));
+}
+function exportarRecorte() {
+    const { recorte, x, y } = recorteAtual;
+    const { escala, largura } = escalaRecorte();
+    const visivel = largura / escala; // largura do recorte em pixels da imagem original
+    const tela = document.createElement("canvas");
+    tela.width = Math.max(1, Math.round(Math.min(recorte.largura, visivel))); // nunca aumenta a imagem
+    tela.height = Math.max(1, Math.round(tela.width / recorte.proporcao));
+    const k = tela.width / visivel;
+    const contexto = tela.getContext("2d");
+    contexto.imageSmoothingQuality = "high";
+    contexto.drawImage(imagemRecorte, tela.width / 2 - x * k, tela.height / 2 - y * k, imagemRecorte.naturalWidth * k, imagemRecorte.naturalHeight * k);
+    // WebP é leve e guarda transparência; o navegador que não gera WebP entrega PNG.
+    return new Promise((responder) => tela.toBlob(responder, "image/webp", 0.86));
+}
+let arraste = null;
+recortador.addEventListener("pointerdown", (evento) => {
+    arraste = { id: evento.pointerId, x: evento.clientX, y: evento.clientY };
+    recortador.setPointerCapture(evento.pointerId);
+    recortador.classList.add("recortador--arrastando");
+});
+recortador.addEventListener("pointermove", (evento) => {
+    if (!arraste || evento.pointerId !== arraste.id)
+        return;
+    moverRecorte(evento.clientX - arraste.x, evento.clientY - arraste.y);
+    arraste.x = evento.clientX;
+    arraste.y = evento.clientY;
+});
+for (const tipo of ["pointerup", "pointercancel"]) {
+    recortador.addEventListener(tipo, (evento) => {
+        if (arraste?.id !== evento.pointerId)
+            return;
+        arraste = null;
+        recortador.classList.remove("recortador--arrastando");
+    });
+}
+recortador.addEventListener("wheel", (evento) => {
+    evento.preventDefault();
+    aproximarRecorte(recorteAtual.zoom * (evento.deltaY < 0 ? 1.08 : 1 / 1.08));
+}, { passive: false });
+recortador.addEventListener("keydown", (evento) => {
+    const passo = evento.shiftKey ? 40 : 10;
+    const setas = {
+        ArrowLeft: [-passo, 0],
+        ArrowRight: [passo, 0],
+        ArrowUp: [0, -passo],
+        ArrowDown: [0, passo],
+    };
+    if (evento.key in setas)
+        moverRecorte(...setas[evento.key]);
+    else if (evento.key === "+" || evento.key === "=")
+        aproximarRecorte(recorteAtual.zoom + 0.1);
+    else if (evento.key === "-" || evento.key === "_")
+        aproximarRecorte(recorteAtual.zoom - 0.1);
+    else
+        return;
+    evento.preventDefault();
+});
+zoomRecorte.addEventListener("input", () => aproximarRecorte(Number(zoomRecorte.value)));
+window.addEventListener("resize", () => {
+    if (dialogoFoto.open)
+        desenharRecorte();
+});
+el("foto-usar").addEventListener("click", async () => {
+    const imagem = await exportarRecorte();
+    const responder = recorteAtual.responder;
+    recorteAtual.responder = null;
+    dialogoFoto.close();
+    responder?.(imagem);
+});
+dialogoFoto.addEventListener("close", () => {
+    recorteAtual.responder?.(null); // fechou no X, no Cancelar ou no Esc
+    recorteAtual.responder = null;
+    imagemRecorte.removeAttribute("src");
+});
+function ligarCampoFoto(form, prefixo, recorte) {
+    const oculto = campo(form, "imagem_url");
+    const quadro = el(`${prefixo}-foto-quadro`);
+    const previa = el(`${prefixo}-foto-previa`);
+    const entrada = el(`${prefixo}-foto-arquivo`);
+    const ajustar = el(`${prefixo}-foto-ajustar`);
+    const remover = el(`${prefixo}-foto-remover`);
+    const enviando = el(`${prefixo}-foto-enviando`);
+    let original = null; // a imagem escolhida, inteira, para dar para recortar de novo
+    let envio = Promise.resolve();
+    function mostrar(url) {
+        const segura = urlImagem(url);
+        oculto.value = segura ?? "";
+        previa.hidden = !segura;
+        if (segura)
+            previa.src = segura;
+        else
+            previa.removeAttribute("src");
+        el(`${prefixo}-foto-vazio`).hidden = Boolean(segura);
+        el(`${prefixo}-foto-escolher`).textContent = segura ? "Trocar imagem" : "Escolher imagem";
+        // Imagem de outro site não pode ser recortada (o navegador bloqueia a leitura).
+        ajustar.hidden = !segura || !(original || segura.startsWith("/"));
+        remover.hidden = !segura;
+    }
+    function avisarMudanca() {
+        // Atualiza a prévia e marca o formulário como alterado.
+        form.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    async function recortarEEnviar(endereco) {
+        limparErroDe(form, "imagem_url");
+        let imagem;
+        try {
+            imagem = await recortarImagem(endereco, recorte);
+        }
+        catch {
+            marcarErro(form, "imagem_url", "Não deu para abrir essa imagem. Tente outro arquivo (jpg, png ou webp).");
+            return;
+        }
+        if (!imagem)
+            return;
+        enviando.hidden = false;
+        entrada.disabled = ajustar.disabled = remover.disabled = true;
+        try {
+            const extensao = imagem.type === "image/webp" ? "webp" : imagem.type === "image/jpeg" ? "jpg" : "png";
+            const enviado = await enviarArquivo(new File([imagem], `imagem.${extensao}`, { type: imagem.type }), "capa");
+            mostrar(enviado.url);
+            avisarMudanca();
+        }
+        catch (erro) {
+            marcarErro(form, "imagem_url", mensagemDeErro(erro));
+        }
+        finally {
+            enviando.hidden = true;
+            entrada.disabled = ajustar.disabled = remover.disabled = false;
+        }
+    }
+    function escolher(arquivo) {
+        limparErroDe(form, "imagem_url");
+        const nome = arquivo.name.toLowerCase();
+        if (!arquivo.type.startsWith("image/") && !EXTENSOES_IMAGEM.some((ext) => nome.endsWith(ext))) {
+            marcarErro(form, "imagem_url", "Escolha uma imagem (jpg, png ou webp).");
+            return;
+        }
+        if (arquivo.size > MAIOR_ORIGINAL_MB * 1024 * 1024) {
+            marcarErro(form, "imagem_url", `A imagem passa de ${MAIOR_ORIGINAL_MB} MB. Escolha uma menor.`);
+            return;
+        }
+        if (original)
+            URL.revokeObjectURL(original);
+        original = URL.createObjectURL(arquivo);
+        envio = recortarEEnviar(original);
+    }
+    entrada.addEventListener("change", () => {
+        const arquivo = entrada.files?.[0];
+        entrada.value = "";
+        if (arquivo)
+            escolher(arquivo);
+    });
+    quadro.addEventListener("click", () => {
+        if (!entrada.disabled)
+            entrada.click();
+    });
+    quadro.addEventListener("dragover", (evento) => {
+        evento.preventDefault();
+        quadro.classList.add("foto-campo__quadro--soltar");
+    });
+    quadro.addEventListener("dragleave", () => quadro.classList.remove("foto-campo__quadro--soltar"));
+    quadro.addEventListener("drop", (evento) => {
+        evento.preventDefault();
+        quadro.classList.remove("foto-campo__quadro--soltar");
+        const arquivo = evento.dataTransfer?.files[0];
+        if (arquivo && !entrada.disabled)
+            escolher(arquivo);
+    });
+    ajustar.addEventListener("click", () => {
+        const atual = original ?? oculto.value;
+        if (atual)
+            envio = recortarEEnviar(atual);
+    });
+    remover.addEventListener("click", () => {
+        mostrar(null);
+        avisarMudanca();
+        entrada.focus();
+    });
+    return {
+        iniciar(url) {
+            if (original)
+                URL.revokeObjectURL(original);
+            original = null;
+            limparErroDe(form, "imagem_url");
+            mostrar(url);
+        },
+        pronto: () => envio,
+    };
+}
+/** Atalho "Trocar foto" das listas: com o formulário aberto, vai ao campo da imagem e abre o seletor de arquivo. */
+function irParaFoto(prefixo) {
+    const entrada = el(`${prefixo}-foto-arquivo`);
+    el(`${prefixo}-foto-quadro`).scrollIntoView({ block: "center" });
+    entrada.focus();
+    entrada.click();
+}
+function botaoFoto(tem, descricao, logo = false) {
+    const nome = logo ? "logo" : "foto";
+    return `<button class="botao-mini" type="button" data-acao="foto" aria-describedby="${descricao}">${tem ? "Trocar" : "Pôr"} ${nome}</button>`;
+}
+const fotoEvento = ligarCampoFoto(formEvento, "ev", RECORTE_FOTO);
+const fotoVaga = ligarCampoFoto(formVaga, "vg", RECORTE_LOGO);
+const fotoNoticia = ligarCampoFoto(formNoticia, "nt", RECORTE_FOTO);
 // ---------- Abas ----------
 function abaValida(valor) {
     return ABAS.includes(valor);
@@ -192,6 +493,8 @@ function carregarAba(aba) {
             return carregarEventos();
         case "vagas":
             return carregarVagas();
+        case "noticias":
+            return carregarNoticias();
         case "moderacao":
             return carregarDenuncias();
         case "destaques":
@@ -288,9 +591,13 @@ function htmlRegistroEvento(e) {
     if (e.gratuito)
         etiquetas.push(etiqueta("neutra", "Gratuito"));
     const descricao = `reg-evento-${e.id}`;
+    const foto = urlImagem(e.imagem_url);
     return `
     <li class="registro${e.oculto ? " registro--apagado" : ""}" data-id="${e.id}">
-      <div class="registro__data" aria-hidden="true"><span>${esc(e.dia)}</span>${esc(e.mes)}</div>
+      <div class="registro__lado" aria-hidden="true">
+        <div class="registro__data"><span>${esc(e.dia)}</span>${esc(e.mes)}</div>
+        ${foto ? `<img class="registro__foto" src="${esc(foto)}" alt="" loading="lazy">` : ""}
+      </div>
       <div class="registro__corpo">
         <h3 class="registro__titulo" id="${descricao}">${esc(e.titulo)}</h3>
         <p class="registro__meta">${esc([e.tipo_rotulo, e.data_rotulo, lugarEvento(e)].join(" · "))}</p>
@@ -298,6 +605,7 @@ function htmlRegistroEvento(e) {
       </div>
       <div class="registro__acoes">
         <button class="botao-mini" type="button" data-acao="editar" aria-describedby="${descricao}">Editar</button>
+        ${botaoFoto(Boolean(foto), descricao)}
         ${e.vale_carimbo ? `<button class="botao-mini botao-mini--magenta" type="button" data-acao="qr" aria-describedby="${descricao}">QR e cartaz</button>` : ""}
         <button class="botao-mini" type="button" data-acao="duplicar" aria-describedby="${descricao}">Duplicar</button>
         <button class="botao-mini" type="button" data-acao="${e.oculto ? "mostrar" : "ocultar"}" aria-describedby="${descricao}">
@@ -334,6 +642,9 @@ listaEventos.addEventListener("click", async (evento) => {
     switch (botao.dataset.acao) {
         case "editar":
             return abrirFormEvento(item);
+        case "foto":
+            abrirFormEvento(item);
+            return irParaFoto("ev");
         case "duplicar":
             return abrirFormEvento(item, true);
         case "qr":
@@ -377,13 +688,12 @@ function abrirFormEvento(evento, duplicar = false) {
         campo(formEvento, "area").value = evento.area ?? "";
         campo(formEvento, "gratuito").checked = evento.gratuito;
         campo(formEvento, "vale_carimbo").checked = evento.vale_carimbo;
-        definirImagemEvento(evento.imagem_url);
     }
     else {
         campo(formEvento, "modalidade").value = "presencial";
         campo(formEvento, "publico_alvo").value = "todas";
-        definirImagemEvento(null);
     }
+    fotoEvento.iniciar(evento?.imagem_url ?? null);
     atualizarModalidade();
     void carregarCidades(campo(formEvento, "uf").value);
     atualizarPreviaEvento();
@@ -430,6 +740,7 @@ formEvento.addEventListener("submit", async (evento) => {
     const botao = formEvento.querySelector("button[type=submit]");
     botao.disabled = true;
     try {
+        await fotoEvento.pronto();
         const dados = dadosEvento();
         const salvo = eventoEditando
             ? await putJson(`/api/admin/eventos/${eventoEditando}`, dados)
@@ -454,49 +765,6 @@ formEvento.addEventListener("submit", async (evento) => {
     finally {
         botao.disabled = false;
     }
-});
-// Imagem do evento: mesmo envio dos projetos (POST /api/uploads, finalidade "capa").
-function definirImagemEvento(url) {
-    const segura = urlSegura(url);
-    campo(formEvento, "imagem_url").value = segura ?? "";
-    const previa = el("ev-imagem-previa");
-    previa.hidden = !segura;
-    if (segura)
-        previa.src = segura;
-    else
-        previa.removeAttribute("src");
-    el("ev-imagem-remover").hidden = !segura;
-}
-el("ev-imagem-arquivo").addEventListener("change", async (evento) => {
-    const entrada = evento.target;
-    const arquivo = entrada.files?.[0];
-    if (!arquivo)
-        return;
-    limparErros(formEvento, errosEvento);
-    const problema = conferirArquivo(arquivo, EXTENSOES_IMAGEM);
-    if (problema) {
-        marcarErro(formEvento, "imagem_url", problema);
-        entrada.value = "";
-        return;
-    }
-    entrada.disabled = true;
-    try {
-        const enviado = await enviarArquivo(arquivo, "capa");
-        definirImagemEvento(enviado.url);
-        formsSujos.add(formEvento);
-    }
-    catch (erro) {
-        marcarErro(formEvento, "imagem_url", mensagemDeErro(erro));
-    }
-    finally {
-        entrada.disabled = false;
-        entrada.value = "";
-    }
-});
-el("ev-imagem-remover").addEventListener("click", () => {
-    definirImagemEvento(null);
-    formsSujos.add(formEvento);
-    el("ev-imagem-arquivo").focus();
 });
 // Cidades do IBGE como sugestão (o campo continua aceitando texto livre).
 const municipiosPorUf = new Map();
@@ -593,6 +861,18 @@ function atualizarPreviaEvento() {
         </div>
         ${d.vale_carimbo ? '<span class="carimbo-selo"><span>vale</span><strong>carimbo</strong></span>' : ""}
       </article>
+    </li>
+    ${htmlPreviaFoto(d.imagem_url, "A foto abre a página do evento:")}`;
+}
+/** A agenda não mostra foto no ingresso; a prévia mostra como ela fica no alto da página do evento. */
+function htmlPreviaFoto(url, rotulo) {
+    const foto = urlImagem(url);
+    if (!foto)
+        return "";
+    return `
+    <li class="previa__extra">
+      <p class="previa__nota">${esc(rotulo)}</p>
+      <figure class="detalhe__foto"><img src="${esc(foto)}" alt=""></figure>
     </li>`;
 }
 // ---------- QR do evento ----------
@@ -648,9 +928,10 @@ function htmlRegistroVaga(v) {
     if (v.reconferir)
         etiquetas.push(etiqueta("alerta", `Conferida há ${v.dias_desde_coleta} dias`));
     const descricao = `reg-vaga-${v.id}`;
+    const logo = urlImagem(v.imagem_url);
     return `
     <li class="registro${v.oculta ? " registro--apagado" : ""}" data-id="${v.id}">
-      <div class="registro__icone" aria-hidden="true">${icone(v.icone)}</div>
+      ${logo ? `<img class="registro__logo" src="${esc(logo)}" alt="" loading="lazy">` : `<div class="registro__icone" aria-hidden="true">${icone(v.icone)}</div>`}
       <div class="registro__corpo">
         <h3 class="registro__titulo" id="${descricao}">${esc(v.titulo)}</h3>
         <p class="registro__meta">${esc([v.organizacao, v.tipo_rotulo, v.cidade || "Nacional / online", v.prazo_rotulo].join(" · "))}</p>
@@ -658,6 +939,7 @@ function htmlRegistroVaga(v) {
       </div>
       <div class="registro__acoes">
         <button class="botao-mini" type="button" data-acao="editar" aria-describedby="${descricao}">Editar</button>
+        ${botaoFoto(Boolean(logo), descricao, true)}
         ${v.reconferir ? `<button class="botao-mini botao-mini--magenta" type="button" data-acao="conferir" aria-describedby="${descricao}">Conferi hoje</button>` : ""}
         <a class="botao-mini" href="${esc(urlSegura(v.link_original) ?? "#")}" target="_blank" rel="noopener" aria-describedby="${descricao}">Abrir edital</a>
         <button class="botao-mini" type="button" data-acao="${v.oculta ? "mostrar" : "ocultar"}" aria-describedby="${descricao}">
@@ -693,6 +975,10 @@ listaVagas.addEventListener("click", async (evento) => {
         return;
     if (botao.dataset.acao === "editar")
         return abrirFormVaga(item);
+    if (botao.dataset.acao === "foto") {
+        abrirFormVaga(item);
+        return irParaFoto("vg");
+    }
     botao.disabled = true;
     try {
         if (botao.dataset.acao === "conferir") {
@@ -742,6 +1028,7 @@ function abrirFormVaga(vaga) {
             campo(formVaga, nome).checked = Boolean(vaga.marcadas[nome]);
         campo(formVaga, "fonte_afirmacao").value = vaga.fonte_afirmacao;
     }
+    fotoVaga.iniciar(vaga?.imagem_url ?? null);
     atualizarFonte();
     atualizarPreviaVaga();
     formsSujos.delete(formVaga);
@@ -751,7 +1038,7 @@ function abrirFormVaga(vaga) {
 function dadosVaga() {
     const dados = new FormData(formVaga);
     const corpo = {};
-    for (const nome of ["titulo", "organizacao", "tipo", "area", "descricao", "modalidade", "cidade", "prazo", "link_original", "data_coleta", "fonte_afirmacao"]) {
+    for (const nome of ["titulo", "organizacao", "tipo", "area", "descricao", "modalidade", "cidade", "prazo", "link_original", "data_coleta", "fonte_afirmacao", "imagem_url"]) {
         corpo[nome] = texto(dados, nome);
     }
     for (const nome of AFIRMATIVAS)
@@ -783,6 +1070,7 @@ function atualizarPreviaVaga() {
             classePrazo += " cartao__prazo--encerrado";
     }
     const descricao = d.descricao.length <= 150 ? d.descricao : `${d.descricao.slice(0, 147).replace(/\s+\S*$/, "")}…`;
+    const logo = urlImagem(d.imagem_url);
     el("previa-vaga").innerHTML = `
     <li>
       <article class="cartao cartao--ficha cartao--vaga" style="--rot: 0.8deg; --cor-ficha: var(--pin-violeta)">
@@ -793,7 +1081,9 @@ function atualizarPreviaVaga() {
             <span class="${classePrazo}">${esc(prazo)}</span>
           </div>
           <h3 class="cartao__titulo">${esc(d.titulo || "Título da vaga")}</h3>
-          <p class="cartao__organizacao">${esc(d.organizacao || "Instituição ou empresa")}</p>
+          <p class="cartao__organizacao${logo ? " cartao__organizacao--logo" : ""}">
+            ${logo ? `<img class="cartao__logo" src="${esc(logo)}" alt="">` : ""}${esc(d.organizacao || "Instituição ou empresa")}
+          </p>
           <p class="cartao__area">${esc(area)}</p>
           ${selos.length ? `<ul class="selos">${selos.map((s) => `<li class="selo selo--${s.valor}">${esc(s.rotulo)}</li>`).join("")}</ul>` : ""}
           <p class="cartao__resumo">${esc(descricao || "A descrição curta aparece aqui.")}</p>
@@ -817,6 +1107,7 @@ formVaga.addEventListener("submit", async (evento) => {
     const botao = formVaga.querySelector("button[type=submit]");
     botao.disabled = true;
     try {
+        await fotoVaga.pronto();
         const dados = dadosVaga();
         const salva = vagaEditando
             ? await putJson(`/api/vagas/${vagaEditando}`, dados)
@@ -834,6 +1125,185 @@ formVaga.addEventListener("submit", async (evento) => {
             mostrarErros(formVaga, errosVaga, erro.erros);
         else
             mostrarErroGeral(formVaga, errosVaga, erro);
+    }
+    finally {
+        botao.disabled = false;
+    }
+});
+// ---------- Notícias: lista ----------
+function htmlRegistroNoticia(n) {
+    const foto = urlImagem(n.imagem_url);
+    const etiquetas = [];
+    if (n.oculta)
+        etiquetas.push(etiqueta("oculto", "Oculta"));
+    if (n.destaque)
+        etiquetas.push(etiqueta("carimbo", "Destaque"));
+    if (n.cientista_brasileira)
+        etiquetas.push(etiqueta("neutra", "Cientista brasileira"));
+    if (n.cientista_negra)
+        etiquetas.push(etiqueta("selo-negras", "Mulher negra na ciência"));
+    if (!foto)
+        etiquetas.push(etiqueta("alerta", "Sem foto"));
+    const descricao = `reg-noticia-${n.id}`;
+    return `
+    <li class="registro${n.oculta ? " registro--apagado" : ""}" data-id="${n.id}">
+      ${foto ? `<img class="registro__foto" src="${esc(foto)}" alt="" loading="lazy">` : `<div class="registro__icone" aria-hidden="true">${icone(n.icone)}</div>`}
+      <div class="registro__corpo">
+        <h3 class="registro__titulo" id="${descricao}">${esc(n.titulo)}</h3>
+        <p class="registro__meta">${esc([n.cientista, n.categoria_rotulo, n.data_publicacao_rotulo, n.fonte_nome].filter(Boolean).join(" · "))}</p>
+        <ul class="etiquetas-admin">${etiquetas.join("")}</ul>
+      </div>
+      <div class="registro__acoes">
+        <button class="botao-mini" type="button" data-acao="editar" aria-describedby="${descricao}">Editar</button>
+        ${botaoFoto(Boolean(foto), descricao)}
+        <a class="botao-mini" href="${esc(urlSegura(n.link_fonte) ?? "#")}" target="_blank" rel="noopener" aria-describedby="${descricao}">Abrir fonte</a>
+        <button class="botao-mini" type="button" data-acao="${n.oculta ? "mostrar" : "ocultar"}" aria-describedby="${descricao}">
+          ${n.oculta ? "Mostrar no site" : "Ocultar"}
+        </button>
+      </div>
+    </li>`;
+}
+async function carregarNoticias(focarId = null) {
+    listaNoticias.setAttribute("aria-busy", "true");
+    const parametros = new URLSearchParams({ estado: filtros.noticias, q: el("busca-noticias").value.trim() });
+    try {
+        const dados = await api(`/api/admin/noticias?${parametros}`);
+        noticias = new Map(dados.itens.map((n) => [n.id, n]));
+        mostrarContagens("noticias", dados.contagens);
+        listaNoticias.innerHTML = dados.itens.length
+            ? dados.itens.map(htmlRegistroNoticia).join("")
+            : htmlEstado("Nenhuma notícia aqui", filtros.noticias === "no_site" ? "Publique a primeira em “Nova notícia”." : "Troque o filtro ou a busca.");
+        focarRegistro(listaNoticias, focarId);
+    }
+    catch (erro) {
+        listaNoticias.innerHTML = htmlErroLista(erro);
+    }
+    finally {
+        listaNoticias.removeAttribute("aria-busy");
+    }
+}
+listaNoticias.addEventListener("click", async (evento) => {
+    const botao = evento.target.closest("button[data-acao]");
+    const id = Number(botao?.closest("[data-id]")?.dataset.id);
+    const item = noticias.get(id);
+    if (!botao || !item)
+        return;
+    if (botao.dataset.acao === "editar")
+        return abrirFormNoticia(item);
+    if (botao.dataset.acao === "foto") {
+        abrirFormNoticia(item);
+        return irParaFoto("nt");
+    }
+    const ocultar = botao.dataset.acao === "ocultar";
+    botao.disabled = true;
+    try {
+        await postJson(`/api/noticias/${id}/ocultar`, { oculta: ocultar });
+        avisar(ocultar ? `“${item.titulo}” saiu do site.` : `“${item.titulo}” voltou para o site.`);
+        await carregarNoticias(id);
+    }
+    catch (erro) {
+        avisar(mensagemDeErro(erro));
+        botao.disabled = false;
+    }
+});
+// ---------- Notícias: formulário (grava pelas rotas /api/noticias) ----------
+function abrirFormNoticia(noticia) {
+    formNoticia.reset();
+    limparErros(formNoticia, errosNoticia);
+    noticiaEditando = noticia?.id ?? null;
+    el("titulo-form-noticia").textContent = noticia ? "Editar notícia" : "Nova notícia";
+    campo(formNoticia, "data_publicacao").value = noticia?.data_publicacao ?? hojeIso();
+    if (noticia) {
+        campo(formNoticia, "titulo").value = noticia.titulo;
+        campo(formNoticia, "cientista").value = noticia.cientista;
+        campo(formNoticia, "instituicao").value = noticia.instituicao ?? "";
+        campo(formNoticia, "resumo").value = noticia.resumo;
+        campo(formNoticia, "categoria").value = noticia.categoria;
+        campo(formNoticia, "area").value = noticia.area;
+        campo(formNoticia, "fonte_nome").value = noticia.fonte_nome;
+        campo(formNoticia, "link_fonte").value = noticia.link_fonte;
+        campo(formNoticia, "cientista_brasileira").checked = noticia.cientista_brasileira;
+        campo(formNoticia, "cientista_negra").checked = noticia.cientista_negra;
+        campo(formNoticia, "destaque").checked = noticia.destaque;
+    }
+    fotoNoticia.iniciar(noticia?.imagem_url ?? null);
+    atualizarPreviaNoticia();
+    formsSujos.delete(formNoticia);
+    dialogoNoticia.showModal();
+    campo(formNoticia, "titulo").focus();
+}
+function dadosNoticia() {
+    const dados = new FormData(formNoticia);
+    const corpo = {};
+    for (const nome of ["titulo", "cientista", "instituicao", "resumo", "categoria", "area", "data_publicacao", "fonte_nome", "link_fonte", "imagem_url"]) {
+        corpo[nome] = texto(dados, nome);
+    }
+    for (const nome of ["cientista_brasileira", "cientista_negra", "destaque"])
+        corpo[nome] = dados.has(nome);
+    return corpo;
+}
+function atualizarPreviaNoticia() {
+    const d = dadosNoticia();
+    const categoria = opcoes.noticias.categorias.find((c) => c.valor === d.categoria);
+    const area = opcoes.areas.find((a) => a.valor === d.area)?.rotulo ?? "Área";
+    const [ano, mes, dia] = d.data_publicacao.split("-");
+    const foto = urlImagem(d.imagem_url);
+    // Mesmo corte do servidor (noticias/servico.py): 170 letras no cartão.
+    const resumo = d.resumo.length <= 170 ? d.resumo : `${d.resumo.slice(0, 167).replace(/\s+\S*$/, "")}…`;
+    const selos = [];
+    if (d.cientista_brasileira)
+        selos.push('<li class="selo selo--brasileira">Cientista brasileira</li>');
+    if (d.cientista_negra)
+        selos.push('<li class="selo selo--negras">Mulher negra na ciência</li>');
+    el("previa-noticia").innerHTML = `
+    <li>
+      <article class="cartao cartao--recorte" style="--rot: -0.7deg; --rot-fita: 1.2deg; --cor-ficha: var(--pin-azul)">
+        <span class="pin" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
+        <div>
+          ${foto ? `<div class="recorte__foto"><img src="${esc(foto)}" alt=""></div>` : ""}
+          <div class="recorte__topo">
+            <span class="recorte__categoria">${icone(categoria?.icone ?? "ic")}${esc(categoria?.rotulo ?? "Categoria")}</span>
+            <span>${dia ? esc(`${dia}/${mes}/${ano}`) : "Data"}</span>
+          </div>
+          <h3 class="cartao__titulo">${esc(d.titulo || "Manchete da notícia")}</h3>
+          <p class="recorte__protagonista">${esc(d.cientista || "Cientista ou equipe")}</p>
+          ${d.instituicao ? `<p class="recorte__instituicao">${esc(d.instituicao)}</p>` : ""}
+          ${selos.length ? `<ul class="selos">${selos.join("")}</ul>` : ""}
+          <p class="cartao__resumo">${esc(resumo || "O começo do resumo aparece aqui.")}</p>
+        </div>
+        <div class="recorte__rodape">
+          <span class="recorte__area">${esc(area)}</span>
+          <span>Fonte: ${esc(d.fonte_nome || "veículo")}</span>
+        </div>
+      </article>
+    </li>
+    ${foto ? "" : '<li class="previa__aviso">Sem foto, o recorte aparece só com o texto.</li>'}`;
+}
+formNoticia.addEventListener("input", atualizarPreviaNoticia);
+formNoticia.addEventListener("change", atualizarPreviaNoticia);
+formNoticia.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const botao = formNoticia.querySelector("button[type=submit]");
+    botao.disabled = true;
+    try {
+        await fotoNoticia.pronto();
+        const dados = dadosNoticia();
+        const salva = noticiaEditando
+            ? await putJson(`/api/noticias/${noticiaEditando}`, dados)
+            : await postJson("/api/noticias", dados);
+        const nova = noticiaEditando === null;
+        formsSujos.delete(formNoticia);
+        dialogoNoticia.close();
+        avisar(nova ? `“${salva.titulo}” entrou em Notícias.` : "Notícia atualizada.");
+        if (nova)
+            marcarSegmento("noticias", "no_site");
+        await carregarNoticias(salva.id);
+    }
+    catch (erro) {
+        if (erro instanceof ErroApi && Object.keys(erro.erros).length)
+            mostrarErros(formNoticia, errosNoticia, erro.erros);
+        else
+            mostrarErroGeral(formNoticia, errosNoticia, erro);
     }
     finally {
         botao.disabled = false;
@@ -1012,14 +1482,16 @@ function ligarFiltros() {
             if (!botao)
                 return;
             marcarSegmento(lista, botao.dataset.estado ?? "");
-            void (lista === "eventos" ? carregarEventos() : carregarVagas());
+            void carregarAba(lista);
         });
     });
     el("busca-eventos").addEventListener("input", debounce(() => void carregarEventos()));
     el("busca-vagas").addEventListener("input", debounce(() => void carregarVagas()));
+    el("busca-noticias").addEventListener("input", debounce(() => void carregarNoticias()));
     el("busca-projetos").addEventListener("input", debounce(() => void carregarCandidatos()));
     el("novo-evento").addEventListener("click", () => abrirFormEvento());
     el("nova-vaga").addEventListener("click", () => abrirFormVaga());
+    el("nova-noticia").addEventListener("click", () => abrirFormNoticia());
 }
 function preencherFormularios() {
     preencherSelect(el("ev-tipo"), opcoes.eventos.tipos);
@@ -1036,6 +1508,8 @@ function preencherFormularios() {
     preencherSelect(el("vg-tipo"), opcoes.vagas.tipos);
     preencherSelect(el("vg-area"), opcoes.areas);
     preencherSelect(el("vg-modalidade"), opcoes.vagas.modalidades);
+    preencherSelect(el("nt-categoria"), opcoes.noticias.categorias);
+    preencherSelect(el("nt-area"), opcoes.areas);
 }
 async function iniciar() {
     try {

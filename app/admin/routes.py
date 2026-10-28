@@ -12,6 +12,8 @@ from ..extensoes import db
 from ..mural import servico as servico_mural
 from ..mural.models import Denuncia, Projeto, semana_atual
 from ..mural.tipos import MOTIVOS_DENUNCIA
+from ..noticias import servico as servico_noticias
+from ..noticias.models import Noticia
 from ..servicos import qr
 from ..usuarias.models import Usuaria
 from ..vagas import servico as servico_vagas
@@ -102,6 +104,7 @@ def api_opcoes():
                 "tipos": servico_vagas.TIPOS_VAGA,
                 "modalidades": servico_vagas.MODALIDADES_VAGA,
             },
+            "noticias": {"categorias": servico_noticias.CATEGORIAS_NOTICIA},
             "areas": catalogos.AREAS,
             "estados": catalogos.ESTADOS,
             "limite_destaques": LIMITE_DESTAQUES,
@@ -149,6 +152,11 @@ def api_resumo():
         pendencias.append({"aba": "vagas", "filtro": "encerradas", "texto": _plural(vagas_encerradas, "vaga com prazo encerrado continua", "vagas com prazo encerrado continuam") + " no site."})
     if vagas_reconferir:
         pendencias.append({"aba": "vagas", "texto": _plural(vagas_reconferir, "vaga foi conferida", "vagas foram conferidas") + f" há mais de {DIAS_PARA_RECONFERIR} dias."})
+    noticias_sem_foto = Noticia.query.filter(
+        Noticia.oculta.is_(False), or_(Noticia.imagem_url.is_(None), Noticia.imagem_url == "")
+    ).count()
+    if noticias_sem_foto:
+        pendencias.append({"aba": "noticias", "texto": _plural(noticias_sem_foto, "notícia está", "notícias estão") + " sem foto."})
     if destaques < LIMITE_DESTAQUES:
         pendencias.append({"aba": "destaques", "texto": f"A vitrine desta semana tem {destaques} de {LIMITE_DESTAQUES} destaques."})
 
@@ -160,6 +168,7 @@ def api_resumo():
                 {"rotulo": "eventos na agenda", "valor": proximos.count()},
                 {"rotulo": "eventos que dão carimbo", "valor": proximos.filter(Evento.token_qr.isnot(None)).count()},
                 {"rotulo": "vagas abertas", "valor": vagas_abertas},
+                {"rotulo": "notícias no site", "valor": Noticia.query.filter(Noticia.oculta.is_(False)).count()},
             ],
             "pendencias": pendencias,
         }
@@ -324,6 +333,43 @@ def api_conferir_vaga(vaga_id):
     vaga.data_coleta = date.today()
     db.session.commit()
     return jsonify(_ficha_vaga(vaga, date.today()))
+
+
+# ---------- Notícias (a gravação usa as rotas /api/noticias que já existem) ----------
+
+
+def _ficha_noticia(noticia):
+    dados = servico_noticias.detalhe(noticia)
+    dados["oculta"] = noticia.oculta
+    return dados
+
+
+@bp.get("/api/admin/noticias")
+@api_admin
+def api_noticias():
+    estados = {
+        "no_site": Noticia.query.filter(Noticia.oculta.is_(False)),
+        "ocultas": Noticia.query.filter(Noticia.oculta.is_(True)),
+    }
+    busca = _busca((Noticia.titulo, Noticia.cientista, Noticia.instituicao, Noticia.fonte_nome))
+    if busca is not None:
+        estados = {chave: q.filter(busca) for chave, q in estados.items()}
+
+    estado = request.args.get("estado", "no_site")
+    consulta = estados.get(estado, estados["no_site"])
+    itens = consulta.order_by(Noticia.data_publicacao.desc(), Noticia.id.desc()).limit(LIMITE_LISTA)
+    return jsonify(
+        {
+            "itens": [_ficha_noticia(n) for n in itens],
+            "contagens": {chave: q.count() for chave, q in estados.items()},
+        }
+    )
+
+
+@bp.get("/api/admin/noticias/<int:noticia_id>")
+@api_admin
+def api_noticia(noticia_id):
+    return jsonify(_ficha_noticia(db.get_or_404(Noticia, noticia_id)))
 
 
 # ---------- Moderação de denúncias ----------
