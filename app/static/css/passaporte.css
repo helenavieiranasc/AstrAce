@@ -303,3 +303,38 @@
     padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
+
+/* ---------- Check-in pelo QR do evento ---------- */
+
+.checkin {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+}
+
+.checkin__nota {
+  width: min(100%, 34rem);
+  transform: rotate(-1.5deg);
+}
+
+.checkin__evento {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.checkin__nota h1 {
+  margin: 0 0 12px;
+  font-family: var(--fonte-mao);
+  font-size: clamp(2.1rem, 7vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.checkin__nota p {
+  margin: 0 0 12px;
+}
+
+.checkin__acoes {
+  margin-top: 18px;
+}

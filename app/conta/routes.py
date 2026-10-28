@@ -18,6 +18,10 @@ ERROS_LOGIN = {
     "email": "Sua conta Google precisa ter o e-mail confirmado para entrar.",
 }
 
+# Token do QR que a usuária escaneou antes de entrar: depois do login (e do cadastro), a página
+# inicial leva de volta ao check-in.
+CHECKIN_PENDENTE = "checkin_pendente"
+
 
 def _erro(mensagem, status, **extra):
     return jsonify({"erro": mensagem, **extra}), status
@@ -48,6 +52,9 @@ def landing():
     if usuaria:
         if not _cadastro_completo(usuaria):
             return redirect(url_for("conta.pagina_cadastro"))
+        token = session.pop(CHECKIN_PENDENTE, None)
+        if token:
+            return redirect(url_for("passaporte.pagina_checkin", token=token))
         return render_template("inicio.html", nome=usuaria.nome_publico)
     codigo = request.args.get("erro")
     return render_template(
@@ -90,8 +97,11 @@ def google_retorno():
     from ..passaporte.servico import conceder_boas_vindas
 
     conceder_boas_vindas(usuaria)  # o carimbo de boas-vindas do passaporte (só na primeira vez)
+    checkin_pendente = session.get(CHECKIN_PENDENTE)
     session.clear()
     session["usuaria_id"] = usuaria.id
+    if checkin_pendente:
+        session[CHECKIN_PENDENTE] = checkin_pendente
     session.permanent = True
     return redirect(_destino(usuaria))
 
