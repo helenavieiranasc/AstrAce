@@ -6,6 +6,7 @@ from sqlalchemy import or_
 
 from .. import catalogos
 from .models import Noticia
+from .seed import popular_noticias
 
 CATEGORIAS_NOTICIA = [
     {"valor": "descoberta", "rotulo": "Descoberta científica", "icone": "ic"},
@@ -30,6 +31,12 @@ FILTROS = (
 )
 
 
+def _garantir_noticias():
+    """Garante que o banco tenha a curadoria inicial mesmo se ninguém rodou seed-noticias."""
+    if Noticia.query.count() == 0 or Noticia.query.filter(Noticia.imagem_url.is_(None)).first():
+        popular_noticias(limpar=False)
+
+
 def _ativo(valor):
     if isinstance(valor, bool):
         return valor
@@ -43,6 +50,7 @@ def _formatar_data(d):
 
 
 def consultar(filtros, pagina=1, por_pagina=12):
+    _garantir_noticias()
     q = Noticia.query.filter(Noticia.oculta.is_(False))
 
     for campo in ("area", "categoria"):
@@ -81,6 +89,7 @@ def consultar(filtros, pagina=1, por_pagina=12):
 
 
 def destaques(limite=3):
+    _garantir_noticias()
     return (
         Noticia.query.filter(
             Noticia.oculta.is_(False),

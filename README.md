@@ -48,20 +48,38 @@ Para uma página nova: estenda `base.html`, use as variáveis de cor de `base.cs
 
 ## Mural (Pessoa 1)
 
-Páginas: `/mural` e `/mural/novo`.
+Páginas: `/mural`, `/mural/novo` e `/mural/mapa` (mapa "Onde elas brilham").
 
 | Rota | O que faz |
 | --- | --- |
-| `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, instituições, cidades e motivos de denúncia |
+| `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, estados, instituições, cidades, motivos de denúncia e `local_perfil` (`{uf, cidade}` do perfil, para o formulário já vir preenchido) |
+| `GET /api/cidades?uf=PE` | Municípios do estado, em ordem alfabética (da base guardada no projeto, sem chamar API externa) |
+| `GET /api/mural/mapa` | Projetos visíveis agrupados por cidade: `{cidades: [{cidade, uf, x, y, total, projetos}], total, sem_local}`. `x` e `y` são a posição (em %) no desenho `static/img/mapa-brasil.svg` |
 | `GET /api/projetos` | Lista com filtros `q`, `tipo`, `area`, `nivel`, `instituicao`, `cidade`, `identidade`, mais `pagina`, `por_pagina` e `ordem` (`recentes` ou `estrelas`) |
-| `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`) |
-| `GET /api/projetos/<id>` | Detalhe |
+| `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`). Sem nenhum escolhido, os que mais ganharam estrelas nos últimos 7 dias (o mural mostra "Em alta na semana") |
+| `GET /api/projetos/<id>` | Detalhe, com `parecidos` (até 3 cartões da mesma área, completando com os do mesmo tipo), `bilhetes` (cada frase com `total` e `meu`), `minha` (se quem vê é a autora) e `citacao` (referência ABNT e citações no texto) |
+| `POST /api/projetos/<id>/bilhetes` | `{"frase": "inspirador"}` cola ou tira esse bilhete da usuária logada. Só frases de `FRASES_BILHETE` (`tipos.py`); a autora não cola no próprio projeto (`403`). Devolve `{bilhetes, total}` |
 | `POST /api/projetos/<id>/estrela` | Dá ou tira a estrela da usuária logada. Devolve `{estrelas, estrelado}` |
-| `POST /api/projetos` | Cria um projeto (JSON, com `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
+| `POST /api/projetos` | Cria um projeto (JSON, com `uf` e `cidade`, `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
 | `POST /api/uploads` | Envia um arquivo (form-data: `arquivo` e `finalidade` = `material`, `foto` ou `capa`). Devolve `{id, url, nome, tipo, tamanho}` |
 | `GET /uploads/<nome>` | Abre ou baixa um arquivo enviado |
 | `POST /api/projetos/<id>/denuncias` | `{"motivo": "...", "comentario": "..."}`. Com 3 denúncias, o projeto sai do mural |
 | `POST /api/projetos/<id>/destaque` | Só admin. `{"destaque": true}` coloca o projeto nos destaques da semana |
+
+**Estado e cidade:** no formulário, a autora escolhe o estado e a cidade numa lista com os 5.570 municípios
+(`app/dados/municipios.json`, da base [kelvins/municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros), licença MIT,
+com os códigos do IBGE). O servidor confere se a cidade existe naquele estado e guarda o nome oficial em `cidade` e a sigla em `uf`.
+Quem manda só `cidade`, sem `uf` (como a edição pelo perfil), continua funcionando: o estado é completado quando o nome existe em um só estado.
+`app/municipios.py` serve para qualquer frente: `buscar("Recife", "PE")`, `nomes_da_uf("PE")`.
+A coluna `uf` entra sozinha em bancos antigos ao subir o app (`mural.completar_colunas`).
+
+**Citar:** o botão "Citar" do detalhe mostra a referência segundo a ABNT NBR 6023:2025 e a citação no texto segundo
+a NBR 10520:2023 (sobrenome só com a inicial maiúscula). A referência é montada em `app/mural/citacao.py` com os dados
+do projeto (nome público da autora, título, tipo, curso, evento, instituição, cidade e ano) e aponta para a página do
+projeto, ou para o link, no caso de software. O painel avisa para citar a publicação original quando ela existir.
+
+**Mapa:** as coordenadas vêm da mesma base de municípios, então qualquer cidade aparece. Projetos antigos sem `uf` entram quando o nome
+é único no Brasil; os outros ficam em `sem_local`. O desenho dos estados vem da malha do IBGE e fica no projeto, então o mapa funciona sem internet.
 
 O filtro por identidade só considera quem marcou aquela identidade como pública (`publica = 1`).
 
@@ -78,6 +96,20 @@ Além disso, cada projeto pode ter até 5 fotos (opcional). A primeira vira a ca
 Em extensão, social e protótipo, as fotos também contam como material (`fotos_contam` em `tipos.py`).
 O servidor confere os primeiros bytes de cada arquivo, então um `.exe` renomeado para `.pdf` é recusado.
 Os arquivos ficam em `instance/uploads/`, fora do git.
+
+## Quiz "Que cientista você seria?"
+
+Página: `/quiz`, com um papel na página inicial e um item no menu lateral. São 6 perguntas; cada resposta dá pontos para áreas e a área
+com mais pontos define uma cientista brasileira de referência. O resultado leva para projetos, eventos e vagas
+da área (`?area=` em `/mural`, `/eventos` e `/vagas`) e gera uma imagem para o story (1080x1920, desenhada no navegador).
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/quiz` | Perguntas e opções (sem os pontos) |
+| `POST /api/quiz/resultado` | `{"respostas": [0, 2, 1, 3, 0, 1]}` (índice da opção em cada pergunta). Devolve `{area, area_rotulo, cientista, sobre, perfil}` |
+| `GET /api/quiz/resultado/<area>` | O resultado de uma área, para o link compartilhado (`/quiz?resultado=fisica`) |
+
+Perguntas, pontos e cientistas ficam em `app/quiz/dados.py`. Um teste confere que toda área pode sair como resultado.
 
 ## Eventos (Pessoa 3)
 
@@ -146,9 +178,27 @@ para cada área (Projetos `/mural`, Eventos `/eventos`, Vagas `/vagas`, Notícia
 e o fim do cadastro levam, e a logo do cabeçalho já aponta para `/`. Sem login, o `/` continua sendo a landing.
 
 Os papéis usam dados que já existem: a data do próximo evento (`/api/eventos/proximo`) e quantos projetos e vagas há.
-O Passaporte ainda não tem página, então aparece como decoração, sem link, com um aviãozinho de papel 3D
-(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho). Quando `/passaporte` existir,
-é só trocar a `div.inicio-passaporte` por um link.
+O cartão do Passaporte também leva a `/passaporte`, com o aviãozinho de papel 3D
+(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho).
+
+## Passaporte
+
+`/passaporte` (precisa de login e cadastro completo) mostra o passaporte 3D da usuária: capa de couro rosa com a
+logo em metalizado, que abre na lombada; folhas que viram de verdade (com curvatura) clicando ou arrastando; e,
+na primeira vez, um carimbo 3D que desce, imprime o carimbo de boas-vindas e sobe. No celular em pé, aberto,
+mostra uma página de cada vez. Os botões "Página anterior / Próxima página" fazem o mesmo pelo teclado.
+Sem WebGL (ou sem internet para o Three.js), aparece a versão em texto, que é também a que o leitor de tela lê.
+
+| Arquivo | O que tem |
+| --- | --- |
+| `app/passaporte/` | Rota, modelo `Carimbo` (tabela `carimbos`) e `servico.conceder()` |
+| `frontend/src/passaporte-3d.ts` | Cena Three.js: capa, folhas, carimbo e animações |
+| `frontend/src/passaporte-paginas.ts` | As páginas desenhadas em canvas (identidade, carimbos, impressão da tinta) |
+
+O carimbo de boas-vindas é concedido no login (e, para quem já tinha conta, ao abrir o passaporte). Cada
+`codigo` vale uma vez por usuária. `visto_em` guarda que a animação já passou
+(`POST /api/passaporte/carimbos/<codigo>/visto`), então ela não se repete nem em outro dispositivo.
+Para os carimbos de eventos (check-in por QR), use `servico.conceder(usuaria, f"evento-{id}", titulo)`.
 
 ## Perfil
 

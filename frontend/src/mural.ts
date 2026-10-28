@@ -2,7 +2,9 @@ import {
   api,
   el,
   esc,
+  CORES_CAPA,
   formatarTamanho,
+  htmlFoto,
   icone,
   mensagemDeErro,
   nomeDoFormato,
@@ -11,6 +13,8 @@ import {
   urlSegura,
   type Cartao,
   type Detalhe,
+  type FraseBilhete,
+  type Mapa,
   type OpcoesMural,
   type PaginaProjetos,
 } from "./comum.js";
@@ -20,19 +24,6 @@ const CAMPOS_FILTRO = ["q", "tipo", "area", "nivel", "instituicao", "cidade", "i
 type Filtros = Record<(typeof CAMPOS_FILTRO)[number], string>;
 
 const PINS = ["--pin-magenta", "--pin-violeta", "--pin-verde", "--pin-ambar", "--pin-azul"];
-const CORES_CAPA: Record<string, string> = {
-  computacao: "#c9dcf5",
-  engenharias: "#f8d9a8",
-  matematica: "#dccff5",
-  fisica: "#c7cdf2",
-  quimica: "#c4ecd8",
-  biologicas: "#d2efc2",
-  saude: "#f9cbd8",
-  ambiental: "#dcedb6",
-  humanas: "#f6d5c0",
-  educacao: "#fbe5a0",
-};
-
 // Nomes curtos para as etiquetas de área caberem numa linha (o nome completo fica no title e no aria-label).
 const AREAS_CURTAS: Record<string, string> = {
   computacao: "Computação",
@@ -146,13 +137,7 @@ function rotacao(id: number, escala = 1): string {
 
 function htmlCartao(c: Cartao, variante: "grade" | "polaroid"): string {
   const pin = PINS[c.id % PINS.length];
-  const imagem = urlSegura(c.imagem_url);
-
-  // Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área.
-  const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
-  const foto = imagem
-    ? `<img src="${esc(imagem)}" alt="" loading="lazy">`
-    : `<div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div>`;
+  const foto = htmlFoto(c);
 
   // Na grade, o cartão fica preso com pin; nos destaques, com fita adesiva.
   const destaque = variante === "polaroid";
@@ -225,6 +210,72 @@ async function alternarEstrela(botao: HTMLButtonElement): Promise<void> {
       botao.classList.remove("estrela--pulo");
       void botao.offsetWidth; // reinicia a animação
       botao.classList.add("estrela--pulo");
+    }
+  } catch (erro) {
+    avisar(mensagemDeErro(erro));
+  } finally {
+    delete botao.dataset.ocupado;
+  }
+}
+
+// ---------- Bilhetes de incentivo ----------
+
+function htmlTotalBilhete(total: number): string {
+  return `${total}<span class="visualmente-oculto"> ${total === 1 ? "pessoa deixou" : "pessoas deixaram"}</span>`;
+}
+
+function htmlBilhetes(p: Detalhe): string {
+  const lista = p.bilhetes ?? [];
+  if (lista.length === 0) return "";
+  const recebidos = lista.reduce((soma, b) => soma + b.total, 0);
+  const ajuda = p.minha
+    ? recebidos
+      ? "Os bilhetes que seu projeto recebeu."
+      : "Seu projeto ainda não recebeu bilhetes."
+    : `Cole um bilhete para incentivar ${esc(p.autora)}. Pode escolher mais de um, e clicar de novo tira.`;
+
+  const itens = lista
+    .map((b, i) => {
+      const classes = `bilhete bilhete--${esc(b.cor)}${b.total || b.meu ? "" : " bilhete--vazio"}`;
+      const estilo = `--rot: ${rotacao(p.id + i * 3, 1.2)}deg`;
+      const conteudo = `<span class="bilhete__frase">${esc(b.rotulo)}</span>
+        <span class="bilhete__total">${htmlTotalBilhete(b.total)}</span>`;
+      // A autora só vê os bilhetes; quem visita clica para colar ou tirar.
+      return p.minha
+        ? `<li><span class="${classes}" style="${estilo}">${conteudo}</span></li>`
+        : `<li><button type="button" class="${classes}" style="${estilo}" data-bilhete="${esc(b.valor)}"
+             data-projeto="${p.id}" aria-pressed="${b.meu}">${conteudo}</button></li>`;
+    })
+    .join("");
+
+  return `
+    <section class="bilhetes" aria-labelledby="bilhetes-titulo">
+      <h3 id="bilhetes-titulo">Bilhetes de incentivo</h3>
+      <p class="bilhetes__ajuda">${ajuda}</p>
+      <ul class="bilhetes__lista">${itens}</ul>
+    </section>`;
+}
+
+async function alternarBilhete(botao: HTMLButtonElement): Promise<void> {
+  if (botao.dataset.ocupado) return;
+  botao.dataset.ocupado = "1";
+  const id = Number(botao.dataset.projeto);
+  try {
+    const r = await postJson<{ bilhetes: FraseBilhete[] }>(`/api/projetos/${id}/bilhetes`, {
+      frase: botao.dataset.bilhete,
+    });
+    // Atualiza só os post-its (sem redesenhar a seção), para o foco continuar no botão.
+    for (const b of r.bilhetes) {
+      const alvo = conteudoDetalhe.querySelector<HTMLButtonElement>(`[data-bilhete="${b.valor}"]`);
+      if (!alvo) continue;
+      alvo.setAttribute("aria-pressed", String(b.meu));
+      alvo.classList.toggle("bilhete--vazio", !b.total && !b.meu);
+      alvo.querySelector(".bilhete__total")!.innerHTML = htmlTotalBilhete(b.total);
+    }
+    if (botao.getAttribute("aria-pressed") === "true") {
+      botao.classList.remove("bilhete--colando");
+      void botao.offsetWidth; // reinicia a animação
+      botao.classList.add("bilhete--colando");
     }
   } catch (erro) {
     avisar(mensagemDeErro(erro));
@@ -403,10 +454,37 @@ async function carregarDestaques(): Promise<void> {
   try {
     const lista = await api<Cartao[]>("/api/projetos/destaques");
     if (lista.length === 0) return;
+    // Nenhum escolhido pela equipe: o servidor mandou os mais estrelados da semana.
+    const automatico = lista.every((c) => !c.destaque);
+    el("destaques-titulo").textContent = automatico ? "Em alta na semana" : "Destaques da semana";
+    el("destaques-nota").hidden = !automatico;
     destaquesLista.innerHTML = lista.map((c) => htmlCartao(c, "polaroid")).join("");
     destaques.hidden = false;
   } catch {
     // A faixa de destaques é opcional: sem ela, o mural continua funcionando.
+  }
+}
+
+// ---------- Convite para o mapa ----------
+
+async function carregarVitrineMapa(): Promise<void> {
+  try {
+    const mapa = await api<Mapa>("/api/mural/mapa");
+    if (mapa.cidades.length === 0) return; // fica o texto padrão
+    const desenho = el("vitrine-mapa-desenho");
+    desenho.insertAdjacentHTML(
+      "beforeend",
+      mapa.cidades
+        .map((c) => `<span class="vitrine-mapa__ponto" style="left: ${c.x}%; top: ${c.y}%"></span>`)
+        .join(""),
+    );
+    const projetos = mapa.cidades.reduce((soma, c) => soma + c.total, 0);
+    const n = mapa.cidades.length;
+    el("vitrine-mapa-resumo").textContent =
+      `${projetos} ${projetos === 1 ? "projeto" : "projetos"} em ${n} ${n === 1 ? "cidade" : "cidades"}. ` +
+      "Veja onde elas estão fazendo ciência pelo Brasil.";
+  } catch {
+    // Sem os dados, o convite continua funcionando com o texto padrão.
   }
 }
 
@@ -419,6 +497,88 @@ function itemFicha(rotulo: string, valor: string | number | null | undefined, li
     ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Abrir link</a>`
     : esc(valor);
   return `<div><dt>${esc(rotulo)}</dt><dd>${conteudo}</dd></div>`;
+}
+
+function htmlParecidos(lista: Cartao[] | undefined): string {
+  if (!lista?.length) return "";
+  const itens = lista
+    .map(
+      (c) => `
+      <li>
+        <a class="mini" href="/mural?projeto=${c.id}" data-parecido="${c.id}" style="--rot: ${rotacao(c.id, 0.8)}deg">
+          <span class="mini__foto">${htmlFoto(c)}</span>
+          <span class="mini__tipo">${esc(c.tipo_rotulo)}</span>
+          <span class="mini__titulo">${esc(c.titulo)}</span>
+          <span class="mini__area">${esc(c.area_rotulo)}</span>
+        </a>
+      </li>`,
+    )
+    .join("");
+  return `
+    <section class="parecidos" aria-labelledby="parecidos-titulo">
+      <h3 id="parecidos-titulo">Projetos parecidos</h3>
+      <ul class="parecidos__lista">${itens}</ul>
+    </section>`;
+}
+
+// ---------- Citar (ABNT) ----------
+
+function htmlCitacao(p: Detalhe): string {
+  const c = p.citacao;
+  if (!c) return "";
+  return `
+    <section class="citacao" id="citacao" aria-labelledby="citacao-titulo" hidden>
+      <h3 id="citacao-titulo">Como citar este projeto</h3>
+
+      <div class="citacao__bloco">
+        <p class="citacao__rotulo">Referência <span>ABNT NBR 6023:2025</span></p>
+        <p class="citacao__texto" id="citacao-referencia">${c.referencia_html}</p>
+        <button class="botao botao--texto citacao__copiar" type="button" data-copiar="referencia">Copiar referência</button>
+      </div>
+
+      <div class="citacao__bloco">
+        <p class="citacao__rotulo">Citação no texto <span>ABNT NBR 10520:2023</span></p>
+        <ul class="citacao__curtas">
+          <li><code>${esc(c.citacao_parentetica)}</code>
+            <button class="botao botao--texto citacao__copiar" type="button" data-copiar="parentetica">Copiar</button></li>
+          <li><code>${esc(c.citacao_narrativa)}</code>
+            <button class="botao botao--texto citacao__copiar" type="button" data-copiar="narrativa">Copiar</button></li>
+        </ul>
+      </div>
+
+      <p class="citacao__aviso">Gerada com os dados do projeto. Confira antes de usar e, se o trabalho foi publicado
+        em revista, anais ou repositório, cite a publicação original.</p>
+      <p class="citacao__resultado" id="citacao-resultado" role="status"></p>
+    </section>`;
+}
+
+let citacaoAtual: Detalhe["citacao"];
+
+/** Copia com o negrito do título (HTML) quando o navegador deixa; senão, só o texto. */
+async function copiarCitacao(qual: string): Promise<void> {
+  const c = citacaoAtual;
+  if (!c) return;
+  const resultado = el("citacao-resultado");
+  const texto =
+    qual === "referencia" ? c.referencia_texto : qual === "parentetica" ? c.citacao_parentetica : c.citacao_narrativa;
+  try {
+    if (qual === "referencia" && "ClipboardItem" in window) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([c.referencia_html], { type: "text/html" }),
+          "text/plain": new Blob([texto], { type: "text/plain" }),
+        }),
+      ]);
+    } else {
+      await navigator.clipboard.writeText(texto);
+    }
+    resultado.textContent = qual === "referencia" ? "Referência copiada, com o título em negrito." : "Citação copiada.";
+  } catch {
+    // Sem permissão para a área de transferência: seleciona o texto para copiar com Ctrl+C.
+    const alvo = qual === "referencia" ? el("citacao-referencia") : null;
+    if (alvo) window.getSelection()?.selectAllChildren(alvo);
+    resultado.textContent = "Não deu para copiar sozinho. Selecione o texto e use Ctrl+C.";
+  }
 }
 
 function htmlDetalhe(p: Detalhe): string {
@@ -443,6 +603,7 @@ function htmlDetalhe(p: Detalhe): string {
       ${itemFicha("Cidade", p.cidade)}
       ${p.detalhes.map((d) => itemFicha(d.rotulo, d.valor, d.e_link)).join("")}
     </dl>
+    ${htmlBilhetes(p)}
     <div class="detalhe__acoes">
       <button class="estrela-grande" type="button" data-estrela="${p.id}" data-titulo="${esc(p.titulo)}"
         aria-pressed="${p.estrelado}">
@@ -461,10 +622,18 @@ function htmlDetalhe(p: Detalhe): string {
         data-titulo="${esc(p.titulo)}">
         ${icone("compartilhar")}<span id="compartilhar-texto">Compartilhar</span>
       </button>
+      ${
+        p.citacao
+          ? `<button class="botao botao--secundario" type="button" id="citar" aria-expanded="false" aria-controls="citacao">
+               ${icone("citar")}<span>Citar</span>
+             </button>`
+          : ""
+      }
       <button class="denunciar" type="button" id="denunciar" aria-expanded="false" aria-controls="denuncia">
         Denunciar projeto
       </button>
     </div>
+    ${htmlCitacao(p)}
     <form class="denuncia" id="denuncia" data-id="${p.id}" novalidate hidden>
       <h3>Denunciar projeto</h3>
       <p>A equipe revisa toda denúncia. Projetos com várias denúncias saem do mural até a revisão.</p>
@@ -480,11 +649,13 @@ function htmlDetalhe(p: Detalhe): string {
         <button class="botao botao--texto" type="button" data-acao="cancelar-denuncia">Cancelar</button>
       </div>
       <p class="denuncia__resultado" id="denuncia-resultado" role="status"></p>
-    </form>`;
+    </form>
+    ${htmlParecidos(p.parecidos)}`;
 }
 
-async function abrirDetalhe(id: number, origem?: HTMLElement, mensagem?: string): Promise<void> {
-  focoAntesDoDetalhe = origem ?? (document.activeElement as HTMLElement | null);
+async function abrirDetalhe(id: number, origem?: HTMLElement, mensagem?: string, trocando = false): Promise<void> {
+  // Ao ir para um projeto parecido, o foco continua voltando ao cartão de onde o primeiro foi aberto.
+  if (!trocando) focoAntesDoDetalhe = origem ?? (document.activeElement as HTMLElement | null);
   conteudoDetalhe.innerHTML = '<p class="carregando" id="detalhe-titulo">Carregando projeto…</p>';
   if (!dialogo.open) dialogo.showModal();
 
@@ -492,6 +663,16 @@ async function abrirDetalhe(id: number, origem?: HTMLElement, mensagem?: string)
     const projeto = await api<Detalhe>(`/api/projetos/${id}`);
     const aviso = mensagem ? `<p class="detalhe__aviso" role="status">${esc(mensagem)}</p>` : "";
     conteudoDetalhe.innerHTML = aviso + htmlDetalhe(projeto);
+    citacaoAtual = projeto.citacao;
+    if (trocando) {
+      // Outro projeto na mesma janela: volta ao topo e leva o foco ao título.
+      conteudoDetalhe.closest(".detalhe__folha")?.scrollTo({ top: 0 });
+      const titulo = document.getElementById("detalhe-titulo");
+      if (titulo) {
+        titulo.tabIndex = -1;
+        titulo.focus();
+      }
+    }
   } catch (erro) {
     conteudoDetalhe.innerHTML = `
       <h2 id="detalhe-titulo">Projeto indisponível</h2>
@@ -620,11 +801,40 @@ function ligarEventos(): void {
   conteudoDetalhe.addEventListener("click", (e) => {
     const alvo = e.target as HTMLElement;
 
+    const bilhete = alvo.closest<HTMLButtonElement>("[data-bilhete]");
+    if (bilhete) {
+      void alternarBilhete(bilhete);
+      return;
+    }
+
+    const parecido = alvo.closest<HTMLAnchorElement>("[data-parecido]");
+    if (parecido) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // nova aba: segue o link
+      e.preventDefault();
+      void abrirDetalhe(Number(parecido.dataset.parecido), undefined, undefined, true);
+      return;
+    }
+
     const estrela = alvo.closest<HTMLButtonElement>("[data-estrela]");
     if (estrela) {
       void alternarEstrela(estrela);
       return;
     }
+    const botaoCitar = alvo.closest<HTMLButtonElement>("#citar");
+    if (botaoCitar) {
+      const painel = el("citacao");
+      const abrir = painel.hidden;
+      painel.hidden = !abrir;
+      botaoCitar.setAttribute("aria-expanded", String(abrir));
+      if (abrir) painel.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    const copiar = alvo.closest<HTMLButtonElement>("[data-copiar]");
+    if (copiar) {
+      void copiarCitacao(copiar.dataset.copiar!);
+      return;
+    }
+
     const botaoCompartilhar = alvo.closest<HTMLButtonElement>("#compartilhar");
     if (botaoCompartilhar) {
       void compartilhar(botaoCompartilhar);
@@ -685,6 +895,7 @@ async function iniciar(): Promise<void> {
   sincronizarUrl(filtros); // tira ?projeto= e ?publicado= da barra de endereço
 
   void carregarDestaques();
+  void carregarVitrineMapa();
   await carregar(true);
 
   const publicado = Number(params.get("publicado"));

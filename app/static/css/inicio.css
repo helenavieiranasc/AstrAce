@@ -16,7 +16,7 @@
   grid-template-areas:
     "proj proj proj marc marc marc marc marc marc even even even"
     "proj proj proj noti noti noti pass pass pass vaga vaga vaga"
-    "reca reca reca noti noti noti pass pass pass vaga vaga vaga";
+    "quiz quiz quiz noti noti noti pass pass pass vaga vaga vaga";
   align-items: start;
   gap: clamp(26px, 3vw, 44px) clamp(22px, 2.6vw, 40px);
   max-width: 1280px;
@@ -29,7 +29,7 @@
 .inicio-noticias { grid-area: noti; }
 .inicio-passaporte { grid-area: pass; }
 .inicio-vagas { grid-area: vaga; }
-.inicio-recado { grid-area: reca; }
+.inicio-quiz { grid-area: quiz; }
 
 /* ---------- Papel: o que todos têm em comum ---------- */
 
@@ -622,32 +622,69 @@
   transform-origin: top center;
 }
 
-/* ---------- Recado ---------- */
+/* ---------- Quiz: post-it com cara de teste de revista ---------- */
 
-.inicio-recado {
+.inicio-quiz {
   justify-self: center;
-  width: min(100%, 230px);
-  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 250px);
+  padding: 26px 20px 18px;
+  color: var(--tinta);
+  text-decoration: none;
   transform: rotate(var(--rot));
   animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-.inicio-recado p {
-  margin: 0;
-  font-family: var(--fonte-mao);
-  font-size: 1.55rem;
+.inicio-quiz__selo {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--magenta);
+  color: #fff;
   font-weight: 700;
-  line-height: 1.05;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(8deg);
 }
 
-.inicio-rabisco--coracao {
-  position: static;
-  display: block;
-  width: 26px;
-  height: 26px;
-  margin: 8px 0 0 auto;
-  rotate: 12deg;
+.inicio-quiz__titulo {
+  font-family: var(--fonte-mao);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.inicio-quiz__opcoes {
+  display: grid;
+  gap: 3px;
+  font-size: 0.92rem;
+}
+
+.inicio-quiz__opcoes span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Quadradinhos de marcar, um já marcado à mão. */
+.inicio-quiz__opcoes i {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--tinta);
+  border-radius: 3px;
+}
+
+.inicio-quiz__opcoes i.marcado {
+  background:
+    linear-gradient(45deg, transparent 42%, var(--magenta) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--magenta) 42% 58%, transparent 58%);
 }
 
 /* ---------- Telas menores: o mural se reorganiza, sem só encolher ---------- */
@@ -680,7 +717,7 @@
       "marc marc marc marc marc marc"
       "proj proj proj even even even"
       "vaga vaga vaga noti noti noti"
-      "pass pass pass pass reca reca";
+      "pass pass pass pass quiz quiz";
   }
 
   .inicio-adesivo--mascote {
@@ -691,13 +728,13 @@
 @media (max-width: 640px) {
   .inicio-mural {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "marc" "proj" "even" "vaga" "noti" "pass" "reca";
+    grid-template-areas: "marc" "proj" "even" "vaga" "noti" "quiz" "pass";
     gap: 34px;
   }
 
   /* Menos inclinação no celular, para ler sem esforço. */
   .inicio-papel,
-  .inicio-recado {
+  .inicio-quiz {
     --rot-celular: calc(var(--rot) * 0.5);
     transform: rotate(var(--rot-celular));
   }
@@ -735,7 +772,7 @@
     height: 124px;
   }
 
-  .inicio-recado {
+  .inicio-quiz {
     width: min(78%, 240px);
   }
 }

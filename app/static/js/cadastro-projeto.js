@@ -2,6 +2,8 @@ import { ErroApi, EXTENSOES_IMAGEM, EXTENSOES_MATERIAL, api, conferirArquivo, el
 const LIMITE_ARQUIVOS = 5;
 const LIMITE_FOTOS = 5;
 const form = el("form-projeto");
+const campoUf = el("uf");
+const campoCidade = el("cidade");
 const tipos = el("tipos");
 const blocoExtras = el("bloco-extras");
 const extras = el("extras");
@@ -296,6 +298,34 @@ function mostrarErros(erros) {
     }
     mostrarResumo(`<p>Confira os campos marcados:</p><ul>${itens.join("")}</ul>`);
 }
+// ---------- Estado e cidade ----------
+const cidadesPorUf = new Map();
+/** Preenche as cidades do estado. Sem estado, a cidade fica desligada. */
+async function carregarCidades(uf, selecionada = "") {
+    campoCidade.disabled = true;
+    if (!uf) {
+        campoCidade.innerHTML = '<option value="">Escolha o estado primeiro</option>';
+        return;
+    }
+    campoCidade.innerHTML = '<option value="">Carregando cidades…</option>';
+    try {
+        let nomes = cidadesPorUf.get(uf);
+        if (!nomes) {
+            nomes = await api(`/api/cidades?uf=${encodeURIComponent(uf)}`);
+            cidadesPorUf.set(uf, nomes);
+        }
+        if (campoUf.value !== uf)
+            return; // trocou de estado no meio
+        campoCidade.innerHTML = '<option value="">Escolha</option>';
+        preencherSelect(campoCidade, nomes);
+        campoCidade.value = nomes.includes(selecionada) ? selecionada : "";
+        campoCidade.disabled = false;
+    }
+    catch (erro) {
+        campoCidade.innerHTML = '<option value="">Escolha o estado primeiro</option>';
+        mostrarErroCampo("cidade", `Não deu para carregar as cidades. ${mensagemDeErro(erro)}`);
+    }
+}
 // ---------- Envio ----------
 function coletar() {
     const dados = new FormData(form);
@@ -312,6 +342,7 @@ function coletar() {
         ano: valor("ano"),
         nivel: valor("nivel"),
         instituicao: valor("instituicao"),
+        uf: valor("uf"),
         cidade: valor("cidade"),
         link_externo: valor("link_externo"),
         detalhes,
@@ -333,6 +364,8 @@ function validarNoNavegador(dados) {
             erros[`detalhes.${campo.nome}`] = `Preencha o campo ${campo.rotulo}.`;
         }
     }
+    if (dados.uf && !dados.cidade)
+        erros.cidade = "Escolha a cidade.";
     const enviandoFotos = fotos.some((f) => f.estado === "enviando");
     if (enviandoFotos)
         erros.fotos = "Espere as fotos terminarem de enviar.";
@@ -385,6 +418,12 @@ async function publicar(evento) {
 }
 // ---------- Início ----------
 function ligarEventos() {
+    campoUf.addEventListener("change", () => {
+        esconderErro("uf");
+        esconderErro("cidade");
+        void carregarCidades(campoUf.value);
+    });
+    campoCidade.addEventListener("change", () => esconderErro("cidade"));
     const contador = el("resumo-contador");
     campoResumo.addEventListener("input", () => {
         contador.textContent = String(campoResumo.value.length);
@@ -451,6 +490,11 @@ async function iniciar() {
         renderTipos(opcoes.tipos);
         preencherSelect(el("area"), opcoes.areas);
         preencherSelect(el("nivel"), opcoes.niveis);
+        preencherSelect(campoUf, opcoes.estados);
+        if (opcoes.local_perfil) {
+            campoUf.value = opcoes.local_perfil.uf;
+            void carregarCidades(opcoes.local_perfil.uf, opcoes.local_perfil.cidade);
+        }
     }
     catch (erro) {
         tipos.innerHTML = `<p class="campo__erro">${icone("alerta")}<span>Não foi possível carregar o formulário. ${esc(mensagemDeErro(erro))}</span></p>`;
