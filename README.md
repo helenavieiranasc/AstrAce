@@ -48,13 +48,13 @@ Para uma página nova: estenda `base.html`, use as variáveis de cor de `base.cs
 
 ## Mural (Pessoa 1)
 
-Páginas: `/mural`, `/mural/novo` e `/mural/mapa` (mapa "Onde elas brilham").
+Páginas: `/mural` e `/mural/novo`. O mapa agora tem aba própria, o **Mapa de Inspiração** (`/mapa`, veja a seção abaixo); `/mural/mapa` redireciona para ele.
 
 | Rota | O que faz |
 | --- | --- |
 | `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, estados, instituições, cidades, motivos de denúncia e `local_perfil` (`{uf, cidade}` do perfil, para o formulário já vir preenchido) |
 | `GET /api/cidades?uf=PE` | Municípios do estado, em ordem alfabética (da base guardada no projeto, sem chamar API externa) |
-| `GET /api/mural/mapa` | Projetos visíveis agrupados por cidade: `{cidades: [{cidade, uf, x, y, total, projetos}], total, sem_local}`. `x` e `y` são a posição (em %) no desenho `static/img/mapa-brasil.svg` |
+| `GET /api/mural/mapa` | Projetos visíveis agrupados por cidade: `{cidades: [{cidade, uf, x, y, lat, lon, total, projetos}], total, sem_local}`. `x` e `y` são a posição (em %) no desenho `static/img/mapa-brasil.svg`; `lat` e `lon` posicionam o pin no mapa |
 | `GET /api/projetos` | Lista com filtros `q`, `tipo`, `area`, `nivel`, `instituicao`, `cidade`, `identidade`, mais `pagina`, `por_pagina` e `ordem` (`recentes` ou `estrelas`) |
 | `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`). Sem nenhum escolhido, os que mais ganharam estrelas nos últimos 7 dias (o mural mostra "Em alta na semana") |
 | `GET /api/projetos/<id>` | Detalhe, com `parecidos` (até 3 cartões da mesma área, completando com os do mesmo tipo), `bilhetes` (cada frase com `total` e `meu`), `minha` (se quem vê é a autora) e `citacao` (referência ABNT e citações no texto) |
@@ -79,7 +79,22 @@ do projeto (nome público da autora, título, tipo, curso, evento, instituição
 projeto, ou para o link, no caso de software. O painel avisa para citar a publicação original quando ela existir.
 
 **Mapa:** as coordenadas vêm da mesma base de municípios, então qualquer cidade aparece. Projetos antigos sem `uf` entram quando o nome
-é único no Brasil; os outros ficam em `sem_local`. O desenho dos estados vem da malha do IBGE e fica no projeto, então o mapa funciona sem internet.
+é único no Brasil; os outros ficam em `sem_local`. O desenho dos estados vem da malha do IBGE e fica no projeto (`x` e `y` da API continuam disponíveis).
+
+## Mapa de Inspiração (`/mapa`)
+
+Mapa estático: as fronteiras dos países vêm de `app/templates/mapa_mundi.svg` (dados do world-atlas, domínio público, já convertidos; sem chamadas externas). Os pins são botões posicionados por cima; os que caem no mesmo lugar viram um grupo com dois tipos de pin: **rosa** = cidades com projetos de cientistas cadastradas no AstrAce (os mesmos
+dados reais de `GET /api/mural/mapa`; clicar abre os projetos) e **verde** = mulheres da história da ciência e da tecnologia, no lugar de nascimento
+documentado. Não há 3D nem arrastar/zoom: o mapa é fixo, como a versão antiga. Sem a lista de pins, a página continua funcionando.
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /mapa` | A página. Aceita `?cidade=Recife-PE` ou `?mulher=ada-lovelace` para abrir um pin direto |
+| `GET /api/mapa/historicas` | `{mulheres: [...]}` lido de `app/dados/mulheres_historicas.json` |
+
+**Como adicionar uma mulher:** inclua um objeto em `app/dados/mulheres_historicas.json` com `id`, `nome`, `area`, `nascimento`, `morte`, `local`
+(`cidade`, `pais`, `lat`, `lon`, `precisao`), `bio`, `destaque`, `foto` (`url` do Wikimedia Commons, `autor`, `licenca`, `fonte`) e `fontes` (https).
+Só entra com local de nascimento verificável em duas fontes; o teste `tests/test_mulheres_historicas.py` valida o arquivo todo.
 
 O filtro por identidade só considera quem marcou aquela identidade como pública (`publica = 1`).
 

@@ -1,0 +1,600 @@
+{
+  "versao": 1,
+  "nota": "Local de nascimento conferido entre a infobox da Wikipedia e o Wikidata; coordenadas do lugar de nascimento (cidade, bairro ou vila). Fotos do Wikimedia Commons, com licença e autoria. Para incluir alguém, acrescente um item com os mesmos campos.",
+  "mulheres": [
+    {
+      "id": "ada-lovelace",
+      "nome": "Ada Lovelace",
+      "nascimento": 1815,
+      "morte": 1852,
+      "area": "Matemática e computação",
+      "local": {
+        "cidade": "Londres",
+        "detalhe": null,
+        "pais": "Reino Unido",
+        "lat": 51.5072,
+        "lon": -0.1275,
+        "precisao": "cidade"
+      },
+      "bio": "Matemática inglesa, filha do poeta Lord Byron. Trabalhou com Charles Babbage na máquina analítica, um projeto de computador mecânico de uso geral, e foi a primeira a perceber que uma máquina assim podia fazer mais do que contas.",
+      "destaque": "É frequentemente considerada a primeira programadora da história.",
+      "foto": {
+        "arquivo": "Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png?width=420",
+        "licenca": "Domínio público",
+        "autor": "Antoine Claudet",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Ada_Lovelace"
+      ]
+    },
+    {
+      "id": "rosalind-franklin",
+      "nome": "Rosalind Franklin",
+      "nascimento": 1920,
+      "morte": 1958,
+      "area": "Química e cristalografia",
+      "local": {
+        "cidade": "Londres",
+        "detalhe": "Notting Hill",
+        "pais": "Reino Unido",
+        "lat": 51.5096,
+        "lon": -0.2043,
+        "precisao": "bairro"
+      },
+      "bio": "Química e cristalógrafa de raios X inglesa. Seu trabalho foi central para entender a estrutura molecular do DNA, do RNA, de vírus, do carvão e do grafite.",
+      "destaque": "Suas contribuições para a descoberta da estrutura do DNA foram pouco reconhecidas enquanto ela vivia.",
+      "foto": {
+        "arquivo": "Rosalind_Franklin_(retouched).jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rosalind_Franklin_%28retouched%29.jpg?width=420",
+        "licenca": "CC BY-SA 4.0",
+        "autor": "MRC Laboratory of Molecular Biology",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Rosalind_Franklin_(retouched).jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Rosalind_Franklin"
+      ]
+    },
+    {
+      "id": "marie-curie",
+      "nome": "Marie Curie",
+      "nascimento": 1867,
+      "morte": 1934,
+      "area": "Física e química",
+      "local": {
+        "cidade": "Varsóvia",
+        "detalhe": null,
+        "pais": "Polônia",
+        "lat": 52.23,
+        "lon": 21.0111,
+        "precisao": "cidade"
+      },
+      "bio": "Física e química polonesa, naturalizada francesa. Dividiu o Nobel de Física de 1903 com Pierre Curie, pelas pesquisas sobre radioatividade, e ganhou o de Química em 1911, pela descoberta do rádio e do polônio.",
+      "destaque": "Foi a primeira mulher a ganhar um Nobel e a única pessoa premiada em duas áreas científicas diferentes.",
+      "foto": {
+        "arquivo": "Marie_Curie_c._1920s.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Marie_Curie_c._1920s.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "Henri Manuel",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Marie_Curie_c._1920s.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Marie_Curie"
+      ]
+    },
+    {
+      "id": "hedy-lamarr",
+      "nome": "Hedy Lamarr",
+      "nascimento": 1914,
+      "morte": 2000,
+      "area": "Invenção e tecnologia",
+      "local": {
+        "cidade": "Viena",
+        "detalhe": null,
+        "pais": "Áustria",
+        "lat": 48.2083,
+        "lon": 16.3725,
+        "precisao": "cidade"
+      },
+      "bio": "Atriz austríaca e norte-americana, estrela do cinema de Hollywood. Também era inventora e, durante a Segunda Guerra Mundial, coinventou um sistema de orientação por rádio.",
+      "destaque": "Com o compositor George Antheil, patenteou em 1942 um sistema de comunicação por rádio que trocava de frequência.",
+      "foto": {
+        "arquivo": "Hedy_Lamarr_Publicity_Photo_for_The_Heavenly_Body_1944.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hedy_Lamarr_Publicity_Photo_for_The_Heavenly_Body_1944.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "autoria desconhecida",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Hedy_Lamarr_Publicity_Photo_for_The_Heavenly_Body_1944.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Hedy_Lamarr"
+      ]
+    },
+    {
+      "id": "lise-meitner",
+      "nome": "Lise Meitner",
+      "nascimento": 1878,
+      "morte": 1968,
+      "area": "Física nuclear",
+      "local": {
+        "cidade": "Viena",
+        "detalhe": null,
+        "pais": "Áustria",
+        "lat": 48.2083,
+        "lon": 16.3725,
+        "precisao": "cidade"
+      },
+      "bio": "Física nuclear austríaca e sueca. Foi a segunda mulher a se doutorar em Física na Universidade de Viena e a primeira a se tornar professora titular de Física na Alemanha.",
+      "destaque": "Teve papel decisivo na descoberta da fissão nuclear.",
+      "foto": {
+        "arquivo": "Lise_Meitner_NatGeo.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Lise_Meitner_NatGeo.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "Harris & Ewing",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Lise_Meitner_NatGeo.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Lise_Meitner"
+      ]
+    },
+    {
+      "id": "rita-levi-montalcini",
+      "nome": "Rita Levi-Montalcini",
+      "nascimento": 1909,
+      "morte": 2012,
+      "area": "Neurobiologia",
+      "local": {
+        "cidade": "Turim",
+        "detalhe": null,
+        "pais": "Itália",
+        "lat": 45.0792,
+        "lon": 7.6761,
+        "precisao": "cidade"
+      },
+      "bio": "Neurobióloga italiana. Dividiu com Stanley Cohen o Nobel de Fisiologia ou Medicina de 1986, pela descoberta do fator de crescimento do nervo (NGF), e foi senadora vitalícia da Itália a partir de 2001.",
+      "destaque": "Foi a primeira ganhadora de um Nobel a chegar aos 100 anos de idade.",
+      "foto": {
+        "arquivo": "Rita_Levi-Montalcini_(1986).png",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rita_Levi-Montalcini_%281986%29.png?width=420",
+        "licenca": "Domínio público",
+        "autor": "Kurt Hagblom (Firma Hagblom-Foto), restaurada por Adam Cuerden",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Rita_Levi-Montalcini_(1986).png"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Rita_Levi-Montalcini"
+      ]
+    },
+    {
+      "id": "jocelyn-bell-burnell",
+      "nome": "Jocelyn Bell Burnell",
+      "nascimento": 1943,
+      "morte": null,
+      "area": "Astrofísica",
+      "local": {
+        "cidade": "Lurgan",
+        "detalhe": null,
+        "pais": "Irlanda do Norte (Reino Unido)",
+        "lat": 54.4647,
+        "lon": -6.3322,
+        "precisao": "cidade"
+      },
+      "bio": "Astrofísica e radioastrônoma norte-irlandesa. Em 1967, enquanto fazia o doutorado, descobriu o primeiro pulsar conhecido.",
+      "destaque": "A descoberta foi premiada com o Nobel de Física de 1974, do qual ela não participou; em 2018 recebeu o Prêmio Especial Breakthrough de Física Fundamental.",
+      "foto": {
+        "arquivo": "Launch_of_IYA_2009,_Paris_-_Grygar,_Bell_Burnell_cropped.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Launch_of_IYA_2009%2C_Paris_-_Grygar%2C_Bell_Burnell_cropped.jpg?width=420",
+        "licenca": "CC BY-SA 3.0",
+        "autor": "Instituto Astronômico da Academia de Ciências da República Tcheca (obra derivada: Anrie)",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Launch_of_IYA_2009,_Paris_-_Grygar,_Bell_Burnell_cropped.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Jocelyn_Bell_Burnell"
+      ]
+    },
+    {
+      "id": "grace-hopper",
+      "nome": "Grace Hopper",
+      "nascimento": 1906,
+      "morte": 1992,
+      "area": "Computação",
+      "local": {
+        "cidade": "Nova York",
+        "detalhe": null,
+        "pais": "Estados Unidos",
+        "lat": 40.7128,
+        "lon": -74.0061,
+        "precisao": "cidade"
+      },
+      "bio": "Cientista da computação, matemática e contra-almirante da Marinha dos Estados Unidos. Foi uma das primeiras programadoras do computador Harvard Mark I.",
+      "destaque": "Criou a teoria das linguagens de programação independentes de máquina e a FLOW-MATIC, que influenciou o COBOL.",
+      "foto": {
+        "arquivo": "Commodore_Grace_M._Hopper,_USN_(covered)_head_and_shoulders_crop.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Commodore_Grace_M._Hopper%2C_USN_%28covered%29_head_and_shoulders_crop.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "James S. Davis",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Commodore_Grace_M._Hopper,_USN_(covered)_head_and_shoulders_crop.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Grace_Hopper"
+      ]
+    },
+    {
+      "id": "katherine-johnson",
+      "nome": "Katherine Johnson",
+      "nascimento": 1918,
+      "morte": 2020,
+      "area": "Matemática",
+      "local": {
+        "cidade": "White Sulphur Springs",
+        "detalhe": null,
+        "pais": "Estados Unidos",
+        "lat": 37.7939,
+        "lon": -80.3036,
+        "precisao": "cidade"
+      },
+      "bio": "Matemática e \"computadora humana\" da NASA. Em 33 anos de carreira na NACA e na NASA, ficou conhecida por dominar cálculos complexos feitos à mão e ajudou a introduzir o uso de computadores em tarefas que antes eram humanas.",
+      "destaque": "Seus cálculos de mecânica orbital foram decisivos para o sucesso dos primeiros voos espaciais tripulados dos EUA.",
+      "foto": {
+        "arquivo": "Katherine_Johnson_1983.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Katherine_Johnson_1983.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "NASA",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Katherine_Johnson_1983.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Katherine_Johnson"
+      ]
+    },
+    {
+      "id": "mary-jackson",
+      "nome": "Mary Jackson",
+      "nascimento": 1921,
+      "morte": 2005,
+      "area": "Engenharia aeroespacial",
+      "local": {
+        "cidade": "Hampton",
+        "detalhe": null,
+        "pais": "Estados Unidos",
+        "lat": 37.0264,
+        "lon": -76.3444,
+        "precisao": "cidade"
+      },
+      "bio": "Engenheira aeroespacial e matemática da NACA, depois NASA, no Centro de Pesquisa Langley, em Hampton. Começou em 1951 como \"computadora\", na divisão segregada West Area Computing.",
+      "destaque": "Em 1958 tornou-se a primeira engenheira negra da NASA.",
+      "foto": {
+        "arquivo": "Mary_Jackson_1979_Portrait_(LRC-1979-B701_P_F002-07086).jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mary_Jackson_1979_Portrait_%28LRC-1979-B701_P_F002-07086%29.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "NASA Langley Research Center, Bob Nye",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Mary_Jackson_1979_Portrait_(LRC-1979-B701_P_F002-07086).jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Mary_Jackson_(engineer)"
+      ]
+    },
+    {
+      "id": "dorothy-vaughan",
+      "nome": "Dorothy Vaughan",
+      "nascimento": 1910,
+      "morte": 2008,
+      "area": "Matemática e programação",
+      "local": {
+        "cidade": "Kansas City",
+        "detalhe": null,
+        "pais": "Estados Unidos",
+        "lat": 39.05,
+        "lon": -94.5833,
+        "precisao": "cidade"
+      },
+      "bio": "Matemática, \"computadora humana\", programadora e professora que trabalhou na NACA e na NASA, no Centro de Pesquisa Langley. Em 1949 assumiu a chefia do grupo West Area Computers.",
+      "destaque": "Foi a primeira mulher negra promovida a supervisora no centro e preparou sua equipe para a chegada dos computadores eletrônicos, no início dos anos 1960.",
+      "foto": {
+        "arquivo": "Dorothy_Vaughan_2.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dorothy_Vaughan_2.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "NASA on The Commons",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Dorothy_Vaughan_2.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Dorothy_Vaughan"
+      ]
+    },
+    {
+      "id": "margaret-hamilton",
+      "nome": "Margaret Hamilton",
+      "nascimento": 1936,
+      "morte": 2026,
+      "area": "Engenharia de software",
+      "local": {
+        "cidade": "Paoli",
+        "detalhe": null,
+        "pais": "Estados Unidos",
+        "lat": 38.5578,
+        "lon": -86.4692,
+        "precisao": "cidade"
+      },
+      "bio": "Cientista da computação que dirigiu a divisão de engenharia de software do Laboratório de Instrumentação do MIT, onde liderou o desenvolvimento do software de voo do computador de orientação do programa Apollo. Fundou a Higher Order Software, em 1976, e a Hamilton Technologies, em 1986.",
+      "destaque": "É creditada por ter cunhado o termo \"engenharia de software\".",
+      "foto": {
+        "arquivo": "Margaret_Hamilton_1995.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Margaret_Hamilton_1995.jpg?width=420",
+        "licenca": "CC BY-SA 3.0",
+        "autor": "Daphne Weld Nichols",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Margaret_Hamilton_1995.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Margaret_Hamilton_(software_engineer)"
+      ]
+    },
+    {
+      "id": "radia-perlman",
+      "nome": "Radia Perlman",
+      "nascimento": 1951,
+      "morte": null,
+      "area": "Redes de computadores",
+      "local": {
+        "cidade": "Portsmouth",
+        "detalhe": "Virgínia",
+        "pais": "Estados Unidos",
+        "lat": 36.8354,
+        "lon": -76.2983,
+        "precisao": "cidade"
+      },
+      "bio": "Programadora e engenheira de redes norte-americana, figura importante na construção das redes e das tecnologias que permitem a internet que conhecemos.",
+      "destaque": "Inventou o Spanning Tree Protocol (STP), fundamental para o funcionamento das pontes de rede.",
+      "foto": {
+        "arquivo": "Radia_Perlman_2009.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Radia_Perlman_2009.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "Scientist-100 at English Wikipedia",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Radia_Perlman_2009.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Radia_Perlman"
+      ]
+    },
+    {
+      "id": "gladys-west",
+      "nome": "Gladys West",
+      "nascimento": 1930,
+      "morte": 2026,
+      "area": "Matemática e geodésia",
+      "local": {
+        "cidade": "Sutherland",
+        "detalhe": "Virgínia",
+        "pais": "Estados Unidos",
+        "lat": 37.1961,
+        "lon": -77.5597,
+        "precisao": "cidade"
+      },
+      "bio": "Matemática conhecida pela modelagem matemática do formato da Terra e pelo trabalho em geodésia por satélite.",
+      "destaque": "Seus modelos de geodésia por satélite foram depois incorporados ao GPS; ela entrou no Hall da Fama da Força Aérea dos EUA em 2018.",
+      "foto": {
+        "arquivo": "181206-F-DT527-087_(cropped).jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/181206-F-DT527-087_%28cropped%29.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "Adrian Cadiz",
+        "fonte": "https://commons.wikimedia.org/wiki/File:181206-F-DT527-087_(cropped).jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Gladys_West"
+      ]
+    },
+    {
+      "id": "chien-shiung-wu",
+      "nome": "Chien-Shiung Wu",
+      "nascimento": 1912,
+      "morte": 1997,
+      "area": "Física de partículas",
+      "local": {
+        "cidade": "Taicang",
+        "detalhe": "Liuhe",
+        "pais": "China",
+        "lat": 31.4515,
+        "lon": 121.1043,
+        "precisao": "cidade"
+      },
+      "bio": "Física experimental sino-americana. No Projeto Manhattan, ajudou a desenvolver o processo de separação dos isótopos de urânio por difusão gasosa.",
+      "destaque": "Conduziu o experimento Wu, que provou que a paridade não se conserva, descoberta que rendeu o Nobel de 1957 a seus colegas.",
+      "foto": {
+        "arquivo": "Chien-shiung_Wu_(1912-1997)_C.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chien-shiung_Wu_%281912-1997%29_C.jpg?width=420",
+        "licenca": "Sem restrições de uso",
+        "autor": "Smithsonian Institution",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Chien-shiung_Wu_(1912-1997)_C.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Chien-Shiung_Wu"
+      ]
+    },
+    {
+      "id": "tu-youyou",
+      "nome": "Tu Youyou",
+      "nascimento": 1930,
+      "morte": null,
+      "area": "Química farmacêutica",
+      "local": {
+        "cidade": "Ningbo",
+        "detalhe": null,
+        "pais": "China",
+        "lat": 29.875,
+        "lon": 121.5492,
+        "precisao": "cidade"
+      },
+      "bio": "Química farmacêutica chinesa. Descobriu a artemisinina e a di-hidroartemisinina, usadas no tratamento da malária e que salvaram milhões de vidas no sul da China, no Sudeste Asiático, na África e na América do Sul.",
+      "destaque": "Recebeu o Nobel de Fisiologia ou Medicina de 2015.",
+      "foto": {
+        "arquivo": "D810_4987_Tu_Youyou,_medicine_(22945001843)_(cropped).jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/D810_4987_Tu_Youyou%2C_medicine_%2822945001843%29_%28cropped%29.jpg?width=420",
+        "licenca": "CC BY 2.0",
+        "autor": "Bengt Nyman from Vaxholm, Sweden",
+        "fonte": "https://commons.wikimedia.org/wiki/File:D810_4987_Tu_Youyou,_medicine_(22945001843)_(cropped).jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Tu_Youyou"
+      ]
+    },
+    {
+      "id": "kalpana-chawla",
+      "nome": "Kalpana Chawla",
+      "nascimento": 1962,
+      "morte": 2003,
+      "area": "Engenharia aeroespacial",
+      "local": {
+        "cidade": "Karnal",
+        "detalhe": null,
+        "pais": "Índia",
+        "lat": 29.69,
+        "lon": 76.9883,
+        "precisao": "cidade"
+      },
+      "bio": "Astronauta, engenheira aeroespacial e piloto indiana-americana. Participou de duas missões espaciais, a STS-87 (1997) e a STS-107 (2003), nas quais conduziu experimentos sobre os efeitos da microgravidade.",
+      "destaque": "Foi a primeira mulher de origem indiana a ir ao espaço.",
+      "foto": {
+        "arquivo": "Kalpana_Chawla,_NASA_photo_portrait_in_orange_suit.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kalpana_Chawla%2C_NASA_photo_portrait_in_orange_suit.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "NASA",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Kalpana_Chawla,_NASA_photo_portrait_in_orange_suit.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Kalpana_Chawla"
+      ]
+    },
+    {
+      "id": "wangari-maathai",
+      "nome": "Wangarĩ Maathai",
+      "nascimento": 1940,
+      "morte": 2011,
+      "area": "Meio ambiente",
+      "local": {
+        "cidade": "Ihithe",
+        "detalhe": "região de Nyeri",
+        "pais": "Quênia",
+        "lat": -0.5685,
+        "lon": 36.8591,
+        "precisao": "vila"
+      },
+      "bio": "Ativista social, ambiental e política queniana. Fundou o Movimento Cinturão Verde, organização focada em plantar árvores, conservar o meio ambiente e defender os direitos das mulheres.",
+      "destaque": "Em 2004, tornou-se a primeira africana a ganhar o Nobel da Paz.",
+      "foto": {
+        "arquivo": "Wangari_Maathai_in_2001.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Wangari_Maathai_in_2001.jpg?width=420",
+        "licenca": "CC BY-SA 2.0",
+        "autor": "Kingkongphoto & www.celebrity-photos.com",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Wangari_Maathai_in_2001.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Wangari_Maathai"
+      ]
+    },
+    {
+      "id": "elizabeth-blackburn",
+      "nome": "Elizabeth Blackburn",
+      "nascimento": 1948,
+      "morte": null,
+      "area": "Biologia molecular",
+      "local": {
+        "cidade": "Hobart",
+        "detalhe": "Tasmânia",
+        "pais": "Austrália",
+        "lat": -42.8833,
+        "lon": 147.3167,
+        "precisao": "cidade"
+      },
+      "bio": "Bióloga australiana-americana, ex-presidente do Instituto Salk. Em 1984, com Carol Greider, codescobriu a telomerase, a enzima que reconstitui os telômeros.",
+      "destaque": "Dividiu o Nobel de Fisiologia ou Medicina de 2009 e foi a primeira australiana a ganhar um Nobel.",
+      "foto": {
+        "arquivo": "Elizabeth_Blackburn_in_2024_by_Christopher_Michel.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Elizabeth_Blackburn_in_2024_by_Christopher_Michel.jpg?width=420",
+        "licenca": "CC BY-SA 4.0",
+        "autor": "Christopher Michel",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Elizabeth_Blackburn_in_2024_by_Christopher_Michel.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Elizabeth_Blackburn"
+      ]
+    },
+    {
+      "id": "bertha-lutz",
+      "nome": "Bertha Lutz",
+      "nascimento": 1894,
+      "morte": 1976,
+      "area": "Zoologia",
+      "local": {
+        "cidade": "São Paulo",
+        "detalhe": null,
+        "pais": "Brasil",
+        "lat": -23.5504,
+        "lon": -46.6339,
+        "precisao": "cidade"
+      },
+      "bio": "Zoóloga, política e diplomata brasileira. Naturalista do Museu Nacional, especializou-se em rãs, e foi peça central na conquista do voto feminino no Brasil.",
+      "destaque": "Assinou a Carta das Nações Unidas e defendeu a inclusão do artigo 8 no documento.",
+      "foto": {
+        "arquivo": "Bertha_Lutz_1925.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bertha_Lutz_1925.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "Adam Cuerden",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Bertha_Lutz_1925.jpg"
+      },
+      "fontes": [
+        "https://en.wikipedia.org/wiki/Bertha_Lutz"
+      ]
+    },
+    {
+      "id": "nise-da-silveira",
+      "nome": "Nise da Silveira",
+      "nascimento": 1905,
+      "morte": 1999,
+      "area": "Psiquiatria",
+      "local": {
+        "cidade": "Maceió",
+        "detalhe": null,
+        "pais": "Brasil",
+        "lat": -9.6658,
+        "lon": -35.735,
+        "precisao": "cidade"
+      },
+      "bio": "Médica psiquiatra brasileira reconhecida no mundo todo. Revolucionou o tratamento mental no Brasil por meio da arte, da livre expressão e do afeto.",
+      "destaque": "Trocou correspondências com Carl Jung, em 1954, e se opôs a tratamentos agressivos, como o confinamento em hospitais.",
+      "foto": {
+        "arquivo": "Nise_da_Silveira.tif",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Nise_da_Silveira.tif?width=420",
+        "licenca": "Domínio público",
+        "autor": "autoria desconhecida",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Nise_da_Silveira.tif"
+      },
+      "fontes": [
+        "https://pt.wikipedia.org/wiki/Nise_da_Silveira"
+      ]
+    },
+    {
+      "id": "cecilia-grierson",
+      "nome": "Cecilia Grierson",
+      "nascimento": 1859,
+      "morte": 1934,
+      "area": "Medicina",
+      "local": {
+        "cidade": "Buenos Aires",
+        "detalhe": null,
+        "pais": "Argentina",
+        "lat": -34.5997,
+        "lon": -58.3819,
+        "precisao": "cidade"
+      },
+      "bio": "Médica, professora e livre-pensadora argentina.",
+      "destaque": "Foi a primeira mulher a receber um diploma de medicina na Argentina.",
+      "foto": {
+        "arquivo": "Retrato_Cecilia_Grierson.jpg",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Retrato_Cecilia_Grierson.jpg?width=420",
+        "licenca": "Domínio público",
+        "autor": "autoria desconhecida",
+        "fonte": "https://commons.wikimedia.org/wiki/File:Retrato_Cecilia_Grierson.jpg"
+      },
+      "fontes": [
+        "https://pt.wikipedia.org/wiki/Cecilia_Grierson"
+      ]
+    }
+  ]
+}

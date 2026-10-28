@@ -14,7 +14,6 @@ import {
   type Cartao,
   type Detalhe,
   type FraseBilhete,
-  type Mapa,
   type OpcoesMural,
   type PaginaProjetos,
 } from "./comum.js";
@@ -465,29 +464,6 @@ async function carregarDestaques(): Promise<void> {
   }
 }
 
-// ---------- Convite para o mapa ----------
-
-async function carregarVitrineMapa(): Promise<void> {
-  try {
-    const mapa = await api<Mapa>("/api/mural/mapa");
-    if (mapa.cidades.length === 0) return; // fica o texto padrão
-    const desenho = el("vitrine-mapa-desenho");
-    desenho.insertAdjacentHTML(
-      "beforeend",
-      mapa.cidades
-        .map((c) => `<span class="vitrine-mapa__ponto" style="left: ${c.x}%; top: ${c.y}%"></span>`)
-        .join(""),
-    );
-    const projetos = mapa.cidades.reduce((soma, c) => soma + c.total, 0);
-    const n = mapa.cidades.length;
-    el("vitrine-mapa-resumo").textContent =
-      `${projetos} ${projetos === 1 ? "projeto" : "projetos"} em ${n} ${n === 1 ? "cidade" : "cidades"}. ` +
-      "Veja onde elas estão fazendo ciência pelo Brasil.";
-  } catch {
-    // Sem os dados, o convite continua funcionando com o texto padrão.
-  }
-}
-
 // ---------- Detalhe ----------
 
 function itemFicha(rotulo: string, valor: string | number | null | undefined, link = false): string {
@@ -895,7 +871,6 @@ async function iniciar(): Promise<void> {
   sincronizarUrl(filtros); // tira ?projeto= e ?publicado= da barra de endereço
 
   void carregarDestaques();
-  void carregarVitrineMapa();
   await carregar(true);
 
   const publicado = Number(params.get("publicado"));

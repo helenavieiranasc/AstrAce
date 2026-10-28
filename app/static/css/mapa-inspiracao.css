@@ -1,0 +1,854 @@
+/* Mapa de Inspiração (/mapa). Usa o quadro de cortiça e a fita do mural.css; aqui só o que é desta página.
+   O mapa é o protagonista: um oceano rosa claro, continentes em creme e pins que se destacam sobre ele. */
+
+.mapa-quadro {
+  max-width: none;
+  margin: 8px 10px 24px;
+  padding: 8px;
+}
+
+.mapa-cortica {
+  padding: clamp(14px, 2vw, 26px);
+}
+
+/* ---------- Cabeçalho: título curto e busca, numa linha só no computador ---------- */
+
+.mapa-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 14px;
+}
+
+.mapa-cabeca__texto {
+  display: grid;
+  gap: 6px;
+  max-width: 560px;
+}
+
+.mapa-cabeca__texto .fita {
+  justify-self: start;
+  margin: 0;
+}
+
+.mapa-cabeca__texto p {
+  justify-self: start;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel);
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--tinta);
+}
+
+/* Busca: um campo só, com resultados que aparecem embaixo dele. */
+.mapa-busca {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  width: min(100%, 360px);
+}
+
+.mapa-busca__rotulo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.mapa-busca__campo {
+  position: relative;
+}
+
+.mapa-busca__campo svg {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  translate: 0 -50%;
+  fill: none;
+  stroke: var(--tinta-suave);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.mapa-busca input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px 10px 44px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1rem;
+  box-shadow: var(--sombra-papel);
+}
+
+.mapa-busca input:focus {
+  border-color: var(--magenta);
+  outline: 3px solid rgb(184 19 92 / 0.25);
+  outline-offset: 0;
+}
+
+.mapa-busca__resultados {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 12px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel-alta);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.mapa-busca__resultados li + li {
+  margin-top: 2px;
+}
+
+.mapa-busca__resultados button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mapa-busca__resultados button:hover,
+.mapa-busca__resultados button:focus-visible {
+  background: var(--rosa-claro);
+  outline: none;
+}
+
+.mapa-busca__resultados small {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--tinta-suave);
+}
+
+.mapa-busca__vazio {
+  padding: 10px;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Legenda: duas formas, que também ligam e desligam cada tipo ---------- */
+
+.mapa-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mapa-legenda__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 16px 6px 10px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 1px rgb(42 28 21 / 0.2);
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.mapa-legenda__item:hover {
+  border-color: var(--madeira);
+}
+
+/* Desligado: contorno tracejado e texto riscado, para ficar claro que é um interruptor. */
+.mapa-legenda__item[aria-pressed="false"] {
+  background: transparent;
+  border-style: dashed;
+  color: var(--tinta-suave);
+}
+
+.mapa-legenda__item[aria-pressed="false"] > span:last-child {
+  text-decoration: line-through;
+}
+
+.mapa-legenda__item[aria-pressed="false"] .mapa-amostra {
+  opacity: 0.35;
+}
+
+.mapa-legenda__total {
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+.mapa-legenda__total:not(:empty)::before {
+  content: "· ";
+}
+
+/* As amostras usam o mesmo desenho dos pins: bolinha rosa e estrela verde. */
+.mapa-amostra {
+  flex: none;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.mapa-amostra--rosa {
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--pin-magenta);
+  box-shadow: 0 1px 2px rgb(42 28 21 / 0.35);
+}
+
+.mapa-amostra--estrela {
+  background: var(--pin-verde);
+  clip-path: polygon(50% 0, 61% 35%, 98% 38%, 69% 60%, 80% 96%, 50% 75%, 20% 96%, 31% 60%, 2% 38%, 39% 35%);
+}
+
+.mapa-amostra--estrela-rosa {
+  background: var(--pin-magenta);
+  clip-path: polygon(50% 0, 61% 35%, 98% 38%, 69% 60%, 80% 96%, 50% 75%, 20% 96%, 31% 60%, 2% 38%, 39% 35%);
+}
+
+/* ---------- Palco: o mapa, com profundidade de papel e um oceano rosa ---------- */
+
+.mapa-area {
+  position: relative;
+}
+
+.mapa-palco {
+  min-width: 0;
+}
+
+/* O desenho e os pins usam a mesma caixa, então a % de cada pin cai exatamente sobre o lugar certo. */
+.mapa-caixa {
+  position: relative;
+  width: 100%;
+  padding: clamp(8px, 1.6vw, 18px);
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 39px, rgb(184 19 92 / 0.06) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgb(184 19 92 / 0.06) 39px 40px),
+    radial-gradient(ellipse at 40% 35%, #fde3ee 0%, #f7bfd5 100%);
+  box-shadow: inset 0 0 0 1px rgb(152 18 76 / 0.2), 0 14px 28px -12px rgb(42 28 21 / 0.45);
+}
+
+.mapa-mundi {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Terras em creme com contorno rosado: o mapa fica claro e legível sobre o oceano. */
+.mapa-mundi__paises path {
+  fill: #fffaf3;
+  stroke: #e7a8c4;
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.mapa-pinos {
+  position: absolute;
+  inset: clamp(8px, 1.6vw, 18px);
+}
+
+/* ---------- Pins: bolinha rosa (AstrAce), estrela verde (história), misto quando juntos ---------- */
+
+.mapa-pino {
+  --cor: var(--pin-magenta);
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--cor);
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgb(42 28 21 / 0.35);
+  animation: pino-entra 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 22ms);
+  transition: transform 0.2s ease, opacity 0.3s ease, box-shadow 0.2s ease;
+}
+
+.mapa-pino:hover,
+.mapa-pino:focus-visible {
+  z-index: 2;
+  transform: translate(-50%, -50%) scale(1.25);
+  outline: 3px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+/* Estrela: a forma é um recorte, e o contorno branco vem de sombras em volta dela. */
+.mapa-pino--estrela {
+  --cor: var(--pin-verde);
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  filter:
+    drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff)
+    drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+    drop-shadow(0 2px 3px rgb(42 28 21 / 0.35));
+}
+
+.mapa-pino--estrela::before,
+.mapa-pino--estrela-rosa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cor);
+  clip-path: polygon(50% 0, 61% 35%, 98% 38%, 69% 60%, 80% 96%, 50% 75%, 20% 96%, 31% 60%, 2% 38%, 39% 35%);
+}
+
+/* Mulheres do AstrAce: estrela rosa, para ficar ao lado das bolinhas rosas sem ser confundida com elas. */
+.mapa-pino--estrela-rosa {
+  --cor: var(--pin-magenta);
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  filter:
+    drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff)
+    drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+    drop-shadow(0 2px 3px rgb(42 28 21 / 0.35));
+}
+
+.mapa-pino--estrela-rosa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cor);
+  clip-path: polygon(50% 0, 61% 35%, 98% 38%, 69% 60%, 80% 96%, 50% 75%, 20% 96%, 31% 60%, 2% 38%, 39% 35%);
+}
+
+/* Grupo de pins no mesmo lugar: a contagem aparece sobre o botão. */
+.mapa-pino__n {
+  position: relative;
+  pointer-events: none;
+}
+
+/* Pin que não bate com a busca fica apagado, mas continua no lugar. */
+.mapa-pino--fora {
+  opacity: 0.25;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Redesenho (busca, legenda): o pin já está no lugar, então não entra de novo. */
+.mapa-pino--parado {
+  animation: none;
+}
+
+/* Escolhido: anel pulsante, sem tirar o pin do lugar. */
+.mapa-pino--escolhido {
+  z-index: 3;
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.mapa-pino--escolhido::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 2px solid var(--magenta);
+  border-radius: 50%;
+  animation: pino-anel 1.6s ease-out infinite;
+}
+
+@keyframes pino-entra {
+  from {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+
+@keyframes pino-anel {
+  from {
+    opacity: 0.9;
+    scale: 0.9;
+  }
+  to {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+/* Etiqueta do pin sob o mouse ou o foco. */
+.mapa-rotulo {
+  position: absolute;
+  z-index: 4;
+  max-width: 240px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 18px));
+}
+
+.mapa-rotulo span {
+  display: block;
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Pop-up de detalhes: ao lado do pin, dentro do mapa (a posição vem de posicionar()) ---------- */
+
+.mapa-detalhe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: min(340px, calc(100% - 16px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 30px 20px 20px;
+  border-radius: 4px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel-alta);
+  animation: mapa-entra 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mapa-detalhe[hidden] {
+  display: none;
+}
+
+/* Fita adesiva no topo, a mesma ideia dos papéis do mural. */
+.mapa-detalhe__fita {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 96px;
+  height: 22px;
+  background: rgb(246 234 200 / 0.9);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  translate: -50% 0;
+  rotate: -1.5deg;
+}
+
+.mapa-detalhe__fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid var(--papel-borda);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.mapa-detalhe__fechar:hover {
+  border-color: var(--magenta);
+  color: var(--magenta-escuro);
+}
+
+.mapa-detalhe__fechar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+@keyframes mapa-entra {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+/* ---------- Cartões dentro do pop-up ---------- */
+
+.mapa-cartao {
+  display: grid;
+  gap: 14px;
+}
+
+.mapa-cartao__topo {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding-right: 40px;
+}
+
+.mapa-cartao__foto {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 5px solid #fff;
+  border-bottom-width: 9px;
+  background: var(--rosa-claro);
+  box-shadow: var(--sombra-papel);
+  rotate: -2deg;
+}
+
+.mapa-cartao__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Foto que não carregou: a inicial do nome, sem quebrar o cartão. */
+.mapa-cartao__foto--sem {
+  font-family: var(--fonte-mao);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.mapa-cartao__nome {
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--magenta-escuro);
+}
+
+.mapa-cartao__nome:focus-visible {
+  outline-offset: 4px;
+}
+
+.mapa-cartao__area {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.mapa-cartao__origem {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+.mapa-cartao__bio {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.mapa-cartao__destaque {
+  padding: 10px 14px 12px;
+  border-left: 5px solid var(--pin-verde);
+  background: rgb(23 144 127 / 0.1);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.mapa-cartao__destaque p {
+  margin: 0;
+}
+
+.mapa-cartao__destaque-titulo {
+  margin-bottom: 2px !important;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f6a5d;
+}
+
+.mapa-cartao__credito {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--tinta-suave);
+}
+
+.mapa-cartao__credito a {
+  color: inherit;
+}
+
+.mapa-cartao__projetos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px 12px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mapa-cartao__nomes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mapa-cartao__nomes li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--rosa-claro);
+  color: var(--magenta-escuro);
+  font-weight: 700;
+}
+
+/* Vários pins no mesmo lugar: lista de botões. */
+.mapa-grupo {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mapa-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.mapa-item:hover {
+  border-color: var(--madeira);
+  background: #fffaf0;
+}
+
+.mapa-item__texto {
+  display: grid;
+  min-width: 0;
+}
+
+.mapa-item__nome {
+  font-weight: 700;
+}
+
+.mapa-item__sub {
+  font-size: 0.92rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Lista completa: recolhida, abre sob demanda ---------- */
+
+.mapa-listas {
+  margin-top: 22px;
+  border-radius: 12px;
+  background: rgb(255 253 247 / 0.7);
+  box-shadow: inset 0 0 0 1px var(--papel-borda);
+}
+
+.mapa-listas__resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 56px;
+  padding: 12px 18px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 700;
+}
+
+.mapa-listas__resumo::-webkit-details-marker {
+  display: none;
+}
+
+.mapa-listas__resumo::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-right: 2.5px solid var(--magenta);
+  border-bottom: 2.5px solid var(--magenta);
+  rotate: 45deg;
+  transition: rotate 0.25s ease;
+}
+
+.mapa-listas[open] > .mapa-listas__resumo::after {
+  rotate: 225deg;
+}
+
+.mapa-listas__resumo:focus-visible {
+  outline: 3px solid var(--magenta);
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+
+.mapa-listas__titulo {
+  font-family: var(--fonte-mao);
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.mapa-listas__total {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+.mapa-listas__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
+  padding: 4px 18px 18px;
+}
+
+.mapa-lista ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mapa-lista__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  font-family: var(--fonte-mao);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.mapa-lista .mapa-item {
+  border-color: transparent;
+  border-bottom-color: var(--papel-borda);
+  border-radius: 0;
+  background: transparent;
+}
+
+.mapa-lista .mapa-item:hover,
+.mapa-lista .mapa-item:focus-visible {
+  background: rgb(251 211 227 / 0.4);
+  border-color: transparent;
+  border-bottom-color: var(--madeira);
+}
+
+.mapa-lista__vazio,
+.mapa-lista__fora {
+  margin: 6px 4px 0;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Celular: o mapa ocupa a largura toda; o pop-up sai por cima da página ---------- */
+
+@media (max-width: 640px) {
+  .mapa-quadro {
+    margin: 6px 6px 18px;
+  }
+
+  .mapa-cortica {
+    padding: 14px 10px;
+  }
+
+  .mapa-cabeca {
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .mapa-cabeca__texto p {
+    font-size: 0.95rem;
+  }
+
+  .mapa-busca {
+    width: 100%;
+  }
+
+  .mapa-legenda__item {
+    gap: 6px;
+    padding: 6px 12px 6px 8px;
+    font-size: 0.88rem;
+  }
+
+  .mapa-legenda__total {
+    display: none;
+  }
+
+  .mapa-caixa {
+    padding: 6px;
+  }
+
+  .mapa-pinos {
+    inset: 6px;
+  }
+
+  .mapa-pino {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mapa-pino--estrela {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mapa-listas__grade {
+    padding: 4px 12px 14px;
+  }
+}
+
+/* ---------- Movimento reduzido: sem entradas, sem pulsar ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mapa-pino,
+  .mapa-detalhe {
+    animation: none;
+  }
+
+  .mapa-pino--escolhido::after {
+    animation: none;
+  }
+
+  .mapa-pino,
+  .mapa-rotulo,
+  .mapa-listas__resumo::after {
+    transition: none;
+  }
+}
