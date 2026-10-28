@@ -178,9 +178,8 @@ para cada área (Projetos `/mural`, Eventos `/eventos`, Vagas `/vagas`, Notícia
 e o fim do cadastro levam, e a logo do cabeçalho já aponta para `/`. Sem login, o `/` continua sendo a landing.
 
 Os papéis usam dados que já existem: a data do próximo evento (`/api/eventos/proximo`) e quantos projetos e vagas há.
-O Passaporte ainda não tem página, então aparece como decoração, sem link, com um aviãozinho de papel 3D
-(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho). Quando `/passaporte` existir,
-é só trocar a `div.inicio-passaporte` por um link.
+O cartão do Passaporte também leva a `/passaporte`, com o aviãozinho de papel 3D
+(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho).
 
 ## Passaporte
 
