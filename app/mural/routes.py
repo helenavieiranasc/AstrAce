@@ -3,7 +3,7 @@ from flask import abort, current_app, jsonify, render_template, request
 from .. import catalogos, municipios
 from ..auth import usuaria_atual
 from ..extensoes import db
-from . import bp, servico
+from . import bp, citacao, servico
 from .models import Denuncia, Projeto, semana_atual
 from .tipos import MOTIVOS_DENUNCIA, TIPOS
 
@@ -120,6 +120,7 @@ def api_detalhe(projeto_id):
     dados["bilhetes"] = servico.bilhetes(projeto, usuaria)
     # A autora vê os bilhetes que recebeu, mas não deixa bilhete no próprio projeto.
     dados["minha"] = bool(usuaria and usuaria.id == projeto.usuaria_id)
+    dados["citacao"] = citacao.gerar(projeto, f"{request.url_root}mural?projeto={projeto.id}")
     return jsonify(dados)
 
 
