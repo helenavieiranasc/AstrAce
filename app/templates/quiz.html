@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block titulo %}Que cientista você seria? · AstrAce{% endblock %}
+{% block descricao %}Responda 6 perguntas rápidas e descubra com qual cientista brasileira você combina.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro">
+  <div class="cortica quiz-cortica">
+    <div class="quiz-folha">
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+
+      {# Abertura #}
+      <section class="quiz-tela" id="tela-inicio" aria-labelledby="quiz-titulo">
+        <img class="quiz-mascote" src="{{ url_for('static', filename='img/logo-estrela-original-240.png') }}"
+             alt="" width="240" height="244">
+        <h1 class="quiz-titulo" id="quiz-titulo">Que cientista você seria?</h1>
+        <p class="quiz-intro">São 6 perguntas rápidas. No fim, você descobre com qual cientista brasileira combina
+          e onde achar projetos, eventos e vagas da sua área.</p>
+        <button class="botao botao--primario botao--grande" type="button" id="comecar" disabled>Começar o quiz</button>
+        <p class="quiz-aviso" id="aviso-inicio" role="alert" hidden></p>
+      </section>
+
+      {# Perguntas: uma por vez #}
+      <form class="quiz-tela" id="tela-pergunta" novalidate hidden>
+        <div class="quiz-progresso">
+          <p class="quiz-progresso__texto" id="progresso-texto" aria-live="polite"></p>
+          <div class="quiz-progresso__barra" aria-hidden="true"><span id="progresso-barra"></span></div>
+        </div>
+        <fieldset class="quiz-pergunta">
+          <legend class="quiz-pergunta__texto" id="pergunta-texto" tabindex="-1"></legend>
+          <div class="quiz-opcoes" id="opcoes"></div>
+        </fieldset>
+        <div class="quiz-acoes">
+          <button class="botao botao--texto" type="button" id="voltar">Voltar</button>
+          <button class="botao botao--primario" type="submit" id="proxima" disabled>Próxima</button>
+        </div>
+        <p class="quiz-aviso" id="aviso-pergunta" role="alert" hidden></p>
+      </form>
+
+      {# Resultado #}
+      <section class="quiz-tela quiz-resultado" id="tela-resultado" aria-labelledby="resultado-nome" hidden>
+        <p class="quiz-resultado__chamada" id="resultado-chamada">Você seria…</p>
+        <h2 class="quiz-resultado__nome" id="resultado-nome" tabindex="-1"></h2>
+        <p class="quiz-resultado__area" id="resultado-area"></p>
+        <p class="quiz-resultado__perfil" id="resultado-perfil"></p>
+        <div class="quiz-resultado__sobre">
+          <h3>Quem é ela</h3>
+          <p id="resultado-sobre"></p>
+        </div>
+
+        <div class="quiz-trilha">
+          <h3>Seu próximo passo</h3>
+          <ul class="quiz-trilha__lista">
+            <li><a class="quiz-trilha__link" id="link-projetos" href="/mural">Ver projetos da área no mural</a></li>
+            <li><a class="quiz-trilha__link" id="link-eventos" href="/eventos">Achar eventos da área</a></li>
+            <li><a class="quiz-trilha__link" id="link-vagas" href="/vagas">Ver vagas e bolsas da área</a></li>
+          </ul>
+        </div>
+
+        <div class="quiz-compartilhar">
+          <button class="botao botao--primario" type="button" id="story">Imagem para o story</button>
+          <button class="botao botao--secundario" type="button" id="copiar">Copiar link do resultado</button>
+          <button class="botao botao--texto" type="button" id="refazer">Refazer o quiz</button>
+        </div>
+        <p class="quiz-aviso" id="aviso-resultado" role="status" hidden></p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

@@ -92,6 +92,20 @@ Em extensão, social e protótipo, as fotos também contam como material (`fotos
 O servidor confere os primeiros bytes de cada arquivo, então um `.exe` renomeado para `.pdf` é recusado.
 Os arquivos ficam em `instance/uploads/`, fora do git.
 
+## Quiz "Que cientista você seria?"
+
+Página: `/quiz`, com um papel na página inicial e um item no menu lateral. São 6 perguntas; cada resposta dá pontos para áreas e a área
+com mais pontos define uma cientista brasileira de referência. O resultado leva para projetos, eventos e vagas
+da área (`?area=` em `/mural`, `/eventos` e `/vagas`) e gera uma imagem para o story (1080x1920, desenhada no navegador).
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/quiz` | Perguntas e opções (sem os pontos) |
+| `POST /api/quiz/resultado` | `{"respostas": [0, 2, 1, 3, 0, 1]}` (índice da opção em cada pergunta). Devolve `{area, area_rotulo, cientista, sobre, perfil}` |
+| `GET /api/quiz/resultado/<area>` | O resultado de uma área, para o link compartilhado (`/quiz?resultado=fisica`) |
+
+Perguntas, pontos e cientistas ficam em `app/quiz/dados.py`. Um teste confere que toda área pode sair como resultado.
+
 ## Eventos (Pessoa 3)
 
 Página: `/eventos`. O cartaz no topo do mural mostra a data e o nome do próximo evento (`cartaz-eventos.js`).
