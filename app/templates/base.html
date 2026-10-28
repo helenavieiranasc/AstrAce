@@ -42,6 +42,9 @@
       </div>
       {# Seções com nome: quem procura "onde ver quem veio antes" ou "o que fazer agora" acha pelo rótulo. #}
       <nav class="lateral__nav" aria-label="Principal">
+        <ul>
+          <li><a href="/" {% if request.path == '/' %}aria-current="page"{% endif %}>Página inicial</a></li>
+        </ul>
         <p class="lateral__grupo" id="menu-descobrir">Descobrir</p>
         <ul aria-labelledby="menu-descobrir">
           <li><a href="/mural" {% if request.path.startswith('/mural') %}aria-current="page"{% endif %}>Mural de projetos</a></li>
