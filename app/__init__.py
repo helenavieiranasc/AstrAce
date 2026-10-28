@@ -29,6 +29,7 @@ def create_app(config=Config):
     from .noticias.seed import seed_noticias
     from .quiz import bp as quiz_bp
     from .passaporte import bp as passaporte_bp
+    from .mapa import bp as mapa_bp
     from .conta import bp as conta_bp, completar_colunas
 
     app.register_blueprint(conta_bp)  # "/" é a landing page
@@ -39,6 +40,7 @@ def create_app(config=Config):
     app.register_blueprint(noticias_bp)
     app.register_blueprint(quiz_bp)
     app.register_blueprint(passaporte_bp)
+    app.register_blueprint(mapa_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)
     app.cli.add_command(seed_vagas)

@@ -27,13 +27,24 @@ def posicao(lat, lon):
     return round(x / LARGURA * 100, 2), round(y / ALTURA * 100, 2)
 
 
-def localizar(cidade, uf=None):
-    """(nome, UF, x%, y%) da cidade, ou None se não dá para saber qual município é."""
+def _achar(cidade, uf=None):
+    """(nome, UF, lat, lon) do município, ou None se não dá para saber qual é."""
     if not cidade:
         return None
     # Com estado, procura nele; se o texto foi editado à mão (ex.: "Recife - PE"), tenta pelo nome.
-    achada = (uf and municipios.buscar(cidade, uf)) or municipios.buscar_sem_uf(cidade)
+    return (uf and municipios.buscar(cidade, uf)) or municipios.buscar_sem_uf(cidade)
+
+
+def localizar(cidade, uf=None):
+    """(nome, UF, x%, y%) da cidade, ou None se não dá para saber qual município é."""
+    achada = _achar(cidade, uf)
     if not achada:
         return None
     nome, sigla, lat, lon = achada
     return (nome, sigla, *posicao(lat, lon))
+
+
+def coordenadas(cidade, uf=None):
+    """(latitude, longitude) do município, para o globo do Mapa de Inspiração."""
+    achada = _achar(cidade, uf)
+    return (achada[2], achada[3]) if achada else None

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mapa de Inspiração · AstrAce{% endblock %}
+{% block descricao %}Um mapa para explorar onde meninas e mulheres fazem ciência hoje e onde nasceram mulheres que marcaram a história da ciência e da tecnologia.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mapa-inspiracao.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro mapa-quadro">
+  <div class="cortica mapa-cortica">
+
+    <header class="mapa-cabeca">
+      <div class="mapa-cabeca__texto">
+        <h1 class="fita">Mapa de Inspiração</h1>
+        <p>Onde meninas e mulheres fazem ciência hoje e onde nasceram as que mudaram a história da ciência.</p>
+      </div>
+
+      {# Busca por nome: acha uma pessoa ou uma cidade e leva o mapa até ela. #}
+      <form class="mapa-busca" role="search" id="mapa-busca" autocomplete="off">
+        <label class="mapa-busca__rotulo" for="mapa-busca-campo">Procurar uma pessoa ou cidade</label>
+        <div class="mapa-busca__campo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+          <input type="search" id="mapa-busca-campo" placeholder="Ex.: Marie Curie, Recife" aria-controls="mapa-resultados" aria-expanded="false">
+        </div>
+        <ul class="mapa-busca__resultados" id="mapa-resultados" role="listbox" aria-label="Resultados da busca" hidden></ul>
+      </form>
+    </header>
+
+    {# Legenda que também liga e desliga cada tipo de pin. #}
+    <div class="mapa-legenda" role="group" aria-label="Mostrar no mapa">
+      <button class="mapa-legenda__item" type="button" data-categoria="projetos" aria-pressed="true">
+        <span class="mapa-amostra mapa-amostra--rosa" aria-hidden="true"></span>
+        <span>Projetos do AstrAce <span class="mapa-legenda__total" id="total-astrace"></span></span>
+      </button>
+      <button class="mapa-legenda__item" type="button" data-categoria="mulheres" aria-pressed="true">
+        <span class="mapa-amostra mapa-amostra--estrela-rosa" aria-hidden="true"></span>
+        <span>Mulheres do AstrAce <span class="mapa-legenda__total" id="total-mulheres"></span></span>
+      </button>
+      <button class="mapa-legenda__item" type="button" data-categoria="historia" aria-pressed="true">
+        <span class="mapa-amostra mapa-amostra--estrela" aria-hidden="true"></span>
+        <span>Mulheres da história <span class="mapa-legenda__total" id="total-historia"></span></span>
+      </button>
+    </div>
+
+    <div class="mapa-area" id="mapa-area">
+      <section class="mapa-palco" id="mapa-palco" aria-label="Mapa-múndi com os pins">
+        <div class="mapa-caixa" id="mapa-caixa">
+          {# Desenho estático: só as fronteiras dos países (app/templates/mapa_mundi.svg). #}
+          {% include "mapa_mundi.svg" %}
+          <div class="mapa-pinos" id="mapa-pinos"></div>
+          <p class="mapa-rotulo" id="mapa-rotulo" role="presentation" hidden></p>
+
+          {# Pop-up com os detalhes do pin escolhido, ao lado dele (a posição é calculada em mapa-inspiracao.ts). #}
+          <aside class="mapa-detalhe" id="mapa-detalhe" role="region" aria-label="Detalhes do pin escolhido" hidden>
+            <span class="mapa-detalhe__fita" aria-hidden="true"></span>
+            <button class="mapa-detalhe__fechar" type="button" id="mapa-detalhe-fechar" aria-label="Fechar e voltar ao mapa">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            <div id="mapa-detalhe-conteudo"></div>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    {# Lista completa, recolhida: fica disponível sem tomar a página. #}
+    <details class="mapa-listas" id="mapa-listas">
+      <summary class="mapa-listas__resumo">
+        <span class="mapa-listas__titulo">Ver todas no mapa, em lista</span>
+        <span class="mapa-listas__total" id="mapa-resumo">Procurando os pins…</span>
+      </summary>
+      <div class="mapa-listas__grade">
+        <nav class="mapa-lista" aria-labelledby="titulo-lista-astrace">
+          <h2 class="mapa-lista__titulo" id="titulo-lista-astrace"><span class="mapa-amostra mapa-amostra--rosa" aria-hidden="true"></span>Projetos do AstrAce</h2>
+          <ol id="lista-astrace"></ol>
+          <p class="mapa-lista__fora" id="mapa-sem-local" hidden></p>
+        </nav>
+        <nav class="mapa-lista" aria-labelledby="titulo-lista-historia">
+          <h2 class="mapa-lista__titulo" id="titulo-lista-historia"><span class="mapa-amostra mapa-amostra--estrela" aria-hidden="true"></span>Mulheres da história</h2>
+          <ol id="lista-historia"></ol>
+        </nav>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/mapa-inspiracao.js') }}"></script>
+{% endblock %}

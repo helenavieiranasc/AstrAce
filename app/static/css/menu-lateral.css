@@ -133,6 +133,19 @@
   list-style: none;
 }
 
+.lateral__grupo {
+  margin: 18px 0 4px 14px;
+  font-family: var(--fonte-mao);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--magenta-escuro);
+}
+
+.lateral__grupo:first-child {
+  margin-top: 4px;
+}
+
 .lateral__nav a {
   display: block;
   padding: 12px 14px;

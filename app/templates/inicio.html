@@ -114,18 +114,19 @@
         </span>
       </a>
 
-      {# ---------- Quiz: teste de revista num post-it (antes era um recado só de decoração) ---------- #}
-      <a class="postit postit--rosa inicio-link inicio-quiz" href="/quiz" style="--rot: 3deg; --i: 6">
+      {# ---------- Inspire-se: o mapa e o quiz dividem o mesmo post-it (antes o quiz ocupava sozinho este lugar) ---------- #}
+      <section class="postit postit--rosa inicio-quiz" style="--rot: 3deg; --i: 6" aria-labelledby="inicio-inspire">
         <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
-        <span class="inicio-quiz__selo" aria-hidden="true">quiz</span>
-        <span class="inicio-quiz__titulo">Que cientista você seria?</span>
-        <span class="inicio-quiz__opcoes" aria-hidden="true">
-          <span><i></i>Sonia Guimarães</span>
-          <span><i class="marcado"></i>Bertha Lutz</span>
-          <span><i></i>Nina da Hora</span>
-        </span>
-        <span class="inicio-abrir">fazer o quiz {{ seta }}</span>
-      </a>
+        <h2 class="inicio-quiz__titulo" id="inicio-inspire">Inspire-se</h2>
+        <a class="inicio-quiz__link" href="/mapa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+          <span><b>Mapa de Inspiração</b>Veja onde elas brilham e de onde vieram</span>
+        </a>
+        <a class="inicio-quiz__link" href="/quiz">
+          <svg viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg>
+          <span><b>Que cientista você seria?</b>Um quiz rápido</span>
+        </a>
+      </section>
 
     </div>
   </div>
