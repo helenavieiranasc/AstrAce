@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block titulo %}Passaporte · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/passaporte.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+{% set p = passaporte %}
+<div class="quadro passaporte-quadro">
+  <div class="cortica passaporte-cortica">
+
+    <div class="passaporte-cabeca">
+      <h1 class="fita">Seu passaporte</h1>
+      <p class="passaporte-dica" id="passaporte-dica">Toque na capa para abrir.<span class="passaporte-dica__resto"> Depois, toque nas páginas para virar.</span></p>
+    </div>
+
+    {# O passaporte 3D entra aqui. Sem WebGL, quem aparece é a versão em texto logo abaixo. #}
+    <div class="passaporte-palco" id="passaporte-palco" aria-hidden="true">
+      <p class="passaporte-palco__carregando" id="passaporte-carregando">Abrindo a gaveta…</p>
+    </div>
+
+    <button class="passaporte-sair-tela" type="button" id="passaporte-sair-tela" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+      <span>Sair da tela cheia</span>
+    </button>
+
+    <div class="passaporte-controles" id="passaporte-controles" hidden>
+      <button class="botao botao--secundario" type="button" id="passaporte-anterior" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span id="passaporte-anterior-texto">Página anterior</span>
+      </button>
+      <p class="passaporte-onde" id="passaporte-onde" aria-live="polite">Passaporte fechado</p>
+      <button class="botao botao--primario" type="button" id="passaporte-proxima">
+        <span id="passaporte-proxima-texto">Abrir passaporte</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    {# Versão em texto: é a que leitores de tela leem e a que aparece sem WebGL. #}
+    <div class="passaporte-texto" id="passaporte-texto">
+      <section class="passaporte-texto__pagina" aria-labelledby="pt-identidade">
+        <h2 id="pt-identidade">Passaporte AstrAce nº {{ p.numero }}</h2>
+        <dl>
+          <dt>Nome</dt><dd>{{ p.nome }}</dd>
+          <dt>Membro desde</dt><dd>{{ p.membro_desde }}</dd>
+          {% if p.nivel %}<dt>Fase dos estudos</dt><dd>{{ p.nivel }}</dd>{% endif %}
+          {% if p.area %}<dt>Área</dt><dd>{{ p.area }}</dd>{% endif %}
+          {% if p.instituicao %}<dt>Instituição</dt><dd>{{ p.instituicao }}</dd>{% endif %}
+          {% if p.local %}<dt>Cidade</dt><dd>{{ p.local }}</dd>{% endif %}
+        </dl>
+      </section>
+      <section class="passaporte-texto__pagina" aria-labelledby="pt-carimbos">
+        <h2 id="pt-carimbos">Carimbos</h2>
+        {% if p.carimbos %}
+        <ul>
+          {% for c in p.carimbos %}<li>{{ c.titulo }} ({{ c.concedido_em }})</li>{% endfor %}
+        </ul>
+        {% else %}
+        <p>Nenhum carimbo ainda.</p>
+        {% endif %}
+      </section>
+      <section class="passaporte-texto__pagina" aria-labelledby="pt-eventos">
+        <h2 id="pt-eventos">Eventos</h2>
+        <p>Os carimbos dos eventos de que você participar vão aparecer nestas páginas.
+          <a href="/eventos">Ver a agenda de eventos</a>.</p>
+      </section>
+    </div>
+
+  </div>
+</div>
+
+<script type="application/json" id="passaporte-dados">{{ p | tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/passaporte.js') }}"></script>
+{% endblock %}

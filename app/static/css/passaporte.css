@@ -1,0 +1,305 @@
+/* Aba do Passaporte. Usa o quadro de cortiça de mural.css; aqui só o que é desta página. */
+
+/* Tela cheia: sobra só uma bordinha de madeira em volta, o cabeçalho do site em cima e uma
+   faixa fina de botões embaixo. O título flutua no canto e some quando o passaporte abre. */
+.passaporte-quadro {
+  max-width: none;
+  margin: 8px 10px;
+  padding: 8px;
+}
+
+.passaporte-cortica {
+  position: relative;
+  padding: 0;
+}
+
+.passaporte-cabeca {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 2;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  max-width: min(300px, 28%); /* não encosta na capa fechada, que fica no meio */
+  transition: opacity 0.4s ease, translate 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Aberto, o passaporte usa a largura toda: o título sai do caminho. */
+.passaporte-cortica--aberto .passaporte-cabeca {
+  opacity: 0;
+  translate: 0 -10px;
+  pointer-events: none;
+}
+
+.passaporte-cabeca .fita {
+  margin-bottom: 0;
+}
+
+.passaporte-dica {
+  margin: 0;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: rgb(255 253 247 / 0.9);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+/* O canvas é transparente: o passaporte deita direto na cortiça e a sombra cai nela.
+   Altura = tela menos o cabeçalho do site (72px), a bordinha de madeira e a faixa de botões. */
+.passaporte-palco {
+  position: relative;
+  width: 100%;
+  height: max(440px, calc(100vh - 72px - 32px - 62px));
+  height: max(440px, calc(100dvh - 72px - 32px - 62px));
+}
+
+.passaporte-palco canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.passaporte-palco--3d canvas {
+  opacity: 1;
+}
+
+.passaporte-palco__carregando {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--papel);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 0.35);
+}
+
+.passaporte-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  height: 62px;
+}
+
+.passaporte-controles .botao svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.passaporte-onde {
+  min-width: 14ch;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgb(255 253 247 / 0.92);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---------- Tela cheia (depois de abrir) ---------- */
+
+/* A cortiça cobre a tela toda, por cima do cabeçalho; o palco fica com tudo menos os botões. */
+.passaporte-cortica--tela-cheia {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+}
+
+.passaporte-cortica--tela-cheia .passaporte-palco {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.passaporte-cortica--tela-cheia .passaporte-controles {
+  flex: none;
+}
+
+/* Não deixa a página de trás rolar enquanto o passaporte está em tela cheia. */
+.passaporte-sem-rolagem,
+.passaporte-sem-rolagem body {
+  overflow: hidden;
+}
+
+.passaporte-sair-tela {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px 8px 10px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 8px;
+  background: var(--papel);
+  color: var(--tinta);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--sombra-papel);
+}
+
+.passaporte-sair-tela:hover {
+  border-color: var(--magenta);
+  background: var(--rosa-claro);
+}
+
+.passaporte-sair-tela svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Sem 3D: título e versão em texto em fluxo normal, um embaixo do outro. */
+.passaporte-cortica:has(.passaporte-texto--visivel) {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 28px 16px;
+}
+
+.passaporte-cortica:has(.passaporte-texto--visivel) .passaporte-cabeca {
+  position: static;
+  justify-items: center;
+  max-width: none;
+}
+
+/* Versão em texto: sempre para o leitor de tela; visível só quando não há 3D. */
+.passaporte-texto:not(.passaporte-texto--visivel) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.passaporte-texto--visivel {
+  display: grid;
+  gap: 20px;
+  width: min(100%, 640px);
+}
+
+.passaporte-texto__pagina {
+  padding: 26px 24px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel);
+}
+
+.passaporte-texto__pagina h2 {
+  margin: 0 0 10px;
+  font-family: var(--fonte-mao);
+  font-size: 2rem;
+  color: var(--magenta-escuro);
+}
+
+.passaporte-texto__pagina dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  margin: 0;
+}
+
+.passaporte-texto__pagina dt {
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.passaporte-texto__pagina dd {
+  margin: 0;
+}
+
+/* Celular em pé: o passaporte ocupa a largura; título em cima e botões embaixo, centralizados. */
+@media (max-width: 760px) {
+  .passaporte-quadro {
+    margin: 6px;
+    padding: 6px;
+  }
+
+  .passaporte-palco {
+    height: max(400px, calc(100vh - 68px - 24px - 112px));
+    height: max(400px, calc(100dvh - 68px - 24px - 112px));
+  }
+
+  .passaporte-cabeca {
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    justify-items: center;
+    max-width: none;
+    text-align: center;
+  }
+
+  .passaporte-cabeca .fita {
+    font-size: 1.6rem;
+  }
+
+  .passaporte-dica {
+    font-size: 0.84rem;
+  }
+
+  /* No celular a dica fica curta, para não cobrir o topo da capa. */
+  .passaporte-dica__resto {
+    display: none;
+  }
+
+  .passaporte-controles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 8px;
+    height: auto;
+    padding: 8px 4px 2px;
+  }
+
+  .passaporte-onde {
+    grid-column: 1 / -1;
+    order: -1;
+    padding-block: 4px;
+  }
+
+  .passaporte-controles .botao {
+    min-height: 44px;
+    padding-inline: 10px;
+  }
+
+  /* Em tela cheia no celular, o botão de sair vira só o ícone, no canto. */
+  .passaporte-sair-tela {
+    top: 8px;
+    right: 8px;
+    padding: 8px 10px;
+  }
+
+  .passaporte-sair-tela span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .passaporte-cortica--tela-cheia .passaporte-controles {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}

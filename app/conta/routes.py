@@ -87,6 +87,9 @@ def google_retorno():
         return redirect(url_for("conta.landing", erro="email"))
 
     usuaria = _usuaria_do_google(perfil)
+    from ..passaporte.servico import conceder_boas_vindas
+
+    conceder_boas_vindas(usuaria)  # o carimbo de boas-vindas do passaporte (só na primeira vez)
     session.clear()
     session["usuaria_id"] = usuaria.id
     session.permanent = True

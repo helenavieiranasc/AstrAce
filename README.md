@@ -178,9 +178,27 @@ para cada área (Projetos `/mural`, Eventos `/eventos`, Vagas `/vagas`, Notícia
 e o fim do cadastro levam, e a logo do cabeçalho já aponta para `/`. Sem login, o `/` continua sendo a landing.
 
 Os papéis usam dados que já existem: a data do próximo evento (`/api/eventos/proximo`) e quantos projetos e vagas há.
-O Passaporte ainda não tem página, então aparece como decoração, sem link, com um aviãozinho de papel 3D
-(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho). Quando `/passaporte` existir,
-é só trocar a `div.inicio-passaporte` por um link.
+O cartão do Passaporte também leva a `/passaporte`, com o aviãozinho de papel 3D
+(`frontend/src/aviao-3d.ts`, Three.js do CDN; sem WebGL fica um desenho).
+
+## Passaporte
+
+`/passaporte` (precisa de login e cadastro completo) mostra o passaporte 3D da usuária: capa de couro rosa com a
+logo em metalizado, que abre na lombada; folhas que viram de verdade (com curvatura) clicando ou arrastando; e,
+na primeira vez, um carimbo 3D que desce, imprime o carimbo de boas-vindas e sobe. No celular em pé, aberto,
+mostra uma página de cada vez. Os botões "Página anterior / Próxima página" fazem o mesmo pelo teclado.
+Sem WebGL (ou sem internet para o Three.js), aparece a versão em texto, que é também a que o leitor de tela lê.
+
+| Arquivo | O que tem |
+| --- | --- |
+| `app/passaporte/` | Rota, modelo `Carimbo` (tabela `carimbos`) e `servico.conceder()` |
+| `frontend/src/passaporte-3d.ts` | Cena Three.js: capa, folhas, carimbo e animações |
+| `frontend/src/passaporte-paginas.ts` | As páginas desenhadas em canvas (identidade, carimbos, impressão da tinta) |
+
+O carimbo de boas-vindas é concedido no login (e, para quem já tinha conta, ao abrir o passaporte). Cada
+`codigo` vale uma vez por usuária. `visto_em` guarda que a animação já passou
+(`POST /api/passaporte/carimbos/<codigo>/visto`), então ela não se repete nem em outro dispositivo.
+Para os carimbos de eventos (check-in por QR), use `servico.conceder(usuaria, f"evento-{id}", titulo)`.
 
 ## Perfil
 

@@ -234,11 +234,9 @@ def test_nao_usa_foto_de_outra_pessoa(ana, bia):
 def test_inicio_mostra_o_mural_de_navegacao(ana):
     pagina = ana.get("/").get_data(as_text=True)
     assert "Oi, Ana!" in pagina
-    for destino in ('href="/mural"', 'href="/eventos"', 'href="/vagas"', 'href="/noticias"'):
+    for destino in ('href="/mural"', 'href="/eventos"', 'href="/vagas"', 'href="/noticias"', 'href="/passaporte"'):
         assert destino in pagina
-    # O Passaporte ainda não tem página: aparece no mural, mas sem link.
-    assert "Passaporte" in pagina
-    assert 'href="/passaporte" class' not in pagina and "inicio-passaporte\" href" not in pagina
+    assert "em breve" not in pagina
 
 
 def test_inicio_sem_login_e_a_landing(app):
