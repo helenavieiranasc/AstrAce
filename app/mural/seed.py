@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import click
 
+from .. import municipios
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..uploads.routes import pasta_uploads
@@ -284,9 +285,11 @@ def seed_mural(limpar):
         autora = por_email[email]
         detalhes = dict(detalhes)
         link = detalhes.pop("link", None) or ("https://github.com/" if tipo == "software" else None)
+        local = municipios.buscar_sem_uf(autora.cidade)
         projeto = Projeto(
             usuaria_id=autora.id, tipo=tipo, titulo=titulo, resumo=resumo, area=area, ano=ano,
-            instituicao=autora.instituicao, cidade=autora.cidade, nivel=autora.nivel,
+            instituicao=autora.instituicao, cidade=autora.cidade, uf=local[1] if local else None,
+            nivel=autora.nivel,
             link_externo=link, detalhes=detalhes, destaque=destaque,
             destaque_semana=semana_atual() if destaque else None,
             # Um dia e meio entre cada projeto: só os mais recentes ganham a etiqueta "Novo!".

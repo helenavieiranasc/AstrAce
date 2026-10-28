@@ -42,6 +42,8 @@ export interface ArquivoEnviado {
 
 export interface OpcoesMural {
   tipos: TipoProjeto[];
+  estados: Opcao[];
+  local_perfil: { uf: string; cidade: string } | null;
   areas: Opcao[];
   niveis: Opcao[];
   identidades: Opcao[];
@@ -95,6 +97,21 @@ export interface FraseBilhete {
   cor: string;
   total: number;
   meu: boolean;
+}
+
+export interface CidadeNoMapa {
+  cidade: string;
+  uf: string;
+  x: number; // porcentagem da largura do desenho
+  y: number; // porcentagem da altura
+  total: number;
+  projetos: Cartao[];
+}
+
+export interface Mapa {
+  cidades: CidadeNoMapa[];
+  total: number;
+  sem_local: number;
 }
 
 export interface PaginaProjetos {
@@ -252,6 +269,29 @@ const ICONES: Record<string, string> = {
   estrela: '<path d="m12 3.3 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.7l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>',
   compartilhar: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/>',
 };
+
+// Cor da capa de cada área, para projetos sem foto.
+export const CORES_CAPA: Record<string, string> = {
+  computacao: "#c9dcf5",
+  engenharias: "#f8d9a8",
+  matematica: "#dccff5",
+  fisica: "#c7cdf2",
+  quimica: "#c4ecd8",
+  biologicas: "#d2efc2",
+  saude: "#f9cbd8",
+  ambiental: "#dcedb6",
+  humanas: "#f6d5c0",
+  educacao: "#fbe5a0",
+};
+
+/** Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área. */
+export function htmlFoto(c: Cartao): string {
+  const imagem = urlSegura(c.imagem_url);
+  const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
+  return imagem
+    ? `<img src="${esc(imagem)}" alt="" loading="lazy">`
+    : `<div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div>`;
+}
 
 export function icone(nome: string): string {
   return `<svg class="icone" viewBox="0 0 24 24" aria-hidden="true">${ICONES[nome] ?? ICONES.prototipo}</svg>`;

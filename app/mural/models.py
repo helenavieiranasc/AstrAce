@@ -26,6 +26,7 @@ class Projeto(db.Model):
     ano = db.Column(db.Integer, nullable=False)
     instituicao = db.Column(db.String(160), index=True)
     cidade = db.Column(db.String(120), index=True)
+    uf = db.Column(db.String(2))  # sigla do estado; com ela, a cidade é um município de verdade (app/municipios.py)
     nivel = db.Column(db.String(40), index=True)
     link_externo = db.Column(db.String(500))
     imagem_url = db.Column(db.String(500))

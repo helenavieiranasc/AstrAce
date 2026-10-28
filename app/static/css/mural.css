@@ -201,6 +201,102 @@
   min-width: 0;
 }
 
+/* ---------- Convite para o mapa: folha quadriculada com mini mapa e pontos ---------- */
+
+.vitrine-mapa {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(110px, 14vw, 150px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 32px);
+  max-width: 620px;
+  padding: 18px clamp(18px, 2.6vw, 30px);
+  background:
+    linear-gradient(rgb(46 107 214 / 0.07) 1px, transparent 1px) 0 0 / 18px 18px,
+    linear-gradient(90deg, rgb(46 107 214 / 0.07) 1px, transparent 1px) 0 0 / 18px 18px,
+    var(--papel);
+  color: var(--tinta);
+  text-decoration: none;
+  box-shadow: var(--sombra-papel);
+  transform: rotate(-0.8deg);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.vitrine-mapa:hover {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: var(--sombra-papel-alta);
+}
+
+.vitrine-mapa:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 4px;
+}
+
+.vitrine-mapa .fita-canto {
+  position: absolute;
+  top: -10px;
+  left: -16px;
+  width: 80px;
+  height: 24px;
+  background: rgb(246 234 200 / 0.88);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+  transform: rotate(-28deg);
+}
+
+.vitrine-mapa__desenho {
+  position: relative;
+  display: block;
+}
+
+.vitrine-mapa__desenho img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Ponto de cada cidade com projeto. */
+.vitrine-mapa__ponto {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--pin-magenta);
+  box-shadow: 0 0 0 2px #fff, 0 1px 3px rgb(0 0 0 / 0.35);
+}
+
+.vitrine-mapa__texto {
+  display: grid;
+  gap: 6px;
+}
+
+.vitrine-mapa__titulo {
+  font-family: var(--fonte-mao);
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.vitrine-mapa__resumo {
+  color: var(--tinta-suave);
+}
+
+.vitrine-mapa__acao {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--magenta);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.vitrine-mapa:hover .vitrine-mapa__acao {
+  background: var(--magenta-escuro);
+}
+
 /* Bilhetinho ao lado da fita quando os destaques são automáticos ("Em alta na semana"). */
 .destaques__nota {
   display: inline-block;
@@ -1765,6 +1861,15 @@ input:focus-visible + .botao {
   .denunciar {
     margin-left: 0;
   }
+}
+
+/* Campos de arquivo escondidos (o botão visível é o label): a regra de largura dos campos não vale para eles. */
+.folha-form input.visualmente-oculto {
+  width: 1px;
+  min-height: 0;
+  height: 1px;
+  padding: 0;
+  border: 0;
 }
 
 /* Espaço para a estrela mascote no canto do formulário (fica no fim para valer sobre as margens acima). */

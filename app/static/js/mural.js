@@ -1,19 +1,7 @@
-import { api, el, esc, formatarTamanho, icone, mensagemDeErro, nomeDoFormato, postJson, preencherSelect, urlSegura, } from "./comum.js";
+import { api, el, esc, CORES_CAPA, formatarTamanho, htmlFoto, icone, mensagemDeErro, nomeDoFormato, postJson, preencherSelect, urlSegura, } from "./comum.js";
 const POR_PAGINA = 12;
 const CAMPOS_FILTRO = ["q", "tipo", "area", "nivel", "instituicao", "cidade", "identidade"];
 const PINS = ["--pin-magenta", "--pin-violeta", "--pin-verde", "--pin-ambar", "--pin-azul"];
-const CORES_CAPA = {
-    computacao: "#c9dcf5",
-    engenharias: "#f8d9a8",
-    matematica: "#dccff5",
-    fisica: "#c7cdf2",
-    quimica: "#c4ecd8",
-    biologicas: "#d2efc2",
-    saude: "#f9cbd8",
-    ambiental: "#dcedb6",
-    humanas: "#f6d5c0",
-    educacao: "#fbe5a0",
-};
 // Nomes curtos para as etiquetas de área caberem numa linha (o nome completo fica no title e no aria-label).
 const AREAS_CURTAS = {
     computacao: "Computação",
@@ -107,14 +95,6 @@ function aoMudarFiltros() {
 function rotacao(id, escala = 1) {
     const x = Math.sin(id * 12.9898) * 43758.5453;
     return (((x - Math.floor(x)) * 4.4 - 2.2) * escala).toFixed(2);
-}
-/** Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área. */
-function htmlFoto(c) {
-    const imagem = urlSegura(c.imagem_url);
-    const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
-    return imagem
-        ? `<img src="${esc(imagem)}" alt="" loading="lazy">`
-        : `<div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div>`;
 }
 function htmlCartao(c, variante) {
     const pin = PINS[c.id % PINS.length];
@@ -436,6 +416,26 @@ async function carregarDestaques() {
         // A faixa de destaques é opcional: sem ela, o mural continua funcionando.
     }
 }
+// ---------- Convite para o mapa ----------
+async function carregarVitrineMapa() {
+    try {
+        const mapa = await api("/api/mural/mapa");
+        if (mapa.cidades.length === 0)
+            return; // fica o texto padrão
+        const desenho = el("vitrine-mapa-desenho");
+        desenho.insertAdjacentHTML("beforeend", mapa.cidades
+            .map((c) => `<span class="vitrine-mapa__ponto" style="left: ${c.x}%; top: ${c.y}%"></span>`)
+            .join(""));
+        const projetos = mapa.cidades.reduce((soma, c) => soma + c.total, 0);
+        const n = mapa.cidades.length;
+        el("vitrine-mapa-resumo").textContent =
+            `${projetos} ${projetos === 1 ? "projeto" : "projetos"} em ${n} ${n === 1 ? "cidade" : "cidades"}. ` +
+                "Veja onde elas estão fazendo ciência pelo Brasil.";
+    }
+    catch {
+        // Sem os dados, o convite continua funcionando com o texto padrão.
+    }
+}
 // ---------- Detalhe ----------
 function itemFicha(rotulo, valor, link = false) {
     if (valor === null || valor === undefined || valor === "")
@@ -747,6 +747,7 @@ async function iniciar() {
     botaoLimpar.hidden = !temFiltro(filtros);
     sincronizarUrl(filtros); // tira ?projeto= e ?publicado= da barra de endereço
     void carregarDestaques();
+    void carregarVitrineMapa();
     await carregar(true);
     const publicado = Number(params.get("publicado"));
     const projeto = Number(params.get("projeto"));

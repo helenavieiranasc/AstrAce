@@ -48,21 +48,33 @@ Para uma página nova: estenda `base.html`, use as variáveis de cor de `base.cs
 
 ## Mural (Pessoa 1)
 
-Páginas: `/mural` e `/mural/novo`.
+Páginas: `/mural`, `/mural/novo` e `/mural/mapa` (mapa "Onde elas brilham").
 
 | Rota | O que faz |
 | --- | --- |
-| `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, instituições, cidades e motivos de denúncia |
+| `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, estados, instituições, cidades, motivos de denúncia e `local_perfil` (`{uf, cidade}` do perfil, para o formulário já vir preenchido) |
+| `GET /api/cidades?uf=PE` | Municípios do estado, em ordem alfabética (da base guardada no projeto, sem chamar API externa) |
+| `GET /api/mural/mapa` | Projetos visíveis agrupados por cidade: `{cidades: [{cidade, uf, x, y, total, projetos}], total, sem_local}`. `x` e `y` são a posição (em %) no desenho `static/img/mapa-brasil.svg` |
 | `GET /api/projetos` | Lista com filtros `q`, `tipo`, `area`, `nivel`, `instituicao`, `cidade`, `identidade`, mais `pagina`, `por_pagina` e `ordem` (`recentes` ou `estrelas`) |
 | `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`). Sem nenhum escolhido, os que mais ganharam estrelas nos últimos 7 dias (o mural mostra "Em alta na semana") |
 | `GET /api/projetos/<id>` | Detalhe, com `parecidos` (até 3 cartões da mesma área, completando com os do mesmo tipo), `bilhetes` (cada frase com `total` e `meu`) e `minha` (se quem vê é a autora) |
 | `POST /api/projetos/<id>/bilhetes` | `{"frase": "inspirador"}` cola ou tira esse bilhete da usuária logada. Só frases de `FRASES_BILHETE` (`tipos.py`); a autora não cola no próprio projeto (`403`). Devolve `{bilhetes, total}` |
 | `POST /api/projetos/<id>/estrela` | Dá ou tira a estrela da usuária logada. Devolve `{estrelas, estrelado}` |
-| `POST /api/projetos` | Cria um projeto (JSON, com `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
+| `POST /api/projetos` | Cria um projeto (JSON, com `uf` e `cidade`, `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
 | `POST /api/uploads` | Envia um arquivo (form-data: `arquivo` e `finalidade` = `material`, `foto` ou `capa`). Devolve `{id, url, nome, tipo, tamanho}` |
 | `GET /uploads/<nome>` | Abre ou baixa um arquivo enviado |
 | `POST /api/projetos/<id>/denuncias` | `{"motivo": "...", "comentario": "..."}`. Com 3 denúncias, o projeto sai do mural |
 | `POST /api/projetos/<id>/destaque` | Só admin. `{"destaque": true}` coloca o projeto nos destaques da semana |
+
+**Estado e cidade:** no formulário, a autora escolhe o estado e a cidade numa lista com os 5.570 municípios
+(`app/dados/municipios.json`, da base [kelvins/municipios-brasileiros](https://github.com/kelvins/municipios-brasileiros), licença MIT,
+com os códigos do IBGE). O servidor confere se a cidade existe naquele estado e guarda o nome oficial em `cidade` e a sigla em `uf`.
+Quem manda só `cidade`, sem `uf` (como a edição pelo perfil), continua funcionando: o estado é completado quando o nome existe em um só estado.
+`app/municipios.py` serve para qualquer frente: `buscar("Recife", "PE")`, `nomes_da_uf("PE")`.
+A coluna `uf` entra sozinha em bancos antigos ao subir o app (`mural.completar_colunas`).
+
+**Mapa:** as coordenadas vêm da mesma base de municípios, então qualquer cidade aparece. Projetos antigos sem `uf` entram quando o nome
+é único no Brasil; os outros ficam em `sem_local`. O desenho dos estados vem da malha do IBGE e fica no projeto, então o mapa funciona sem internet.
 
 O filtro por identidade só considera quem marcou aquela identidade como pública (`publica = 1`).
 

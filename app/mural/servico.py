@@ -5,10 +5,11 @@ from urllib.parse import urlparse
 from flask import current_app
 from sqlalchemy import and_, func, or_
 
-from .. import catalogos
+from .. import catalogos, municipios
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..usuarias.models import IdentidadeUsuaria, Usuaria
+from . import mapa
 from .models import Bilhete, Estrela, Projeto, semana_atual
 from .tipos import FRASES_BILHETE, FRASES_POR_VALOR, TIPOS_POR_VALOR
 
@@ -97,6 +98,32 @@ def parecidos(projeto, limite=3):
             .all()
         )
     return itens
+
+
+def projetos_no_mapa():
+    """Projetos visíveis agrupados por cidade, com a posição de cada cidade no desenho do mapa."""
+    projetos = (
+        Projeto.query.filter(Projeto.oculto.is_(False))
+        .order_by(Projeto.total_estrelas.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+        .all()
+    )
+    cidades, sem_local = {}, 0
+    for p in projetos:
+        local = mapa.localizar(p.cidade, p.uf)
+        if not local:
+            sem_local += 1
+            continue
+        nome, uf, x, y = local
+        grupo = cidades.setdefault(
+            (nome, uf), {"cidade": nome, "uf": uf, "x": x, "y": y, "total": 0, "projetos": []}
+        )
+        grupo["total"] += 1
+        grupo["projetos"].append(cartao(p))
+    return {
+        "cidades": sorted(cidades.values(), key=lambda c: (-c["total"], c["cidade"])),
+        "total": len(projetos),
+        "sem_local": sem_local,
+    }
 
 
 def valores_distintos(coluna):
@@ -263,6 +290,44 @@ def _lista_enviada(dados, chave, finalidade, limite, autora, erros):
     return [encontrados[i] for i in dict.fromkeys(ids)]
 
 
+def local_do_perfil(autora):
+    """(cidade, uf) do perfil, se for um município de verdade; senão (cidade como está, None)."""
+    if not autora or not autora.cidade:
+        return None, None
+    uf = autora.conta.estado if getattr(autora, "conta", None) else None
+    achado = municipios.buscar(autora.cidade, uf) if uf else municipios.buscar_sem_uf(autora.cidade)
+    return (achado[0], achado[1]) if achado else (autora.cidade, None)
+
+
+def _local(dados, autora, erros):
+    """Devolve (cidade, uf).
+
+    Com estado (formulário novo): a cidade precisa existir nele e fica com o nome oficial.
+    Sem estado (quem ainda manda só o texto, como a edição pelo perfil): aceita o texto e
+    completa o estado quando o nome existe em um único estado do Brasil.
+    Os dois vazios: usa o local do perfil da autora."""
+    cidade = _texto(dados, "cidade", 120)
+    uf = _texto(dados, "uf", 2).upper()
+
+    if uf:
+        if uf not in municipios.ufs():
+            erros["uf"] = "Escolha o estado da lista."
+            return cidade or None, None
+        if not cidade:
+            erros["cidade"] = "Escolha a cidade."
+            return None, uf
+        achado = municipios.buscar(cidade, uf)
+        if not achado:
+            erros["cidade"] = "Escolha uma cidade da lista."
+            return cidade, uf
+        return achado[0], achado[1]
+
+    if not cidade:
+        return local_do_perfil(autora)
+    achado = municipios.buscar_sem_uf(cidade)
+    return (achado[0], achado[1]) if achado else (cidade, None)
+
+
 def validar(dados, autora):
     """Devolve (campos_limpos, erros, arquivos). erros é {campo: mensagem}."""
     erros = {}
@@ -297,7 +362,7 @@ def validar(dados, autora):
         erros["nivel"] = "Escolha um nível da lista."
 
     limpo["instituicao"] = _texto(dados, "instituicao", 160) or (autora.instituicao if autora else None)
-    limpo["cidade"] = _texto(dados, "cidade", 120) or (autora.cidade if autora else None)
+    limpo["cidade"], limpo["uf"] = _local(dados, autora, erros)
 
     for nome in ("link_externo", "imagem_url"):
         limpo[nome] = _texto(dados, nome, 500) or None

@@ -17,7 +17,7 @@ def create_app(config=Config):
     from .eventos import models as _eventos  # noqa: F401
     from .vagas import models as _vagas  # noqa: F401
     from .noticias import models as _noticias  # noqa: F401
-    from .mural import bp as mural_bp
+    from .mural import bp as mural_bp, completar_colunas as completar_colunas_mural
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
     from .eventos import bp as eventos_bp
@@ -42,5 +42,6 @@ def create_app(config=Config):
     with app.app_context():
         db.create_all()
         completar_colunas(db)
+        completar_colunas_mural(db)
 
     return app

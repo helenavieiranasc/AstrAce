@@ -15,7 +15,7 @@ from . import bp
 from .routes import _cadastro_completo, _erro, _formacoes, _usuaria_logada
 
 # Campos que a edição aceita. Tipo, arquivos, fotos e capa não mudam por aqui.
-CAMPOS_EDITAVEIS = ("titulo", "resumo", "area", "ano", "nivel", "instituicao", "cidade", "link_externo", "detalhes")
+CAMPOS_EDITAVEIS = ("titulo", "resumo", "area", "ano", "nivel", "instituicao", "cidade", "uf", "link_externo", "detalhes")
 
 
 @bp.get("/perfil")

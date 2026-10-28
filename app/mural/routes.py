@@ -1,6 +1,6 @@
 from flask import abort, current_app, jsonify, render_template, request
 
-from .. import catalogos
+from .. import catalogos, municipios
 from ..auth import usuaria_atual
 from ..extensoes import db
 from . import bp, servico
@@ -33,6 +33,11 @@ def pagina_mural():
     return render_template("mural.html")
 
 
+@bp.get("/mural/mapa")
+def pagina_mapa():
+    return render_template("mapa.html")
+
+
 @bp.get("/mural/novo")
 def pagina_novo_projeto():
     return render_template("mural_novo.html")
@@ -42,9 +47,13 @@ def pagina_novo_projeto():
 
 @bp.get("/api/mural/opcoes")
 def api_opcoes():
+    cidade, uf = servico.local_do_perfil(usuaria_atual())
     return jsonify(
         {
             "tipos": TIPOS,
+            "estados": catalogos.ESTADOS,
+            # Para o formulário já vir com o local do perfil (só quando é um município de verdade).
+            "local_perfil": {"uf": uf, "cidade": cidade} if uf else None,
             "areas": catalogos.AREAS,
             "niveis": catalogos.NIVEIS,
             "identidades": catalogos.IDENTIDADES,
@@ -53,6 +62,23 @@ def api_opcoes():
             "motivos_denuncia": MOTIVOS_DENUNCIA,
         }
     )
+
+
+@bp.get("/api/cidades")
+def api_cidades():
+    """Municípios do estado (?uf=PE), em ordem alfabética, da base guardada no projeto."""
+    uf = request.args.get("uf", "").strip().upper()
+    if uf not in municipios.ufs():
+        return _erro("Escolha um estado da lista.", 422)
+    resposta = jsonify(municipios.nomes_da_uf(uf))
+    resposta.cache_control.max_age = 86400  # a lista quase nunca muda
+    resposta.cache_control.public = True
+    return resposta
+
+
+@bp.get("/api/mural/mapa")
+def api_mapa():
+    return jsonify(servico.projetos_no_mapa())
 
 
 @bp.get("/api/projetos")
