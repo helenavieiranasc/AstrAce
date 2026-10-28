@@ -1,9 +1,9 @@
 """Regras do mural: consulta com filtros, validação e formato do JSON."""
-from datetime import date
+from datetime import date, datetime, timedelta
 from urllib.parse import urlparse
 
 from flask import current_app
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, func, or_
 
 from .. import catalogos
 from ..extensoes import db
@@ -14,6 +14,7 @@ from .tipos import TIPOS_POR_VALOR
 
 FILTROS = ("tipo", "area", "instituicao", "cidade", "nivel", "identidade")
 ORDENS = ("recentes", "estrelas")
+DIAS_EM_ALTA = 7  # sem destaques escolhidos, a faixa mostra os mais estrelados desse período
 
 
 def consultar(filtros, pagina=1, por_pagina=12, ordem="recentes"):
@@ -55,7 +56,8 @@ def consultar(filtros, pagina=1, por_pagina=12, ordem="recentes"):
 
 
 def destaques_da_semana(limite=5):
-    return (
+    """Os escolhidos pela admin nesta semana. Sem nenhum escolhido, os que estão em alta."""
+    escolhidos = (
         Projeto.query.filter(
             Projeto.oculto.is_(False),
             Projeto.destaque.is_(True),
@@ -65,6 +67,36 @@ def destaques_da_semana(limite=5):
         .limit(limite)
         .all()
     )
+    return escolhidos or em_alta(limite)
+
+
+def em_alta(limite=5):
+    """Projetos que mais ganharam estrelas nos últimos DIAS_EM_ALTA dias (só quem ganhou alguma)."""
+    desde = datetime.utcnow() - timedelta(days=DIAS_EM_ALTA)
+    estrelas_recentes = func.count(Estrela.id)
+    return (
+        Projeto.query.join(Estrela, Estrela.projeto_id == Projeto.id)
+        .filter(Projeto.oculto.is_(False), Estrela.criada_em >= desde)
+        .group_by(Projeto.id)
+        .order_by(estrelas_recentes.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+        .limit(limite)
+        .all()
+    )
+
+
+def parecidos(projeto, limite=3):
+    """Até `limite` projetos da mesma área; se faltar, completa com os do mesmo tipo."""
+    base = Projeto.query.filter(Projeto.oculto.is_(False), Projeto.id != projeto.id)
+    ordem = (Projeto.total_estrelas.desc(), Projeto.criado_em.desc(), Projeto.id.desc())
+    itens = base.filter(Projeto.area == projeto.area).order_by(*ordem).limit(limite).all()
+    if len(itens) < limite:
+        itens += (
+            base.filter(Projeto.tipo == projeto.tipo, Projeto.area != projeto.area)
+            .order_by(*ordem)
+            .limit(limite - len(itens))
+            .all()
+        )
+    return itens
 
 
 def valores_distintos(coluna):

@@ -108,14 +108,17 @@ function rotacao(id, escala = 1) {
     const x = Math.sin(id * 12.9898) * 43758.5453;
     return (((x - Math.floor(x)) * 4.4 - 2.2) * escala).toFixed(2);
 }
-function htmlCartao(c, variante) {
-    const pin = PINS[c.id % PINS.length];
+/** Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área. */
+function htmlFoto(c) {
     const imagem = urlSegura(c.imagem_url);
-    // Todo projeto é uma polaroid: com foto, mostra a foto; sem foto, uma capa com o ícone do tipo na cor da área.
     const cor = CORES_CAPA[c.area] ?? "var(--rosa-claro)";
-    const foto = imagem
+    return imagem
         ? `<img src="${esc(imagem)}" alt="" loading="lazy">`
         : `<div class="capa" style="--cor-capa: ${cor}">${icone(c.icone)}</div>`;
+}
+function htmlCartao(c, variante) {
+    const pin = PINS[c.id % PINS.length];
+    const foto = htmlFoto(c);
     // Na grade, o cartão fica preso com pin; nos destaques, com fita adesiva.
     const destaque = variante === "polaroid";
     const enfeite = destaque ? "" : `<span class="pin" style="--cor-pin: var(${pin})" aria-hidden="true"></span>`;
@@ -357,6 +360,10 @@ async function carregarDestaques() {
         const lista = await api("/api/projetos/destaques");
         if (lista.length === 0)
             return;
+        // Nenhum escolhido pela equipe: o servidor mandou os mais estrelados da semana.
+        const automatico = lista.every((c) => !c.destaque);
+        el("destaques-titulo").textContent = automatico ? "Em alta na semana" : "Destaques da semana";
+        el("destaques-nota").hidden = !automatico;
         destaquesLista.innerHTML = lista.map((c) => htmlCartao(c, "polaroid")).join("");
         destaques.hidden = false;
     }
@@ -373,6 +380,26 @@ function itemFicha(rotulo, valor, link = false) {
         ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Abrir link</a>`
         : esc(valor);
     return `<div><dt>${esc(rotulo)}</dt><dd>${conteudo}</dd></div>`;
+}
+function htmlParecidos(lista) {
+    if (!lista?.length)
+        return "";
+    const itens = lista
+        .map((c) => `
+      <li>
+        <a class="mini" href="/mural?projeto=${c.id}" data-parecido="${c.id}" style="--rot: ${rotacao(c.id, 0.8)}deg">
+          <span class="mini__foto">${htmlFoto(c)}</span>
+          <span class="mini__tipo">${esc(c.tipo_rotulo)}</span>
+          <span class="mini__titulo">${esc(c.titulo)}</span>
+          <span class="mini__area">${esc(c.area_rotulo)}</span>
+        </a>
+      </li>`)
+        .join("");
+    return `
+    <section class="parecidos" aria-labelledby="parecidos-titulo">
+      <h3 id="parecidos-titulo">Projetos parecidos</h3>
+      <ul class="parecidos__lista">${itens}</ul>
+    </section>`;
 }
 function htmlDetalhe(p) {
     const imagem = urlSegura(p.imagem_url);
@@ -430,10 +457,13 @@ function htmlDetalhe(p) {
         <button class="botao botao--texto" type="button" data-acao="cancelar-denuncia">Cancelar</button>
       </div>
       <p class="denuncia__resultado" id="denuncia-resultado" role="status"></p>
-    </form>`;
+    </form>
+    ${htmlParecidos(p.parecidos)}`;
 }
-async function abrirDetalhe(id, origem, mensagem) {
-    focoAntesDoDetalhe = origem ?? document.activeElement;
+async function abrirDetalhe(id, origem, mensagem, trocando = false) {
+    // Ao ir para um projeto parecido, o foco continua voltando ao cartão de onde o primeiro foi aberto.
+    if (!trocando)
+        focoAntesDoDetalhe = origem ?? document.activeElement;
     conteudoDetalhe.innerHTML = '<p class="carregando" id="detalhe-titulo">Carregando projeto…</p>';
     if (!dialogo.open)
         dialogo.showModal();
@@ -441,6 +471,15 @@ async function abrirDetalhe(id, origem, mensagem) {
         const projeto = await api(`/api/projetos/${id}`);
         const aviso = mensagem ? `<p class="detalhe__aviso" role="status">${esc(mensagem)}</p>` : "";
         conteudoDetalhe.innerHTML = aviso + htmlDetalhe(projeto);
+        if (trocando) {
+            // Outro projeto na mesma janela: volta ao topo e leva o foco ao título.
+            conteudoDetalhe.closest(".detalhe__folha")?.scrollTo({ top: 0 });
+            const titulo = document.getElementById("detalhe-titulo");
+            if (titulo) {
+                titulo.tabIndex = -1;
+                titulo.focus();
+            }
+        }
     }
     catch (erro) {
         conteudoDetalhe.innerHTML = `
@@ -568,6 +607,14 @@ function ligarEventos() {
     dialogo.addEventListener("close", () => focoAntesDoDetalhe?.focus());
     conteudoDetalhe.addEventListener("click", (e) => {
         const alvo = e.target;
+        const parecido = alvo.closest("[data-parecido]");
+        if (parecido) {
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+                return; // nova aba: segue o link
+            e.preventDefault();
+            void abrirDetalhe(Number(parecido.dataset.parecido), undefined, undefined, true);
+            return;
+        }
         const estrela = alvo.closest("[data-estrela]");
         if (estrela) {
             void alternarEstrela(estrela);

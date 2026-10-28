@@ -54,8 +54,8 @@ Páginas: `/mural` e `/mural/novo`.
 | --- | --- |
 | `GET /api/mural/opcoes` | Tipos de projeto (com os campos extras), áreas, níveis, identidades, instituições, cidades e motivos de denúncia |
 | `GET /api/projetos` | Lista com filtros `q`, `tipo`, `area`, `nivel`, `instituicao`, `cidade`, `identidade`, mais `pagina`, `por_pagina` e `ordem` (`recentes` ou `estrelas`) |
-| `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`) |
-| `GET /api/projetos/<id>` | Detalhe |
+| `GET /api/projetos/destaques` | Até 5 projetos com `destaque = 1` e `destaque_semana` igual à semana atual (ex.: `2026-W44`). Sem nenhum escolhido, os que mais ganharam estrelas nos últimos 7 dias (o mural mostra "Em alta na semana") |
+| `GET /api/projetos/<id>` | Detalhe, com `parecidos`: até 3 cartões da mesma área (completa com os do mesmo tipo) |
 | `POST /api/projetos/<id>/estrela` | Dá ou tira a estrela da usuária logada. Devolve `{estrelas, estrelado}` |
 | `POST /api/projetos` | Cria um projeto (JSON, com `arquivos: [ids]` e `fotos: [ids]`). Erros voltam como `422 {"erros": {"campo": "mensagem"}}` |
 | `POST /api/uploads` | Envia um arquivo (form-data: `arquivo` e `finalidade` = `material`, `foto` ou `capa`). Devolve `{id, url, nome, tipo, tamanho}` |

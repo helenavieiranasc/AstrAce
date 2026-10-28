@@ -84,6 +84,7 @@ export interface Detalhe extends Cartao {
   detalhes: DetalheExtra[];
   arquivos: ArquivoEnviado[];
   fotos: ArquivoEnviado[];
+  parecidos?: Cartao[];
 }
 
 export interface PaginaProjetos {

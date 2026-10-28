@@ -86,7 +86,11 @@ def api_destaques():
 @bp.get("/api/projetos/<int:projeto_id>")
 def api_detalhe(projeto_id):
     projeto = _projeto_visivel(projeto_id)
-    return jsonify(servico.detalhe(projeto, servico.estrelados_por(usuaria_atual(), [projeto])))
+    parecidos = servico.parecidos(projeto)
+    estrelados = servico.estrelados_por(usuaria_atual(), [projeto, *parecidos])
+    dados = servico.detalhe(projeto, estrelados)
+    dados["parecidos"] = [servico.cartao(p, estrelados) for p in parecidos]
+    return jsonify(dados)
 
 
 @bp.post("/api/projetos/<int:projeto_id>/estrela")
