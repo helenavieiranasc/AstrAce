@@ -6,6 +6,7 @@ from sqlalchemy import case, or_
 
 from .. import catalogos
 from .models import Vaga
+from .seed import popular_vagas
 
 TIPOS_VAGA = [
     {"valor": "ic", "rotulo": "Iniciação científica", "icone": "ic"},
@@ -41,6 +42,12 @@ FILTROS = (
 )
 
 
+def _garantir_vagas():
+    """Garante que o banco tenha a curadoria inicial mesmo se ninguém rodou seed-vagas."""
+    if Vaga.query.count() == 0:
+        popular_vagas(limpar=False)
+
+
 def _ativo(valor):
     if isinstance(valor, bool):
         return valor
@@ -54,6 +61,7 @@ def _formatar_data(d):
 
 
 def consultar(filtros, pagina=1, por_pagina=12, hoje=None):
+    _garantir_vagas()
     hoje = hoje or date.today()
     q = Vaga.query.filter(Vaga.oculta.is_(False))
 
@@ -116,6 +124,7 @@ def consultar(filtros, pagina=1, por_pagina=12, hoje=None):
 
 
 def valores_distintos(coluna):
+    _garantir_vagas()
     linhas = (
         Vaga.query.with_entities(coluna)
         .filter(Vaga.oculta.is_(False), coluna.isnot(None), coluna != "")

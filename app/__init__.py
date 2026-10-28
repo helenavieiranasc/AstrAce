@@ -22,9 +22,9 @@ def create_app(config=Config):
     from .uploads import bp as uploads_bp
     from .eventos import bp as eventos_bp
     from .eventos.seed import seed_eventos
-    from .vagas import bp as vagas_bp
+    from .vagas import bp as vagas_bp, completar_colunas as completar_colunas_vagas
     from .vagas.seed import seed_vagas
-    from .noticias import bp as noticias_bp
+    from .noticias import bp as noticias_bp, completar_colunas as completar_colunas_noticias
     from .noticias.seed import seed_noticias
     from .quiz import bp as quiz_bp
     from .conta import bp as conta_bp, completar_colunas
@@ -45,5 +45,7 @@ def create_app(config=Config):
         db.create_all()
         completar_colunas(db)
         completar_colunas_mural(db)
+        completar_colunas_vagas(db)
+        completar_colunas_noticias(db)
 
     return app

@@ -151,3 +151,22 @@ def test_pagina_e_api_de_noticias(cliente):
     assert detalhe["link_fonte"].startswith("https://")
     assert detalhe["imagem_url"].startswith("/static/img/noticias/")
     assert detalhe["cientista"]
+
+
+def test_auto_seed_quando_banco_nao_rodou_seed_cli(tmp_path):
+    """Mesmo sem rodar seed-noticias ou seed-vagas no terminal, as páginas já trazem os dados."""
+
+    class ConfigLimpo(Config):
+        TESTING = True
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{(tmp_path / 'sem_seed.db').as_posix()}"
+        PASTA_UPLOADS = str(tmp_path / "uploads")
+
+    app_limpo = create_app(ConfigLimpo)
+    cliente_limpo = app_limpo.test_client()
+
+    noticias = cliente_limpo.get("/api/noticias").get_json()
+    assert noticias["total"] == 12
+    assert len(cliente_limpo.get("/api/noticias/destaques").get_json()) == 3
+
+    vagas = cliente_limpo.get("/api/vagas?por_pagina=30").get_json()
+    assert vagas["total"] == 20
