@@ -17,6 +17,7 @@ def create_app(config=Config):
     from .eventos import models as _eventos  # noqa: F401
     from .vagas import models as _vagas  # noqa: F401
     from .noticias import models as _noticias  # noqa: F401
+    from .admin import models as _admin  # noqa: F401
     from .mural import bp as mural_bp
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
@@ -27,6 +28,7 @@ def create_app(config=Config):
     from .noticias import bp as noticias_bp
     from .noticias.seed import seed_noticias
     from .conta import bp as conta_bp, completar_colunas
+    from .admin import bp as admin_bp, tornar_admin
 
     app.register_blueprint(conta_bp)  # "/" é a landing page
     app.register_blueprint(mural_bp)
@@ -34,10 +36,12 @@ def create_app(config=Config):
     app.register_blueprint(eventos_bp)
     app.register_blueprint(vagas_bp)
     app.register_blueprint(noticias_bp)
+    app.register_blueprint(admin_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)
     app.cli.add_command(seed_vagas)
     app.cli.add_command(seed_noticias)
+    app.cli.add_command(tornar_admin)
 
     with app.app_context():
         db.create_all()

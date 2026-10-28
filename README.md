@@ -169,6 +169,41 @@ cadastro, com o campo "Sobre você" (`usuaria.bio`). Publicar continua em `/mura
 
 Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem `403`, e sem login `401`.
 
+## Painel da equipe (Pessoa 5)
+
+Página: `/admin`, só para contas com `papel = "admin"` (o link "Painel da equipe" aparece no menu só para elas).
+Abas: visão geral (números do banco e pendências), eventos, vagas, denúncias e destaques da semana.
+
+Para dar acesso a alguém (a pessoa precisa ter entrado no site uma vez):
+
+```bash
+flask --app run tornar-admin pessoa@exemplo.com            # --remover tira o acesso
+```
+
+O atalho `LOGIN_DEV` só vale no painel com `--debug` ou nos testes: com o site no ar, ninguém vira admin sem login.
+Toda rota que grava exige JSON (um formulário de outro site não consegue disparar as ações).
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/admin/resumo` | Números (usuárias, projetos, eventos, vagas) e pendências (cartazes para imprimir, vagas vencidas, denúncias) |
+| `GET /api/admin/eventos?estado=&q=` | Todos os eventos: `proximos`, `passados` ou `ocultos`, com `contagens` |
+| `POST /api/admin/eventos`, `PUT /api/admin/eventos/<id>` | Cria ou edita. Com `vale_carimbo: true`, gera o `token_qr`; editar não troca o QR |
+| `POST /api/admin/eventos/<id>/ocultar` | `{"oculto": true}` ou `false` (sempre explícito) |
+| `POST /api/admin/eventos/<id>/qr/novo` | Troca o token: o QR antigo e os cartazes impressos param de valer |
+| `GET /admin/eventos/<id>/qr.png` e `.svg` | O QR (`?baixar=1` para salvar) |
+| `GET /admin/eventos/<id>/cartaz` | Cartaz A4 de check-in para imprimir |
+| `GET /api/admin/vagas?estado=&q=` | Todas as vagas: `no_site`, `encerradas` ou `ocultas`. Gravar usa `POST/PUT /api/vagas` (Pessoa 4) |
+| `POST /api/admin/vagas/<id>/conferir` | A equipe conferiu o edital hoje: atualiza `data_coleta` |
+| `GET /api/admin/denuncias` | Projetos denunciados depois da última decisão da equipe |
+| `POST /api/admin/projetos/<id>/moderar` | `{"decisao": "restaurar"}` (volta ao mural e zera as denúncias) ou `"fora_do_mural"` |
+| `GET /api/admin/destaques`, `POST /api/admin/destaques/<id>` | Vitrine da semana, com no máximo 5 projetos (`409` passando disso) |
+
+As decisões de moderação ficam na tabela `moderacoes`, como histórico.
+
+**QR codes:** `app/servicos/qr.py` (biblioteca `segno`) gera SVG e PNG; `qr.endereco_publico("/checkin/<token>")`
+monta o link. Com o site no ar, defina `URL_PUBLICA` no `.env` com o endereço público (o celular de quem escaneia
+precisa conseguir abrir o link; `127.0.0.1` só funciona no próprio computador).
+
 ## Pontos de encaixe com as outras frentes
 
 - **Pessoa 2 (login e perfil):** o login com Google e o cadastro inicial já existem (seção acima) e gravam `session["usuaria_id"]`,
@@ -184,4 +219,5 @@ Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem 
   Ao salvar um evento que dá carimbo, gere o `token_qr` (ex.: `secrets.token_urlsafe(16)`). Para ocultar, use `oculto = True`.
   A foto ou cartaz do evento vai em `imagem_url` (pode usar o `POST /api/uploads`).
 - **Pessoa 2 (passaporte):** o check-in `/checkin/<token_qr>` encontra o evento com `Evento.query.filter_by(token_qr=token, oculto=False)`.
-  Vale conferir se o evento está acontecendo (`inicio` e `termino`) antes de carimbar.
+  Vale conferir se o evento está acontecendo (`inicio` e `termino`) antes de carimbar. O QR que aponta para essa rota
+  já sai do painel; para o QR de `/verificar/<codigo>` no certificado, use `app/servicos/qr.py`.

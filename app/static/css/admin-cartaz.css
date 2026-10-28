@@ -1,0 +1,180 @@
+/* Cartaz A4 de check-in (painel da equipe). Na tela aparece como uma folha; na impressão, só a folha. */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+.pagina-cartaz {
+  background: var(--madeira-escura);
+}
+
+.cartaz-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  max-width: 210mm;
+  margin: 20px auto 16px;
+  padding: 0 16px;
+  color: var(--papel);
+}
+
+.cartaz-barra p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.folha-a4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 40px;
+  padding: 16mm 18mm 12mm;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel-alta);
+  text-align: center;
+}
+
+.folha-a4__logo {
+  width: 62mm;
+  height: auto;
+}
+
+.folha-a4__chamada {
+  margin: 10mm 0 0;
+  font-family: var(--fonte-mao);
+  font-size: 30pt;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta);
+  transform: rotate(-1.5deg);
+}
+
+.folha-a4__titulo {
+  max-width: 160mm;
+  margin: 6mm 0 2mm;
+  font-size: 24pt;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.folha-a4__quando {
+  margin: 0;
+  font-size: 13pt;
+  color: var(--tinta-suave);
+}
+
+/* QR grande com a estrela por cima (o código aguenta: foi gerado com correção de erro alta). */
+.folha-a4__qr {
+  position: relative;
+  width: 112mm;
+  margin: 9mm 0 7mm;
+  padding: 4mm;
+  border: 1.2mm solid var(--magenta);
+  border-radius: 6mm;
+  background: #fff;
+}
+
+.folha-a4__qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.folha-a4__estrela {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 21%;
+  height: auto;
+  padding: 1.6mm;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.folha-a4__passos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6mm;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12pt;
+  line-height: 1.3;
+}
+
+.folha-a4__passos li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2mm;
+}
+
+.folha-a4__passos span {
+  display: grid;
+  place-items: center;
+  width: 10mm;
+  height: 10mm;
+  border-radius: 50%;
+  background: var(--rosa-claro);
+  font-family: var(--fonte-mao);
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.folha-a4__link {
+  margin: auto 0 0;
+  padding-top: 8mm;
+  font-size: 10pt;
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.folha-a4__rodape {
+  margin: 3mm 0 0;
+  font-size: 9pt;
+  color: var(--tinta-suave);
+}
+
+/* Na tela do celular a folha encolhe; na impressão volta ao tamanho A4. */
+@media screen and (max-width: 840px) {
+  .folha-a4 {
+    width: auto;
+    min-height: 0;
+    margin: 0 8px 24px;
+    padding: 28px 18px;
+  }
+
+  .folha-a4__qr {
+    width: min(112mm, 100%);
+  }
+
+  .folha-a4__passos {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .pagina-cartaz {
+    background: none;
+  }
+
+  .cartaz-barra {
+    display: none;
+  }
+
+  .folha-a4 {
+    height: 297mm;
+    margin: 0;
+    box-shadow: none;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
