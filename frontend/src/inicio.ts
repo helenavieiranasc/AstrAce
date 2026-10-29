@@ -1,5 +1,5 @@
 // Página inicial: completa os cartazes com dados reais (próximo evento, quantos projetos e vagas)
-// e carrega o aviãozinho 3D. Se alguma API falhar, o cartaz fica com o texto que já tem.
+// e carrega o aviãozinho, o globinho e a cartinha 3D. Se alguma API falhar, o cartaz fica com o texto que já tem.
 import { api } from "./comum.js";
 
 interface ProximoEvento {
@@ -48,5 +48,21 @@ const economia = (navigator as Navigator & { connection?: { saveData?: boolean }
 if (aviao && !economia) {
   import("./aviao-3d.js").then(({ montarAviao }) => montarAviao(aviao)).catch(() => {
     // sem 3D, fica o aviãozinho desenhado
+  });
+}
+
+// A cartinha da carta também é 3D (um envelope que abre ao passar o mouse); sem WebGL fica a de CSS.
+const cartinha = document.querySelector<HTMLElement>(".inicio-cartinha__envelope");
+if (cartinha && !economia) {
+  import("./cartinha-3d.js").then(({ montarCartinha }) => montarCartinha(cartinha)).catch(() => {
+    // sem 3D, fica o envelope desenhado em CSS
+  });
+}
+
+// O mini globo do Mapa de Inspiração segue a mesma regra: sem WebGL ou no modo econômico, fica o globo desenhado.
+const globo = document.getElementById("inicio-globo");
+if (globo && !economia) {
+  import("./globo-3d.js").then(({ montarGlobo }) => montarGlobo(globo)).catch(() => {
+    // sem 3D, fica o globo desenhado
   });
 }

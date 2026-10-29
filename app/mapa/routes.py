@@ -1,4 +1,4 @@
-from flask import jsonify, render_template
+from flask import jsonify, make_response, render_template
 
 from ..mural import mapa as posicoes
 from ..mural.models import Projeto
@@ -9,6 +9,15 @@ from . import bp, historicas
 @bp.get("/mapa")
 def pagina_mapa():
     return render_template("mapa_inspiracao.html")
+
+
+@bp.get("/mapa/mundi.svg")
+def mundi_svg():
+    """O desenho dos países, para o globinho da página inicial usar de textura (o mapa o põe direto na página)."""
+    resposta = make_response(render_template("mapa_mundi.svg"))
+    resposta.mimetype = "image/svg+xml"
+    resposta.headers["Cache-Control"] = "public, max-age=86400"
+    return resposta
 
 
 @bp.get("/api/mapa/historicas")
