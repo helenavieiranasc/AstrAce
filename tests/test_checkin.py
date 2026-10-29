@@ -169,3 +169,19 @@ def test_carimbo_do_evento_aparece_nos_dados_do_passaporte(app, logar, criar_eve
     cliente.get("/checkin/token-do-qr")
     pagina = cliente.get("/passaporte").get_data(as_text=True)
     assert f'"codigo": "evento-{evento_id}"' in pagina or f'"codigo":"evento-{evento_id}"' in pagina
+
+
+def test_pedido_de_checkin_antigo_e_esquecido(app, logar, criar_evento):
+    """Quem escaneou, desistiu de entrar e voltou horas depois não cai no check-in."""
+    criar_evento(agora() - timedelta(hours=1), agora() + timedelta(hours=8))
+    cliente = app.test_client()
+    cliente.get("/checkin/token-do-qr")
+    with cliente.session_transaction() as sessao:
+        pendente = sessao["checkin_pendente"]
+        sessao["checkin_pendente"] = {**pendente, "em": pendente["em"] - 3 * 60 * 60}
+
+    logar(cliente)
+    assert cliente.get("/").status_code == 200
+    assert carimbos(app) == []
+    with cliente.session_transaction() as sessao:
+        assert "checkin_pendente" not in sessao

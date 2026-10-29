@@ -3,7 +3,14 @@ from datetime import datetime
 from flask import jsonify, redirect, render_template, session, url_for
 
 from .. import catalogos
-from ..conta.routes import CHECKIN_PENDENTE, _cadastro_completo, _erro, _formacoes, _usuaria_logada
+from ..conta.routes import (
+    CHECKIN_PENDENTE,
+    _cadastro_completo,
+    _erro,
+    _formacoes,
+    _usuaria_logada,
+    guardar_checkin_pendente,
+)
 from ..extensoes import db
 from . import bp, servico
 from .models import Carimbo
@@ -51,7 +58,7 @@ def pagina_checkin(token):
 
     usuaria = _usuaria_logada()
     if not usuaria or not _cadastro_completo(usuaria):
-        session[CHECKIN_PENDENTE] = token
+        guardar_checkin_pendente(token)
         if usuaria:
             return redirect(url_for("conta.pagina_cadastro"))
         return render_template("checkin.html", estado="entrar", evento=evento)
