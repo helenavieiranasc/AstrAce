@@ -285,6 +285,27 @@ do evento. Vale do início do evento até 12 horas depois do fim (sem hora de fi
 vale um carimbo. Quem escaneia sem login vê o botão de entrar e, depois do login e do cadastro, volta sozinha para o
 check-in. Esse pedido fica guardado por 2 horas. O passaporte 3D ainda só desenha o carimbo de boas-vindas.
 
+### Certificados
+
+Todo evento com check-in por QR dá um certificado de participação a quem escaneou. O certificado fica pronto
+quando o evento termina (`fim`, ou `inicio` se não houver fim) e aparece em "Meus certificados", abaixo do passaporte
+(`/passaporte#certificados`, também no menu). Na primeira vez, a usuária confere o nome que vai sair no papel (nome
+social é bem-vindo). Depois de emitido, o certificado guarda uma cópia do nome e dos dados do evento: editar o evento
+ou o perfil não muda o que já foi impresso.
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /certificados/evento/<id>` | Confere o nome e emite. Se já emitiu, leva ao certificado. Sem check-in: `404` |
+| `POST /api/certificados/evento/<id>` | `{"nome": "..."}` emite e devolve `{"url"}`. `403` sem check-in, `409` antes do fim do evento |
+| `GET /certificados/<codigo>` | O certificado em A4 deitado, para imprimir ou salvar em PDF, com botão "Adicionar ao LinkedIn". Só a dona vê; as outras pessoas vão para a verificação |
+| `GET /verificar`, `GET /verificar/<codigo>` | Página pública: digita o código (ou escaneia o QR do certificado) e vê se ele é verdadeiro. Mostra só o que está impresso |
+
+O código tem 10 letras e números sem os que se confundem (ex.: `7KQ3M-XP9TD`) e aceita ser digitado em minúsculas ou
+sem o traço. A carga horária vem do campo "Carga horária" do evento no painel; vazio, o certificado não fala em horas.
+O QR do certificado usa `URL_PUBLICA`: com o site no ar, ela precisa estar no `.env`.
+Arquivos: `app/passaporte/certificados.py` (regras), modelo `Certificado` (tabela `certificados`),
+`templates/certificado.html` e `static/css/certificado.css`.
+
 ## Perfil
 
 O cabeçalho tem o botão "Menu" (abre a barra lateral com os links e a ação da página, `{% block acao_topo %}`), a logo e,
@@ -333,7 +354,7 @@ Toda rota do painel que grava exige JSON (um formulário de outro site não cons
 | --- | --- |
 | `GET /api/admin/resumo` | Números (usuárias, projetos, eventos, vagas) e pendências (cartazes para imprimir, vagas vencidas, denúncias) |
 | `GET /api/admin/eventos?estado=&q=` | Todos os eventos: `proximos`, `passados` ou `ocultos`, com `contagens` |
-| `POST /api/admin/eventos`, `PUT /api/admin/eventos/<id>` | Cria ou edita. Com `vale_carimbo: true`, gera o `token_qr`; editar não troca o QR |
+| `POST /api/admin/eventos`, `PUT /api/admin/eventos/<id>` | Cria ou edita. Com `vale_carimbo: true`, gera o `token_qr`; editar não troca o QR. `carga_horaria` (horas, aceita `1,5`) sai no certificado |
 | `POST /api/admin/eventos/<id>/ocultar` | `{"oculto": true}` ou `false` (sempre explícito) |
 | `POST /api/admin/eventos/<id>/qr/novo` | Troca o token: o QR antigo e os cartazes impressos param de valer |
 | `GET /admin/eventos/<id>/qr.png` e `.svg` | O QR (`?baixar=1` para salvar) |
@@ -370,5 +391,5 @@ precisa conseguir abrir o link; `127.0.0.1` só funciona no próprio computador)
   Para os eventos, grave direto no modelo `Evento` (`app/eventos/models.py`) usando as listas de `app/eventos/catalogo.py`.
   Ao salvar um evento que dá carimbo, gere o `token_qr` (ex.: `secrets.token_urlsafe(16)`). Para ocultar, use `oculto = True`.
   A foto ou cartaz do evento vai em `imagem_url` (pode usar o `POST /api/uploads`).
-- **Pessoa 2 (passaporte):** o check-in `/checkin/<token_qr>` já existe (seção Passaporte). Para o QR de
-  `/verificar/<codigo>` no certificado, use `app/servicos/qr.py`.
+- **Pessoa 2 (passaporte):** o check-in `/checkin/<token_qr>` e os certificados com `/verificar/<codigo>` já existem
+  (seção Passaporte).

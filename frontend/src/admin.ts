@@ -78,6 +78,7 @@ interface EventoAdmin {
   passado: boolean;
   vale_carimbo: boolean;
   link_checkin: string | null;
+  carga_horaria: number | null;
 }
 
 interface Selo {
@@ -883,6 +884,8 @@ function abrirFormEvento(evento?: EventoAdmin, duplicar = false): void {
     // Na cópia, as datas ficam em branco: quase sempre é outro dia.
     campo(formEvento, "inicio").value = duplicar ? "" : evento.inicio;
     campo(formEvento, "fim").value = duplicar ? "" : evento.fim ?? "";
+    campo(formEvento, "carga_horaria").value =
+      evento.carga_horaria === null ? "" : String(evento.carga_horaria).replace(".", ",");
     campo<RadioNodeList & HTMLElement>(formEvento, "modalidade").value = evento.modalidade;
     campo(formEvento, "local").value = evento.local ?? "";
     campo<HTMLSelectElement>(formEvento, "uf").value = evento.uf ?? "";
@@ -915,6 +918,7 @@ function dadosEvento(): Record<string, unknown> {
     descricao: texto(dados, "descricao"),
     inicio: texto(dados, "inicio"),
     fim: texto(dados, "fim"),
+    carga_horaria: texto(dados, "carga_horaria"),
     modalidade: texto(dados, "modalidade"),
     local: texto(dados, "local"),
     uf: texto(dados, "uf"),

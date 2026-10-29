@@ -60,6 +60,7 @@
         <p class="lateral__grupo" id="menu-jornada">Minha jornada</p>
         <ul aria-labelledby="menu-jornada">
           <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
+          <li><a href="/passaporte#certificados" {% if request.path.startswith('/certificados') %}aria-current="page"{% endif %}>Certificados</a></li>
         </ul>
         {% if menu_admin %}
         <p class="lateral__grupo" id="menu-equipe">Equipe</p>
