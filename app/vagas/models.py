@@ -16,6 +16,7 @@ class Vaga(db.Model):
     cidade = db.Column(db.String(120), index=True)
     prazo = db.Column(db.Date, index=True)
     link_original = db.Column(db.String(500), nullable=False)
+    imagem_url = db.Column(db.String(500))  # logo ou foto da instituição (/uploads/...), enviada pelo painel
 
     afirmativa_mulheres = db.Column(db.Boolean, nullable=False, default=False, index=True)
     afirmativa_negras = db.Column(db.Boolean, nullable=False, default=False, index=True)

@@ -187,6 +187,7 @@ def cartao(v, hoje=None):
         "descricao_curta": descricao if len(descricao) <= 150 else descricao[:147].rsplit(" ", 1)[0] + "…",
         "data_coleta": v.data_coleta.isoformat() if v.data_coleta else None,
         "data_coleta_rotulo": _formatar_data(v.data_coleta) or _formatar_data(hoje),
+        "imagem_url": v.imagem_url if _imagem_valida(v.imagem_url) else None,
     }
 
 
@@ -208,6 +209,10 @@ def detalhe(v, hoje=None):
 def _url_valida(valor):
     partes = urlparse(valor or "")
     return partes.scheme in ("http", "https") and bool(partes.netloc)
+
+
+def _imagem_valida(valor):
+    return bool(valor) and (valor.startswith("/uploads/") or _url_valida(valor))
 
 
 def _texto(dados, nome, limite):
@@ -273,6 +278,10 @@ def validar(dados):
     limpo["link_original"] = _texto(dados, "link_original", 500) or _texto(dados, "link", 500)
     if not limpo["link_original"] or not _url_valida(limpo["link_original"]):
         erros["link_original"] = "Cole o link oficial do edital ou da vaga, começando com https://."
+
+    limpo["imagem_url"] = _texto(dados, "imagem_url", 500) or None
+    if limpo["imagem_url"] and not _imagem_valida(limpo["imagem_url"]):
+        erros["imagem_url"] = "Envie a imagem de novo."
 
     limpo["afirmativa_mulheres"] = _ativo(dados.get("afirmativa_mulheres"))
     limpo["afirmativa_negras"] = _ativo(dados.get("afirmativa_negras"))

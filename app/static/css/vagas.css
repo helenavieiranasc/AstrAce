@@ -211,6 +211,31 @@
   color: var(--tinta);
 }
 
+/* Logo da instituição (opcional, enviado pelo painel da equipe). */
+.cartao__organizacao--logo,
+.detalhe__organizacao--logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cartao__logo,
+.detalhe__logo {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border: 1px solid var(--papel-borda);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.detalhe__logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+}
+
 .cartao__meta-vaga {
   display: flex;
   flex-wrap: wrap;

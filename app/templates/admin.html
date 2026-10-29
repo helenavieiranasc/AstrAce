@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block titulo %}Painel da equipe · AstrAce{% endblock %}
+{% block descricao %}Área da equipe: eventos, vagas, notícias, denúncias e destaques da semana.{% endblock %}
+
+{% block estilos %}
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/eventos.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vagas.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/noticias.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block acao_topo %}{% endblock %}
+
+{% block conteudo %}
+{# Campo de imagem dos formulários: escolher ou arrastar, recortar, trocar e remover (admin.ts). #}
+{% macro campo_foto(prefixo, legenda, ajuda, logo=false) %}
+<fieldset class="bloco">
+  <legend>{{ legenda }}</legend>
+  <input type="hidden" name="imagem_url">
+  <div class="campo foto-campo{% if logo %} foto-campo--logo{% endif %}">
+    <div class="foto-campo__quadro" id="{{ prefixo }}-foto-quadro">
+      <img id="{{ prefixo }}-foto-previa" alt="" hidden>
+      <span class="foto-campo__vazio" id="{{ prefixo }}-foto-vazio">
+        {{ "Sem logo" if logo else "Sem foto" }}
+        <small>Arraste uma imagem para cá</small>
+      </span>
+      <span class="foto-campo__enviando" id="{{ prefixo }}-foto-enviando" hidden>Enviando…</span>
+    </div>
+    <div class="foto-campo__lado">
+      <div class="foto-campo__acoes">
+        <label class="botao botao--secundario foto-campo__escolher">
+          <input class="visualmente-oculto" type="file" id="{{ prefixo }}-foto-arquivo" accept="image/*" data-erro-para="imagem_url" aria-describedby="{{ prefixo }}-foto-ajuda">
+          <span id="{{ prefixo }}-foto-escolher">Escolher imagem</span>
+        </label>
+        <button class="botao botao--texto" type="button" id="{{ prefixo }}-foto-ajustar" hidden>Ajustar recorte</button>
+        <button class="botao botao--texto" type="button" id="{{ prefixo }}-foto-remover" hidden>Remover</button>
+      </div>
+      <small id="{{ prefixo }}-foto-ajuda">{{ ajuda }}</small>
+    </div>
+  </div>
+</fieldset>
+{% endmacro %}
+
+<div class="quadro">
+  <div class="cortica cortica--painel">
+
+    <div class="postit postit--verde painel-nota">
+      <span class="pin" style="--cor-pin: var(--pin-azul)" aria-hidden="true"></span>
+      <h1>Painel da equipe</h1>
+      <p>Cadastre eventos, vagas e notícias, revise denúncias e escolha os destaques da semana. Tudo o que você salvar aqui aparece no site na hora.</p>
+    </div>
+
+    <div class="fichario">
+      <div class="fichario__abas" role="tablist" aria-label="Seções do painel">
+        <button class="fichario__aba" type="button" role="tab" id="aba-geral" aria-controls="painel-geral" aria-selected="true" data-aba="geral">Visão geral</button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-eventos" aria-controls="painel-eventos" aria-selected="false" tabindex="-1" data-aba="eventos">Eventos</button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-vagas" aria-controls="painel-vagas" aria-selected="false" tabindex="-1" data-aba="vagas">Vagas</button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-noticias" aria-controls="painel-noticias" aria-selected="false" tabindex="-1" data-aba="noticias">Notícias</button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-moderacao" aria-controls="painel-moderacao" aria-selected="false" tabindex="-1" data-aba="moderacao">
+          Denúncias <span class="fichario__contagem" id="contagem-denuncias" hidden></span>
+        </button>
+        <button class="fichario__aba" type="button" role="tab" id="aba-destaques" aria-controls="painel-destaques" aria-selected="false" tabindex="-1" data-aba="destaques">Destaques</button>
+      </div>
+
+      {# ---------- Visão geral ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-geral" aria-labelledby="aba-geral" tabindex="0">
+        <h2 class="painel-titulo">Como está o AstrAce hoje</h2>
+        <ul class="numeros" id="numeros" aria-busy="true"></ul>
+        <div class="pendencias">
+          <h3 class="painel-subtitulo">Para resolver</h3>
+          <ul class="pendencias__lista" id="pendencias"></ul>
+        </div>
+      </section>
+
+      {# ---------- Eventos ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-eventos" aria-labelledby="aba-eventos" tabindex="0" hidden>
+        <div class="painel-barra">
+          <h2 class="painel-titulo">Eventos</h2>
+          <button class="botao botao--primario" type="button" id="novo-evento">Novo evento</button>
+        </div>
+        <div class="painel-filtros">
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input type="search" id="busca-eventos" aria-label="Buscar eventos" placeholder="Nome, organização ou cidade" autocomplete="off">
+          </div>
+          <div class="segmentos" role="group" aria-label="Quais eventos mostrar" data-lista="eventos">
+            <button type="button" aria-pressed="true" data-estado="proximos">Próximos <span data-contagem="proximos"></span></button>
+            <button type="button" aria-pressed="false" data-estado="passados">Passados <span data-contagem="passados"></span></button>
+            <button type="button" aria-pressed="false" data-estado="ocultos">Ocultos <span data-contagem="ocultos"></span></button>
+          </div>
+        </div>
+        <ul class="registros" id="lista-eventos" aria-busy="true" aria-live="polite"></ul>
+      </section>
+
+      {# ---------- Vagas ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-vagas" aria-labelledby="aba-vagas" tabindex="0" hidden>
+        <div class="painel-barra">
+          <h2 class="painel-titulo">Vagas</h2>
+          <button class="botao botao--primario" type="button" id="nova-vaga">Nova vaga</button>
+        </div>
+        <div class="painel-filtros">
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input type="search" id="busca-vagas" aria-label="Buscar vagas" placeholder="Título, organização ou cidade" autocomplete="off">
+          </div>
+          <div class="segmentos" role="group" aria-label="Quais vagas mostrar" data-lista="vagas">
+            <button type="button" aria-pressed="true" data-estado="no_site">No site <span data-contagem="no_site"></span></button>
+            <button type="button" aria-pressed="false" data-estado="encerradas">Prazo encerrado <span data-contagem="encerradas"></span></button>
+            <button type="button" aria-pressed="false" data-estado="ocultas">Ocultas <span data-contagem="ocultas"></span></button>
+          </div>
+        </div>
+        <ul class="registros" id="lista-vagas" aria-busy="true" aria-live="polite"></ul>
+      </section>
+
+      {# ---------- Notícias ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-noticias" aria-labelledby="aba-noticias" tabindex="0" hidden>
+        <div class="painel-barra">
+          <h2 class="painel-titulo">Notícias</h2>
+          <button class="botao botao--primario" type="button" id="nova-noticia">Nova notícia</button>
+        </div>
+        <div class="painel-filtros">
+          <div class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input type="search" id="busca-noticias" aria-label="Buscar notícias" placeholder="Manchete, cientista ou fonte" autocomplete="off">
+          </div>
+          <div class="segmentos" role="group" aria-label="Quais notícias mostrar" data-lista="noticias">
+            <button type="button" aria-pressed="true" data-estado="no_site">No site <span data-contagem="no_site"></span></button>
+            <button type="button" aria-pressed="false" data-estado="ocultas">Ocultas <span data-contagem="ocultas"></span></button>
+          </div>
+        </div>
+        <ul class="registros" id="lista-noticias" aria-busy="true" aria-live="polite"></ul>
+      </section>
+
+      {# ---------- Denúncias ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-moderacao" aria-labelledby="aba-moderacao" tabindex="0" hidden>
+        <h2 class="painel-titulo">Denúncias para revisar</h2>
+        <p class="painel-intro">Com 3 denúncias, o projeto sai do mural sozinho. Leia o material e decida: se estiver tudo certo, ele volta e as denúncias são zeradas.</p>
+        <ul class="casos" id="lista-denuncias" aria-busy="true"></ul>
+      </section>
+
+      {# ---------- Destaques ---------- #}
+      <section class="fichario__folha" role="tabpanel" id="painel-destaques" aria-labelledby="aba-destaques" tabindex="0" hidden>
+        <div class="painel-barra">
+          <h2 class="painel-titulo">Vitrine da semana</h2>
+          <p class="vitrine-contador" id="contador-destaques" aria-live="polite"></p>
+        </div>
+        <p class="painel-intro">Os destaques ficam no topo do mural até domingo. Na segunda, a vitrine começa vazia de novo.</p>
+        <ul class="vitrine" id="lista-destaques" aria-busy="true"></ul>
+
+        <h3 class="painel-subtitulo">Escolher projetos</h3>
+        <div class="campo-busca painel-busca-projetos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          <input type="search" id="busca-projetos" aria-label="Buscar projetos do mural" placeholder="Buscar no mural (os mais estrelados aparecem primeiro)" autocomplete="off">
+        </div>
+        <ul class="registros" id="lista-candidatos" aria-busy="true"></ul>
+      </section>
+    </div>
+
+  </div>
+</div>
+
+{# ---------- Formulário de evento ---------- #}
+<dialog class="detalhe painel-dialogo" id="dialogo-evento" aria-labelledby="titulo-form-evento">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="painel-dialogo__grade">
+      <form class="folha-form painel-form" id="form-evento" novalidate>
+        <h2 class="painel-form__titulo" id="titulo-form-evento">Novo evento</h2>
+        <p class="painel-form__intro">Campos com * são obrigatórios.</p>
+        <div class="resumo-erros" id="erros-evento" role="alert" tabindex="-1" hidden></div>
+
+        <fieldset class="bloco">
+          <legend>Sobre o evento</legend>
+          <div class="campo">
+            <label for="ev-titulo">Nome do evento *</label>
+            <input id="ev-titulo" name="titulo" maxlength="160" required>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="ev-tipo">Tipo *</label>
+              <select id="ev-tipo" name="tipo" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="ev-organizacao">Quem organiza</label>
+              <input id="ev-organizacao" name="organizacao" maxlength="160">
+            </div>
+          </div>
+          <div class="campo">
+            <label for="ev-descricao">Descrição *</label>
+            <textarea id="ev-descricao" name="descricao" rows="5" maxlength="3000" required aria-describedby="ev-descricao-ajuda"></textarea>
+            <small id="ev-descricao-ajuda">O que vai acontecer, o que levar, se tem certificado ou intérprete de Libras.</small>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Quando</legend>
+          <div class="linha">
+            <div class="campo">
+              <label for="ev-inicio">Começa *</label>
+              <input id="ev-inicio" name="inicio" type="datetime-local" required>
+            </div>
+            <div class="campo">
+              <label for="ev-fim">Termina</label>
+              <input id="ev-fim" name="fim" type="datetime-local">
+            </div>
+          </div>
+          <small>Horário de Brasília.</small>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Onde</legend>
+          <div class="campo">
+            <span class="rotulo" id="ev-modalidade-rotulo">Modalidade *</span>
+            <div class="escolhas" id="ev-modalidades" role="radiogroup" aria-labelledby="ev-modalidade-rotulo"></div>
+          </div>
+          <div id="ev-endereco">
+            <div class="campo">
+              <label for="ev-local">Lugar e endereço *</label>
+              <input id="ev-local" name="local" maxlength="200" placeholder="Ex.: Biblioteca Central, Av. Brasil, 500">
+            </div>
+            <div class="linha">
+              <div class="campo">
+                <label for="ev-uf">Estado *</label>
+                <select id="ev-uf" name="uf"><option value="">Escolha</option></select>
+              </div>
+              <div class="campo">
+                <label for="ev-cidade">Cidade *</label>
+                <input id="ev-cidade" name="cidade" maxlength="120" list="ev-cidades" autocomplete="off">
+                <datalist id="ev-cidades"></datalist>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Inscrição e público</legend>
+          <div class="campo">
+            <label for="ev-link">Link da inscrição ou da página oficial *</label>
+            <input id="ev-link" name="link" type="url" maxlength="500" placeholder="https://" required>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="ev-publico">Para quem</label>
+              <select id="ev-publico" name="publico_alvo"></select>
+            </div>
+            <div class="campo">
+              <label for="ev-area">Área</label>
+              <select id="ev-area" name="area"><option value="">Várias áreas</option></select>
+            </div>
+          </div>
+          <label class="caixa">
+            <input type="checkbox" name="gratuito" checked>
+            <span>Gratuito</span>
+          </label>
+        </fieldset>
+
+        {{ campo_foto("ev", "Foto do evento (opcional)", "Aparece no alto da página do evento. Vale qualquer imagem do computador ou do celular: antes de enviar, você escolhe o recorte.") }}
+
+        <fieldset class="bloco bloco--carimbo">
+          <legend>Passaporte</legend>
+          <label class="caixa caixa--destaque">
+            <input type="checkbox" name="vale_carimbo" checked>
+            <span>
+              <strong>Vale carimbo no passaporte</strong>
+              Cria um QR code para colar na entrada. Quem escanear no evento ganha um carimbo.
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="folha-form__acoes">
+          <button class="botao botao--primario botao--grande" type="submit">Salvar evento</button>
+          <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+        </div>
+      </form>
+
+      <aside class="previa" aria-label="Prévia">
+        <p class="previa__rotulo">Assim vai aparecer na agenda</p>
+        <ul class="agenda__lista previa__lista" id="previa-evento"></ul>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- Formulário de vaga ---------- #}
+<dialog class="detalhe painel-dialogo" id="dialogo-vaga" aria-labelledby="titulo-form-vaga">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="painel-dialogo__grade">
+      <form class="folha-form painel-form" id="form-vaga" novalidate>
+        <h2 class="painel-form__titulo" id="titulo-form-vaga">Nova vaga</h2>
+        <p class="painel-form__intro">Campos com * são obrigatórios. Copie as informações do edital oficial.</p>
+        <div class="resumo-erros" id="erros-vaga" role="alert" tabindex="-1" hidden></div>
+
+        <fieldset class="bloco">
+          <legend>Sobre a vaga</legend>
+          <div class="campo">
+            <label for="vg-titulo">Título *</label>
+            <input id="vg-titulo" name="titulo" maxlength="160" required>
+          </div>
+          <div class="campo">
+            <label for="vg-organizacao">Instituição ou empresa *</label>
+            <input id="vg-organizacao" name="organizacao" maxlength="160" required>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="vg-tipo">Tipo *</label>
+              <select id="vg-tipo" name="tipo" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="vg-area">Área *</label>
+              <select id="vg-area" name="area" required><option value="">Escolha</option></select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="vg-descricao">Descrição curta *</label>
+            <textarea id="vg-descricao" name="descricao" rows="4" maxlength="3000" required aria-describedby="vg-descricao-ajuda"></textarea>
+            <small id="vg-descricao-ajuda">Quem pode se inscrever, valor da bolsa, carga horária. As primeiras 150 letras aparecem no cartão.</small>
+          </div>
+        </fieldset>
+
+        {{ campo_foto("vg", "Logo da instituição (opcional)", "Aparece ao lado do nome da instituição, no cartão e na página da vaga. Logo com fundo transparente continua transparente.", logo=true) }}
+
+        <fieldset class="bloco">
+          <legend>Onde e até quando</legend>
+          <div class="linha">
+            <div class="campo">
+              <label for="vg-modalidade">Modalidade *</label>
+              <select id="vg-modalidade" name="modalidade" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="vg-cidade">Cidade</label>
+              <input id="vg-cidade" name="cidade" maxlength="120" aria-describedby="vg-cidade-ajuda">
+              <small id="vg-cidade-ajuda">Em branco: nacional ou online.</small>
+            </div>
+            <div class="campo">
+              <label for="vg-prazo">Prazo de inscrição</label>
+              <input id="vg-prazo" name="prazo" type="date" aria-describedby="vg-prazo-ajuda">
+              <small id="vg-prazo-ajuda">Em branco: fluxo contínuo.</small>
+            </div>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="vg-link">Link do edital ou da vaga original *</label>
+              <input id="vg-link" name="link_original" type="url" maxlength="500" placeholder="https://" required>
+            </div>
+            <div class="campo">
+              <label for="vg-coleta">Conferida no edital em</label>
+              <input id="vg-coleta" name="data_coleta" type="date">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco bloco--afirmativa">
+          <legend>Ação afirmativa</legend>
+          <p class="bloco__regra">Marque só o que o edital declara. O selo aparece no site apenas com o trecho ou link que comprova.</p>
+          <div class="escolhas escolhas--coluna">
+            <label class="caixa"><input type="checkbox" name="afirmativa_mulheres"><span>Afirmativa para mulheres</span></label>
+            <label class="caixa"><input type="checkbox" name="afirmativa_negras"><span>Afirmativa para mulheres negras</span></label>
+            <label class="caixa"><input type="checkbox" name="afirmativa_trans"><span>Afirmativa para mulheres trans</span></label>
+          </div>
+          <div class="campo" id="vg-fonte-campo" hidden>
+            <label for="vg-fonte">Trecho do edital ou link que comprova *</label>
+            <textarea id="vg-fonte" name="fonte_afirmacao" rows="3" maxlength="1000" aria-describedby="vg-fonte-ajuda"></textarea>
+            <small id="vg-fonte-ajuda">Ex.: “50% das bolsas são reservadas para mulheres negras (item 3.2 do edital)”.</small>
+          </div>
+        </fieldset>
+
+        <div class="folha-form__acoes">
+          <button class="botao botao--primario botao--grande" type="submit">Salvar vaga</button>
+          <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+        </div>
+      </form>
+
+      <aside class="previa" aria-label="Prévia">
+        <p class="previa__rotulo">Assim vai aparecer em Vagas</p>
+        <ul class="grade grade--vagas previa__lista" id="previa-vaga"></ul>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- Formulário de notícia (grava pelas rotas /api/noticias) ---------- #}
+<dialog class="detalhe painel-dialogo" id="dialogo-noticia" aria-labelledby="titulo-form-noticia">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="painel-dialogo__grade">
+      <form class="folha-form painel-form" id="form-noticia" novalidate>
+        <h2 class="painel-form__titulo" id="titulo-form-noticia">Nova notícia</h2>
+        <p class="painel-form__intro">Campos com * são obrigatórios. Resuma com as suas palavras e sempre aponte a fonte original.</p>
+        <div class="resumo-erros" id="erros-noticia" role="alert" tabindex="-1" hidden></div>
+
+        <fieldset class="bloco">
+          <legend>A notícia</legend>
+          <div class="campo">
+            <label for="nt-titulo">Manchete *</label>
+            <input id="nt-titulo" name="titulo" maxlength="180" required>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-cientista">Cientista ou equipe *</label>
+              <input id="nt-cientista" name="cientista" maxlength="140" required>
+            </div>
+            <div class="campo">
+              <label for="nt-instituicao">Instituição</label>
+              <input id="nt-instituicao" name="instituicao" maxlength="160">
+            </div>
+          </div>
+          <div class="campo">
+            <label for="nt-resumo">Resumo *</label>
+            <textarea id="nt-resumo" name="resumo" rows="5" maxlength="3000" required aria-describedby="nt-resumo-ajuda"></textarea>
+            <small id="nt-resumo-ajuda">O que ela descobriu e por que importa. As primeiras 170 letras aparecem no cartão.</small>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-categoria">Categoria *</label>
+              <select id="nt-categoria" name="categoria" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="nt-area">Área *</label>
+              <select id="nt-area" name="area" required><option value="">Escolha</option></select>
+            </div>
+            <div class="campo">
+              <label for="nt-data">Publicada em</label>
+              <input id="nt-data" name="data_publicacao" type="date">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Fonte</legend>
+          <div class="linha">
+            <div class="campo">
+              <label for="nt-fonte">Veículo ou instituição *</label>
+              <input id="nt-fonte" name="fonte_nome" maxlength="120" required placeholder="Ex.: Agência FAPESP">
+            </div>
+            <div class="campo">
+              <label for="nt-link">Link da matéria ou do artigo *</label>
+              <input id="nt-link" name="link_fonte" type="url" maxlength="500" placeholder="https://" required>
+            </div>
+          </div>
+        </fieldset>
+
+        {{ campo_foto("nt", "Foto da notícia (opcional)", "Aparece no alto do recorte e na página da notícia. Use foto com autorização ou de um banco de imagens livre.") }}
+
+        <fieldset class="bloco">
+          <legend>Recortes e destaque</legend>
+          <div class="escolhas escolhas--coluna">
+            <label class="caixa"><input type="checkbox" name="cientista_brasileira" checked><span>Cientista brasileira</span></label>
+            <label class="caixa"><input type="checkbox" name="cientista_negra"><span>Mulher negra na ciência</span></label>
+            <label class="caixa"><input type="checkbox" name="destaque"><span>Destaque no topo de Notícias</span></label>
+          </div>
+        </fieldset>
+
+        <div class="folha-form__acoes">
+          <button class="botao botao--primario botao--grande" type="submit">Salvar notícia</button>
+          <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+        </div>
+      </form>
+
+      <aside class="previa" aria-label="Prévia">
+        <p class="previa__rotulo">Assim vai aparecer em Notícias</p>
+        <ul class="grade grade--noticias previa__lista" id="previa-noticia"></ul>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- Recorte de imagem (abre por cima dos formulários) ---------- #}
+<dialog class="detalhe painel-dialogo painel-dialogo--foto" id="dialogo-foto" aria-labelledby="foto-titulo" aria-describedby="foto-dica">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 class="painel-form__titulo" id="foto-titulo">Ajustar a foto</h2>
+    <p class="painel-form__intro" id="foto-dica">Arraste a imagem para escolher a parte que aparece no site. O quadro tem o formato do cartão.</p>
+    <div class="recortador" id="foto-recortador" tabindex="0" role="group" aria-label="Recorte da imagem" aria-describedby="foto-teclas">
+      <img id="foto-recorte-imagem" alt="" draggable="false">
+    </div>
+    <p class="recortador__teclas" id="foto-teclas">No teclado: as setas movem a imagem (com Shift, mais rápido); + e − aproximam e afastam.</p>
+    <div class="recortador__zoom">
+      <label for="foto-zoom">Aproximar</label>
+      <input type="range" id="foto-zoom" min="1" max="4" step="0.01" value="1">
+    </div>
+    <div class="recortador__acoes">
+      <button class="botao botao--primario" type="button" id="foto-usar">Usar esta imagem</button>
+      <button class="botao botao--texto" type="button" data-fechar>Cancelar</button>
+    </div>
+  </div>
+</dialog>
+
+{# ---------- QR do evento ---------- #}
+<dialog class="detalhe painel-dialogo painel-dialogo--qr" id="dialogo-qr" aria-labelledby="qr-titulo">
+  <div class="detalhe__folha">
+    <button class="detalhe__fechar" type="button" data-fechar aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 class="painel-form__titulo" id="qr-titulo">QR de check-in</h2>
+    <p class="qr__evento" id="qr-evento"></p>
+    <div class="qr__moldura">
+      <img id="qr-imagem" alt="QR code de check-in do evento" width="260" height="260">
+    </div>
+    <p class="qr__link"><span id="qr-link"></span></p>
+    <div class="qr__acoes">
+      <a class="botao botao--primario" id="qr-cartaz" target="_blank" rel="noopener">Abrir cartaz para imprimir</a>
+      <a class="botao botao--secundario" id="qr-png" download>Baixar PNG</a>
+      <a class="botao botao--secundario" id="qr-svg" download>Baixar SVG</a>
+      <button class="botao botao--secundario" type="button" id="qr-copiar">Copiar link</button>
+    </div>
+    <div class="qr__perigo">
+      <button class="botao botao--texto" type="button" id="qr-novo">Gerar um QR novo</button>
+      <small>Use se o QR vazou: o antigo e os cartazes já impressos param de funcionar.</small>
+    </div>
+  </div>
+</dialog>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
