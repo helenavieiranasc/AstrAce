@@ -8,7 +8,7 @@ Plataforma web que dá visibilidade, pertencimento e caminho de carreira a menin
 
 🌐 **Site no ar:** https://helenavieira.pythonanywhere.com
 
-Projeto desenvolvido para o **Hackathon Ciência Delas**.
+Projeto desenvolvido para o [**HackaIF Ciência Delas 2026**](https://hackathon.ifsp.dev/)
 
 ![Página inicial do AstrAce](docs/prints/01-inicio.jpg)
 
