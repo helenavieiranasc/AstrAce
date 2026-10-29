@@ -27,6 +27,73 @@ se os `.js` compilados estão em dia em todo PR.
 **TypeScript:** o código fica em `frontend/src/` e compila para `app/static/js/`.
 Rode `npm run watch` enquanto mexe no front. Os `.js` compilados vão para o git, então quem só mexe no backend não precisa do Node.
 
+## Comandos
+
+Todos rodam na pasta do projeto, com o ambiente virtual ativado. Os comandos `flask --app run ...` leem o `.env`,
+então agem no mesmo banco que o site usa.
+
+**Instalação (uma vez)**
+
+| Comando | O que faz |
+| --- | --- |
+| `python -m venv .venv` | Cria o ambiente virtual |
+| `.venv\Scripts\activate` | Ativa o ambiente no Windows (cmd). PowerShell: `.venv\Scripts\Activate.ps1`. Git Bash: `source .venv/Scripts/activate`. Linux/Mac: `source .venv/bin/activate` |
+| `pip install -r requirements.txt` | Instala as dependências do site |
+| `pip install -r requirements-dev.txt` | Instala também o `pytest`, para rodar os testes |
+| `npm install` | Instala o TypeScript (só para quem mexe no front) |
+| `copy .env.example .env` | Cria o `.env` (Linux/Mac/Git Bash: `cp`). Preencha o login com Google e, com o site no ar, `URL_PUBLICA` |
+
+**Rodar o site**
+
+| Comando | O que faz |
+| --- | --- |
+| `flask --app run run --debug` | Sobe o site em http://127.0.0.1:5000, recarregando a cada mudança no código |
+| `python run.py` | O mesmo, em modo debug |
+
+**Dados de exemplo**
+
+| Comando | O que faz |
+| --- | --- |
+| `flask --app run seed-mural` | Cria usuárias e projetos de exemplo, incluindo a admin de exemplo "Equipe AstrAce" (`equipe@astrace.dev`) |
+| `flask --app run seed-eventos` | Cria eventos de exemplo, com datas a partir de hoje |
+| `flask --app run seed-vagas` | Cria a curadoria de vagas reais. Opcional: com a tabela vazia, as vagas entram sozinhas |
+| `flask --app run seed-noticias` | Cria a curadoria de notícias. Opcional: com a tabela vazia, as notícias entram sozinhas |
+
+Todos aceitam `--limpar`, que apaga os dados daquele tipo antes de recriar. Cuidado: `seed-mural --limpar` apaga
+**todas** as usuárias, inclusive quem foi feita admin. Depois dele, rode `tornar-admin` de novo.
+
+**Administração**
+
+| Comando | O que faz |
+| --- | --- |
+| `flask --app run tornar-admin pessoa@exemplo.com` | Dá acesso ao Painel da equipe. A pessoa precisa ter entrado no site pelo menos uma vez |
+| `flask --app run tornar-admin pessoa@exemplo.com --remover` | Tira o acesso (volta a ser usuária comum) |
+
+Veja como o acesso funciona em [Painel da equipe](#painel-da-equipe-pessoa-5).
+
+**Front-end**
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run build` | Compila `frontend/src/*.ts` para `app/static/js/`. Rode antes de commitar mudanças no front |
+| `npm run watch` | Compila sozinho a cada arquivo salvo |
+
+**Testes**
+
+| Comando | O que faz |
+| --- | --- |
+| `pytest` | Roda todos os testes |
+| `pytest tests/test_checkin.py` | Roda só um arquivo |
+| `pytest -k checkin` | Roda só os testes com essa palavra no nome |
+
+**Utilitários do Flask**
+
+| Comando | O que faz |
+| --- | --- |
+| `flask --app run routes` | Lista todas as rotas do site |
+| `flask --app run shell` | Abre um Python com o app carregado, para consultar o banco (ex.: `Usuaria.query.all()` depois de `from app.usuarias.models import Usuaria`) |
+| `flask --app run --help` | Lista todos os comandos disponíveis |
+
 ## Estrutura
 
 ```
@@ -213,7 +280,10 @@ Sem WebGL (ou sem internet para o Three.js), aparece a versão em texto, que é 
 O carimbo de boas-vindas é concedido no login (e, para quem já tinha conta, ao abrir o passaporte). Cada
 `codigo` vale uma vez por usuária. `visto_em` guarda que a animação já passou
 (`POST /api/passaporte/carimbos/<codigo>/visto`), então ela não se repete nem em outro dispositivo.
-Para os carimbos de eventos (check-in por QR), use `servico.conceder(usuaria, f"evento-{id}", titulo)`.
+**Check-in por QR:** o QR que sai do painel abre `/checkin/<token_qr>`, que dá o carimbo `evento-<id>` com o título
+do evento. Vale do início do evento até 12 horas depois do fim (sem hora de fim, conta a partir do início). Cada evento
+vale um carimbo. Quem escaneia sem login vê o botão de entrar e, depois do login e do cadastro, volta sozinha para o
+check-in. Esse pedido fica guardado por 2 horas. O passaporte 3D ainda só desenha o carimbo de boas-vindas.
 
 ## Perfil
 
@@ -239,14 +309,22 @@ Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem 
 Página: `/admin`, só para contas com `papel = "admin"` (o link "Painel da equipe" aparece no menu só para elas).
 Abas: visão geral (números do banco e pendências), eventos, vagas, notícias, denúncias e destaques da semana.
 
-Para dar acesso a alguém (a pessoa precisa ter entrado no site uma vez):
+**Quem é admin.** Cada usuária tem a coluna `papel` (`"usuaria"` ou `"admin"`), e `usuaria.e_admin` diz se ela é admin.
+Não existe tela para promover alguém: quem já é da equipe roda o comando no servidor.
 
-```bash
-flask --app run tornar-admin pessoa@exemplo.com            # --remover tira o acesso
-```
+1. A pessoa entra no site com o Google pelo menos uma vez, para a conta dela existir no banco.
+2. Alguém da equipe roda `flask --app run tornar-admin email-dela@gmail.com`.
+3. Na próxima página que ela abrir, o link "Painel da equipe" aparece no menu. Não precisa sair e entrar de novo:
+   o papel é lido do banco a cada página.
 
-O atalho `LOGIN_DEV` só vale no painel com `--debug` ou nos testes: com o site no ar, ninguém vira admin sem login.
-Toda rota que grava exige JSON (um formulário de outro site não consegue disparar as ações).
+`--remover` tira o acesso da mesma forma. O comando age no banco do `.env`, então precisa rodar onde o site roda.
+
+**Atalho de desenvolvimento.** Com `LOGIN_DEV=1` (o padrão) e o site em `--debug`, quem abre o site sem login age
+como a primeira usuária do banco. Depois do `seed-mural`, ela é a admin de exemplo "Equipe AstrAce", por isso o painel
+abre direto no seu computador. O painel só aceita esse atalho em `--debug` ou nos testes. Com o site no ar, use
+`LOGIN_DEV=0` no `.env`: outras rotas que gravam (como `/api/vagas` e `/api/noticias`) ainda aceitam o atalho mesmo fora do debug.
+
+Toda rota do painel que grava exige JSON (um formulário de outro site não consegue disparar as ações).
 
 | Rota | O que faz |
 | --- | --- |
@@ -290,6 +368,5 @@ precisa conseguir abrir o link; `127.0.0.1` só funciona no próprio computador)
   Para os eventos, grave direto no modelo `Evento` (`app/eventos/models.py`) usando as listas de `app/eventos/catalogo.py`.
   Ao salvar um evento que dá carimbo, gere o `token_qr` (ex.: `secrets.token_urlsafe(16)`). Para ocultar, use `oculto = True`.
   A foto ou cartaz do evento vai em `imagem_url` (pode usar o `POST /api/uploads`).
-- **Pessoa 2 (passaporte):** o check-in `/checkin/<token_qr>` encontra o evento com `Evento.query.filter_by(token_qr=token, oculto=False)`.
-  Vale conferir se o evento está acontecendo (`inicio` e `termino`) antes de carimbar. O QR que aponta para essa rota
-  já sai do painel; para o QR de `/verificar/<codigo>` no certificado, use `app/servicos/qr.py`.
+- **Pessoa 2 (passaporte):** o check-in `/checkin/<token_qr>` já existe (seção Passaporte). Para o QR de
+  `/verificar/<codigo>` no certificado, use `app/servicos/qr.py`.
