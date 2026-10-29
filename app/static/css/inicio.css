@@ -1,4 +1,4 @@
-/* Página inicial: o mural de navegação do astrAce.
+/* Página inicial: o mural de navegação do AstrAce.
    Usa o quadro, os pins e os post-its de mural.css; aqui ficam só os papéis desta página. */
 
 .inicio-quadro {
@@ -15,8 +15,7 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-areas:
     "proj proj proj marc marc marc marc marc marc even even even"
-    "proj proj proj noti noti noti pass pass pass vaga vaga vaga"
-    "quiz quiz quiz noti noti noti pass pass pass vaga vaga vaga";
+    "glob glob glob noti noti noti pass pass pass vaga vaga vaga";
   align-items: start;
   gap: clamp(26px, 3vw, 44px) clamp(22px, 2.6vw, 40px);
   max-width: 1280px;
@@ -24,12 +23,55 @@
 }
 
 .inicio-marca { grid-area: marc; }
-.inicio-projetos { grid-area: proj; align-self: stretch; }
+.inicio-projetos { grid-area: proj; align-self: start; }
 .inicio-eventos { grid-area: even; }
 .inicio-noticias { grid-area: noti; }
 .inicio-passaporte { grid-area: pass; }
 .inicio-vagas { grid-area: vaga; }
-.inicio-quiz { grid-area: quiz; }
+.inicio-mapa-quiz {
+  grid-area: glob;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 2.4vw, 32px);
+}
+/* O envelopinho fica na mesma célula das vagas, no canto de cima à direita: pega um pouco de Eventos e de Vagas. */
+.inicio-cartinha {
+  grid-area: vaga;
+  align-self: start;
+  justify-self: end;
+  margin-top: calc(-1 * (clamp(26px, 3vw, 44px) / 2 + clamp(132px, 13vw, 176px) / 2.9));
+  margin-right: -64px;
+}
+
+/* Um recado escrito direto na cortiça, no canto de baixo que sobra embaixo das notícias, do passaporte e das vagas. */
+.inicio-recado {
+  grid-column: 4 / -1;
+  grid-row: 2;
+  align-self: end;
+  justify-self: center;
+  max-width: none;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--fonte-mao);
+  font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--madeira-escura, #3f2618);
+  rotate: -2deg;
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.inicio-recado svg {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.2em;
+  vertical-align: baseline;
+  fill: var(--magenta);
+}
 
 /* ---------- Papel: o que todos têm em comum ---------- */
 
@@ -258,20 +300,6 @@
   box-shadow: 0 1px 1px rgb(42 28 21 / 0.18), 0 6px 10px -4px rgb(42 28 21 / 0.4);
   transform: rotate(var(--rot));
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Rabisco de átomo no meio da cartolina (só no desktop, onde ela fica alta). */
-.inicio-rabisco--atomo {
-  position: static;
-  align-self: center;
-  width: 92px;
-  height: 92px;
-  margin: auto 0;
-  color: var(--magenta-escuro);
-  stroke: currentColor;
-  stroke-width: 1.1;
-  opacity: 0.55;
-  rotate: -12deg;
 }
 
 .inicio-polaroide svg {
@@ -622,71 +650,253 @@
   transform-origin: top center;
 }
 
-/* ---------- Inspire-se: um post-it com dois caminhos (mapa e quiz) ---------- */
+/* ---------- Mapa de Inspiração: globinho 3D ---------- */
 
-.inicio-quiz {
-  justify-self: center;
+.inicio-globo {
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 20px 14px 12px;
+  background: var(--papel);
+  text-align: center;
+}
+
+.inicio-globo__palco {
+  position: relative;
+  width: min(100%, 118px);
+  aspect-ratio: 1;
+}
+
+.inicio-globo__palco canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-globo--3d canvas { opacity: 1; }
+.inicio-globo--3d .inicio-globo__desenho { opacity: 0; }
+
+.inicio-globo__desenho {
+  position: absolute;
+  inset: 10%;
+  width: 80%;
+  height: 80%;
+  fill: #ffc4dc;
+  stroke: var(--magenta-escuro);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.inicio-globo__texto {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: min(100%, 290px);
-  padding: 26px 18px 16px;
+  align-items: center;
+  gap: 4px;
+}
+
+.inicio-globo .inicio-titulo {
+  font-size: clamp(1.5rem, 2vw, 1.8rem);
+}
+
+.inicio-globo .inicio-texto {
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.inicio-globo .inicio-abrir {
+  padding-top: 2px;
+  font-size: 1.25rem;
+}
+
+/* ---------- Quiz: post-it verde, com a pergunta em destaque ---------- */
+
+.inicio-quiz {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: calc(100% + clamp(110px, 12vw, 170px));
+  padding: 22px 22px 14px;
   color: var(--tinta);
+  text-decoration: none;
   transform: rotate(var(--rot));
   animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-.inicio-quiz__titulo {
-  margin: 0 0 2px;
+.inicio-quiz__interroga {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: clamp(46px, 4.6vw, 56px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 4px 0 var(--magenta-escuro), 0 10px 14px -6px rgb(42 28 21 / 0.5);
   font-family: var(--fonte-mao);
-  font-size: 2.1rem;
+  font-size: clamp(2rem, 3vw, 2.6rem);
   font-weight: 700;
   line-height: 1;
+  color: #fff;
+  rotate: -8deg;
+  transition: rotate 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-quiz:hover .inicio-quiz__interroga {
+  rotate: 8deg;
+}
+
+.inicio-quiz__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.inicio-quiz__titulo {
+  font-family: var(--fonte-mao);
+  font-size: clamp(1.4rem, 1.9vw, 1.7rem);
+  font-weight: 700;
+  line-height: 0.95;
   color: var(--magenta-escuro);
 }
 
-.inicio-quiz__link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  color: inherit;
-  text-decoration: none;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.inicio-quiz__link:hover,
-.inicio-quiz__link:focus-visible {
-  background: rgb(255 255 255 / 0.55);
-  transform: translateX(3px);
-}
-
-.inicio-quiz__link svg {
-  flex: none;
-  width: 30px;
-  height: 30px;
-  fill: none;
-  stroke: var(--magenta-escuro);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.inicio-quiz__link span {
-  display: grid;
-  font-size: 0.9rem;
+.inicio-quiz__texto {
+  max-width: 38ch;
+  font-size: 0.82rem;
   line-height: 1.3;
 }
 
-.inicio-quiz__link b {
-  font-size: 1rem;
-  text-decoration: underline;
-  text-decoration-color: var(--magenta);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+.inicio-quiz .inicio-abrir {
+  padding-top: 2px;
+  font-size: 1.25rem;
+}
+
+/* ---------- Carta para o futuro: só o envelopinho, flutuando como o aviãozinho ---------- */
+
+.inicio-cartinha {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  align-self: start;
+  width: clamp(132px, 13vw, 176px);
+  aspect-ratio: 1.45;
+  text-decoration: none;
+  rotate: 4deg;
+  animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(8 * 70ms);
+  transition: translate 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-cartinha:hover {
+  translate: 0 -6px;
+}
+
+.inicio-cartinha:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 8px;
+  border-radius: 8px;
+}
+
+.inicio-cartinha__envelope {
+  position: absolute;
+  inset: 0;
+  --papel-env: #ffd9e8;
+  filter: drop-shadow(0 8px 8px rgb(42 28 21 / 0.35));
+}
+
+/* Versão sem WebGL: o envelope desenhado em CSS. */
+.inicio-cartinha__folha,
+.inicio-cartinha__frente,
+.inicio-cartinha__aba {
+  position: absolute;
+  inset: 0;
+}
+
+.inicio-cartinha__folha {
+  inset: 6% 8% 12%;
+  background:
+    repeating-linear-gradient(transparent 0 9px, rgb(184 19 92 / 0.22) 9px 10px),
+    #fff;
+  border-radius: 3px;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-cartinha:hover .inicio-cartinha__folha {
+  transform: translateY(-34%);
+}
+
+.inicio-cartinha__frente {
+  background: var(--papel-env);
+  border-radius: 4px;
+  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+}
+
+.inicio-cartinha__aba {
+  background: color-mix(in srgb, var(--papel-env) 80%, #8c0d45);
+  clip-path: polygon(0 0, 100% 0, 50% 56%);
+  border-radius: 4px 4px 0 0;
+  transform-origin: top center;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-cartinha:hover .inicio-cartinha__aba {
+  transform: rotateX(160deg);
+}
+
+.inicio-cartinha__lacre {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  border-radius: 50%;
+  background: var(--magenta-escuro);
+  fill: #ffd6e8;
+  translate: -50% -50%;
+  transition: opacity 0.2s ease;
+}
+
+.inicio-cartinha:hover .inicio-cartinha__lacre {
+  opacity: 0;
+}
+
+/* Quando a carta chegou, o envelope balança para chamar a atenção (em 3D, quem balança é a cena). */
+.inicio-cartinha--chegou .inicio-cartinha__envelope:not(.inicio-cartinha--3d) {
+  animation: inicio-cartinha-balanco 2.4s ease-in-out infinite;
+}
+
+@keyframes inicio-cartinha-balanco {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg) translateY(-4px); }
+}
+
+/* Com o envelope em 3D, o de CSS some; o canvas é um pouco maior que a caixa para o balanço não cortar. */
+.inicio-cartinha__envelope canvas {
+  position: absolute;
+  inset: -14% -10%;
+  width: 120% !important;
+  height: 128% !important;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.inicio-cartinha--3d canvas { opacity: 1; }
+
+.inicio-cartinha--3d .inicio-cartinha__folha,
+.inicio-cartinha--3d .inicio-cartinha__frente,
+.inicio-cartinha--3d .inicio-cartinha__aba,
+.inicio-cartinha--3d .inicio-cartinha__lacre {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inicio-cartinha--chegou .inicio-cartinha__envelope {
+    animation: none;
+  }
 }
 
 /* ---------- Telas menores: o mural se reorganiza, sem só encolher ---------- */
@@ -694,10 +904,6 @@
 @media (max-width: 1100px) {
   .inicio-projetos {
     align-self: start;
-  }
-
-  .inicio-rabisco--atomo {
-    display: none;
   }
 
   /* Aqui o cartão é largo: capa e texto lado a lado, com espaço à direita para o avião. */
@@ -718,8 +924,19 @@
     grid-template-areas:
       "marc marc marc marc marc marc"
       "proj proj proj even even even"
-      "vaga vaga vaga noti noti noti"
-      "pass pass pass pass quiz quiz";
+      "glob glob glob vaga vaga vaga"
+      "noti noti noti noti noti noti"
+      "pass pass pass pass pass pass";
+  }
+
+  .inicio-quiz {
+    width: 100%;
+  }
+
+  .inicio-recado {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    white-space: normal;
   }
 
   .inicio-adesivo--mascote {
@@ -730,8 +947,18 @@
 @media (max-width: 640px) {
   .inicio-mural {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "marc" "proj" "even" "vaga" "noti" "quiz" "pass";
+    grid-template-areas: "marc" "proj" "even" "cart" "vaga" "noti" "glob" "pass" "reca";
     gap: 34px;
+  }
+
+  .inicio-cartinha {
+    grid-area: cart;
+    justify-self: center;
+    margin: 0;
+  }
+
+  .inicio-recado {
+    grid-area: reca;
   }
 
   /* Menos inclinação no celular, para ler sem esforço. */
@@ -775,6 +1002,7 @@
   }
 
   .inicio-quiz {
-    width: min(78%, 240px);
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

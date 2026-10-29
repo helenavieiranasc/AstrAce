@@ -7,6 +7,7 @@ from flask import current_app, jsonify, redirect, render_template, request, sess
 from .. import catalogos
 from ..carta.models import CartaFuturo
 from ..extensoes import db
+from ..quiz.dados import PERGUNTAS
 from ..uploads.models import Arquivo
 from ..usuarias.models import ContaUsuaria, IdentidadeUsuaria, Usuaria
 from . import bp, google
@@ -58,6 +59,23 @@ def _destino(usuaria):
     return url_for("conta.landing") if _cadastro_completo(usuaria) else url_for("conta.pagina_cadastro")
 
 
+def _cartinha(carta):
+    """A cartinha da página inicial: para onde leva e o que diz, conforme o ponto em que a carta está."""
+    from ..carta import servico as carta_servico  # import aqui: o relógio da carta é trocado nos testes
+
+    situacao = carta.situacao(carta_servico.agora()) if carta else "adiada"
+    if situacao == "em_criacao":
+        return {"href": "/carta/escrever", "titulo": "Continue sua carta", "texto": "Seu rascunho está guardado. Falta só selar.", "selo": "rascunho"}
+    if situacao == "aguardando":
+        quando = carta.revela_em.strftime("%d/%m/%Y")
+        return {"href": "/carta/abrir", "titulo": "Sua carta está selada", "texto": f"Ela abre em {quando}. Até lá, é segredo.", "selo": "selada"}
+    if situacao == "disponivel":
+        return {"href": "/carta/abrir", "titulo": "Sua carta chegou!", "texto": "A data chegou: abra a carta que você escreveu.", "selo": "chegou"}
+    if situacao == "aberta":
+        return {"href": "/carta/abrir", "titulo": "Reler minha carta", "texto": "A carta que você escreveu para você mesma.", "selo": "aberta"}
+    return {"href": "/carta/escrever", "titulo": "Escreva para o futuro", "texto": "Uma carta para a cientista que você vai ser. Ela só abre na data que você escolher.", "selo": "nova"}
+
+
 # ---------- Landing e login ----------
 
 
@@ -75,7 +93,13 @@ def landing():
         # Quem já decidiu (criou, pulou ou está criando) não vê o convite de novo.
         if db.session.get(CartaFuturo, usuaria.id) is None:
             return redirect(url_for("carta.pagina_convite"))
-        return render_template("inicio.html", nome=usuaria.nome_publico)
+        carta = db.session.get(CartaFuturo, usuaria.id)
+        return render_template(
+            "inicio.html",
+            nome=usuaria.nome_publico,
+            cartinha=_cartinha(carta),
+            perguntas_quiz=len(PERGUNTAS),
+        )
     codigo = request.args.get("erro")
     return render_template(
         "landing.html",

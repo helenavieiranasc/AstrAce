@@ -267,3 +267,32 @@ def test_perfil_tem_o_bloco_da_carta(ana):
     cliente, _ = ana
     pagina = cliente.get("/perfil").get_data(as_text=True)
     assert 'id="carta-perfil"' in pagina and "carta.js" in pagina
+
+
+# ---------- A cartinha da página inicial ----------
+
+
+def test_cartinha_da_pagina_inicial_acompanha_a_carta(app, ana, relogio):
+    cliente, uid = ana
+    cliente.post("/carta/adiar")
+    inicio = cliente.get("/").get_data(as_text=True)
+    assert "Escreva para o futuro" in inicio and 'href="/carta/escrever"' in inicio
+
+    assert cliente.put("/api/carta", json={"nome": "Ana"}).status_code == 200
+    assert "Continue sua carta" in cliente.get("/").get_data(as_text=True)
+
+    assert enviar(cliente).status_code == 200
+    inicio = cliente.get("/").get_data(as_text=True)
+    assert "Sua carta está selada" in inicio and "28/10/2029" in inicio and 'href="/carta/abrir"' in inicio
+
+    relogio["agora"] = datetime(2029, 10, 28, 15, 31)
+    assert "Sua carta chegou!" in cliente.get("/").get_data(as_text=True)
+
+
+def test_pagina_inicial_leva_ao_mapa_e_ao_quiz_e_tem_o_globo(ana):
+    cliente, _ = ana
+    cliente.post("/carta/adiar")
+    inicio = cliente.get("/").get_data(as_text=True)
+    assert 'href="/mapa"' in inicio and 'id="inicio-globo"' in inicio and 'href="/quiz"' in inicio
+    mundi = cliente.get("/mapa/mundi.svg")
+    assert mundi.status_code == 200 and mundi.mimetype == "image/svg+xml"
