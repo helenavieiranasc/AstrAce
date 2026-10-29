@@ -1,11 +1,11 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="app/static/img/logo-astrace-fundo-escuro.png">
-  <img src="app/static/img/logo-astrace.png" alt="AstrAce" align="right" width="320">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-astrace-modo-escuro.png">
+    <img src="app/static/img/logo-astrace.png" alt="AstrAce" width="460">
+  </picture>
+</p>
 
-# AstrAce
-
-**"Ciência feita por meninas e mulheres!"**
+<p align="center"><b>"Ciência feita por meninas e mulheres!"</b></p>
 
 Plataforma web que dá visibilidade, pertencimento e caminho de carreira a meninas e mulheres na ciência. O AstrAce reúne em um só lugar um mural de projetos, agenda de eventos, vagas afirmativas, notícias científicas e um passaporte de carimbos, tudo com cara de mural de cortiça e pensado para ser acessível.
 
