@@ -123,7 +123,21 @@ def test_endereco_antigo_redireciona_mantendo_a_cidade(cliente):
     assert r.headers["Location"].endswith("/mapa?cidade=Recife-PE")
 
 
-def test_menu_e_pagina_inicial_levam_ao_mapa(cliente):
+def test_menu_e_pagina_inicial_levam_ao_mapa(app, cliente):
+    from app.carta.models import ADIADA, CartaFuturo
+    from app.usuarias.models import ContaUsuaria, Usuaria
+
+    # O menu lateral só existe para quem entrou: entra por sessão, com o cadastro pronto e a carta já decidida.
+    with app.app_context():
+        u = Usuaria(nome="Ana", email="ana@menu-mapa.local")
+        db.session.add(u)
+        db.session.flush()
+        db.session.add(ContaUsuaria(usuaria_id=u.id, cadastro_concluido_em=datetime.utcnow()))
+        db.session.add(CartaFuturo(usuaria_id=u.id, estado=ADIADA))
+        db.session.commit()
+        uid = u.id
+    with cliente.session_transaction() as sessao:
+        sessao["usuaria_id"] = uid
     assert 'href="/mapa"' in cliente.get("/eventos").get_data(as_text=True)  # menu lateral
     assert 'href="/mapa"' in cliente.get("/").get_data(as_text=True)  # post-it "Inspire-se"
 

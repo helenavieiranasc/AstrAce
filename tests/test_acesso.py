@@ -86,3 +86,28 @@ def test_remover_avisa_quando_o_email_esta_na_lista(tmp_path, monkeypatch):
     assert "ADMIN_EMAILS" in resultado.output
     with app.app_context():
         assert Usuaria.query.filter_by(email="equipe@gmail.com").one().e_admin
+
+
+def test_menu_lateral_so_para_quem_entrou(tmp_path):
+    """Sem login o cabeçalho tem só a marca: nem o botão nem a barra lateral existem na página."""
+    app = _app(tmp_path)
+    from app.extensoes import db
+    from app.usuarias.models import ContaUsuaria, Usuaria
+    from datetime import datetime
+
+    anonimo = app.test_client().get("/").get_data(as_text=True)
+    assert 'id="abrir-menu"' not in anonimo and 'id="menu-lateral"' not in anonimo
+    assert "menu-lateral.js" not in anonimo and "/mural/novo" not in anonimo
+
+    with app.app_context():
+        u = Usuaria(nome="Ana", email="ana@menu.local")
+        db.session.add(u)
+        db.session.flush()
+        db.session.add(ContaUsuaria(usuaria_id=u.id, cadastro_concluido_em=datetime.utcnow()))
+        db.session.commit()
+        uid = u.id
+    logada = app.test_client()
+    with logada.session_transaction() as sessao:
+        sessao["usuaria_id"] = uid
+    pagina = logada.get("/mural").get_data(as_text=True)
+    assert 'id="abrir-menu"' in pagina and 'id="menu-lateral"' in pagina and "menu-lateral.js" in pagina

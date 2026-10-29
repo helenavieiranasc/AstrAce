@@ -69,7 +69,10 @@ def _evento_valido(**mudancas):
 # ---------- Acesso ----------
 
 
-def test_admin_abre_o_painel_e_ve_o_link_no_menu(cliente):
+def test_admin_abre_o_painel_e_ve_o_link_no_menu(app, cliente):
+    with app.app_context():
+        equipe = Usuaria.query.order_by(Usuaria.id).first().email  # a "Equipe AstrAce" do seed
+    _entrar_como(app, cliente, equipe)  # o menu só aparece para quem entrou de verdade (sessão)
     resposta = cliente.get("/admin")
     assert resposta.status_code == 200
     assert 'href="/admin"' in cliente.get("/mural").get_data(as_text=True)
