@@ -155,6 +155,12 @@
   box-shadow: var(--sombra-papel);
 }
 
+/* Um ícone para cada estado: setas para fora (entrar) ou para dentro (sair). */
+.passaporte-sair-tela[aria-pressed="true"] .passaporte-tela-cheia__entrar,
+.passaporte-sair-tela[aria-pressed="false"] .passaporte-tela-cheia__sair {
+  display: none;
+}
+
 .passaporte-sair-tela:hover {
   border-color: var(--magenta);
   background: var(--rosa-claro);
