@@ -1,0 +1,345 @@
+/* Certificado de participação: A4 deitado. Tudo dentro da folha é medido em cqw (1% da largura
+   da folha), então ela encolhe inteira no celular e volta a 297 x 210 mm na impressão. */
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+.pagina-certificado {
+  background: var(--madeira-escura);
+}
+
+/* ---------- Barra de ações (só na tela) ---------- */
+
+.cert-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 297mm;
+  margin: 20px auto 14px;
+  padding: 0 16px;
+  color: var(--papel);
+}
+
+.cert-barra__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cert-barra__dica {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.92rem;
+  opacity: 0.85;
+}
+
+/* ---------- A folha ---------- */
+
+.cert-folha {
+  container-type: inline-size;
+  width: min(297mm, 100% - 32px);
+  margin: 0 auto 40px;
+  box-shadow: var(--sombra-papel-alta);
+}
+
+.cert {
+  --linha: var(--magenta);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  aspect-ratio: 297 / 210;
+  padding: 5.4cqw 6.4cqw 4.6cqw;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 0 0, rgb(251 211 227 / 0.75), transparent 34cqw),
+    radial-gradient(circle at 100% 100%, rgb(251 211 227 / 0.6), transparent 30cqw),
+    var(--papel);
+  color: var(--tinta);
+  text-align: center;
+}
+
+/* Moldura dupla: uma linha grossa e uma fina, em magenta. */
+.cert::before,
+.cert::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.cert::before {
+  inset: 2cqw;
+  border: 0.55cqw solid var(--linha);
+  border-radius: 1.4cqw;
+}
+
+.cert::after {
+  inset: 3.1cqw;
+  border: 0.14cqw solid var(--linha);
+  border-radius: 0.8cqw;
+}
+
+.cert__marca-dagua {
+  position: absolute;
+  right: -5cqw;
+  bottom: -7cqw;
+  z-index: -1;
+  width: 36cqw;
+  height: auto;
+  opacity: 0.13;
+  transform: rotate(-12deg);
+}
+
+.cert__brilho {
+  position: absolute;
+  fill: var(--magenta);
+  z-index: -1;
+}
+
+.cert__brilho--1 {
+  top: 5.2cqw;
+  left: 5.2cqw;
+  width: 2.2cqw;
+  transform: rotate(8deg);
+}
+
+.cert__brilho--2 {
+  top: 8cqw;
+  left: 8.4cqw;
+  width: 1.1cqw;
+  opacity: 0.7;
+}
+
+.cert__brilho--3 {
+  right: 5.4cqw;
+  top: 21cqw;
+  width: 1.4cqw;
+  opacity: 0.55;
+}
+
+/* ---------- Topo ---------- */
+
+.cert__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding: 0 1.4cqw;
+}
+
+.cert__logo {
+  width: 21cqw;
+  height: auto;
+}
+
+.cert__numero {
+  margin: 0;
+  font-size: 1.05cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.cert__numero strong {
+  color: var(--tinta);
+  letter-spacing: 0.12em;
+}
+
+/* ---------- Corpo ---------- */
+
+.cert__corpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4cqw;
+}
+
+.cert__titulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-size: 3.4cqw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  /* o espaçamento entra depois da última letra: compensa para centralizar de verdade */
+  text-indent: 0.32em;
+}
+
+.cert__titulo span {
+  margin-top: 0.2cqw;
+  font-family: var(--fonte-mao);
+  font-size: 1.32em;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-indent: 0;
+  text-transform: none;
+  color: var(--magenta);
+  transform: rotate(-2deg);
+}
+
+.cert__certificamos {
+  margin: 2.4cqw 0 0;
+  font-size: 1.5cqw;
+  color: var(--tinta-suave);
+}
+
+.cert__nome {
+  position: relative;
+  max-width: 100%;
+  margin: 0.2cqw 0 0;
+  padding: 0 3cqw 0.6cqw;
+  font-family: var(--fonte-mao);
+  font-size: 6.4cqw;
+  font-weight: 700;
+  line-height: 1.02;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.cert__nome--longo {
+  font-size: 4.6cqw;
+}
+
+/* Sublinhado de caneta, um pouco mais largo que o nome. */
+.cert__nome::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.9cqw;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 12' preserveAspectRatio='none'%3E%3Cpath d='M3 8c60-6 130-7 200-4s120 4 194-2' fill='none' stroke='%23b8135c' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+
+.cert__texto {
+  max-width: 72cqw;
+  margin: 1.8cqw 0 0;
+  font-size: 1.62cqw;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+
+.cert__texto--longo {
+  font-size: 1.4cqw;
+}
+
+.cert__texto strong {
+  color: var(--magenta-escuro);
+}
+
+/* ---------- Rodapé: assinatura, selo e verificação ---------- */
+
+.cert__rodape {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 3cqw;
+  padding: 0 1.4cqw;
+}
+
+.cert__assinatura {
+  justify-self: start;
+  width: 25cqw;
+}
+
+.cert__rubrica {
+  margin: 0;
+  padding-bottom: 0.4cqw;
+  border-bottom: 0.12cqw solid var(--tinta);
+  font-family: var(--fonte-mao);
+  font-size: 3cqw;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+  transform-origin: left bottom;
+}
+
+.cert__legenda {
+  margin: 0.7cqw 0 0;
+  font-size: 1cqw;
+  line-height: 1.4;
+  color: var(--tinta-suave);
+}
+
+.cert__selo {
+  display: block;
+  width: 15cqw;
+  height: auto;
+  color: var(--magenta);
+  transform: rotate(-11deg);
+  margin-bottom: -0.6cqw;
+}
+
+.cert__selo text {
+  font-family: var(--fonte);
+  letter-spacing: 0.05em;
+}
+
+.cert__verificar {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1.3cqw;
+  text-align: left;
+}
+
+.cert__qr {
+  width: 9.6cqw;
+  margin: 0;
+  padding: 0.5cqw;
+  border: 0.18cqw solid var(--magenta);
+  border-radius: 0.9cqw;
+  background: #fff;
+}
+
+.cert__qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cert__verificar p {
+  margin: 0;
+  max-width: 17cqw;
+  font-size: 0.98cqw;
+  line-height: 1.4;
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.cert__verificar strong {
+  color: var(--tinta);
+}
+
+/* ---------- Impressão: só a folha, no tamanho exato ---------- */
+
+@media print {
+  .pagina-certificado {
+    background: none;
+  }
+
+  .cert-barra {
+    display: none;
+  }
+
+  .cert-folha {
+    width: 297mm;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .cert {
+    height: 210mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

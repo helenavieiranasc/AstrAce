@@ -11,6 +11,17 @@
 
 {% block conteudo %}
 {% set cores = {"carimbado": "verde", "repetido": "verde", "entrar": "amarelo", "cedo": "amarelo"} %}
+{% macro aviso_certificado() %}
+  {% if certificado == "aguardando" %}
+    <p>Quando o evento terminar, o seu certificado de participação fica pronto no passaporte.</p>
+    <p class="checkin__acoes"><a class="botao botao--primario" href="{{ url_for('passaporte.pagina_passaporte') }}">Ver meu passaporte</a></p>
+  {% else %}
+    <p class="checkin__acoes">
+      <a class="botao botao--primario" href="{{ url_for('passaporte.pagina_emitir_certificado', evento_id=evento.id) }}">Ver meu certificado</a>
+      <a class="link-mao" href="{{ url_for('passaporte.pagina_passaporte') }}">Ver meu passaporte</a>
+    </p>
+  {% endif %}
+{% endmacro %}
 <div class="quadro">
   <div class="cortica checkin">
     <section class="postit postit--{{ cores.get(estado, 'rosa') }} checkin__nota" aria-labelledby="checkin-titulo">
@@ -20,12 +31,12 @@
       {% if estado == "carimbado" %}
         <h1 id="checkin-titulo">Carimbo recebido!</h1>
         <p>Sua presença está registrada. O carimbo deste evento já está no seu passaporte.</p>
-        <p class="checkin__acoes"><a class="botao botao--primario" href="{{ url_for('passaporte.pagina_passaporte') }}">Ver meu passaporte</a></p>
+        {{ aviso_certificado() }}
 
       {% elif estado == "repetido" %}
         <h1 id="checkin-titulo">Você já tem este carimbo</h1>
         <p>Sua presença neste evento já estava registrada. Cada evento vale um carimbo.</p>
-        <p class="checkin__acoes"><a class="botao botao--primario" href="{{ url_for('passaporte.pagina_passaporte') }}">Ver meu passaporte</a></p>
+        {{ aviso_certificado() }}
 
       {% elif estado == "entrar" %}
         <h1 id="checkin-titulo">Entre para ganhar o carimbo</h1>

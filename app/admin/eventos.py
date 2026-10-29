@@ -33,6 +33,20 @@ def _data_hora(valor):
     return data.replace(tzinfo=None, second=0, microsecond=0)
 
 
+def _carga_horaria(valor):
+    """Horas, aceitando "9", "1,5" ou "1.5". Devolve (minutos, erro); vazio = o certificado não fala em horas."""
+    texto = str(valor if valor is not None else "").strip().replace(",", ".")
+    if not texto:
+        return None, None
+    try:
+        horas = float(texto)
+    except ValueError:
+        return None, "Escreva só o número de horas, como 3 ou 1,5."
+    if not 0.5 <= horas <= 500:
+        return None, "A carga horária vai de meia hora (0,5) a 500 horas."
+    return round(horas * 60), None
+
+
 def validar(dados):
     """Devolve (campos_limpos, erros, vale_carimbo). Mesmo formato de vagas/servico.validar."""
     erros, limpo = {}, {}
@@ -66,6 +80,10 @@ def validar(dados):
         erros["fim"] = "Use uma data e hora válidas, como 02/11/2026 17:00."
     if limpo["inicio"] and limpo["fim"] and limpo["fim"] <= limpo["inicio"]:
         erros["fim"] = "O fim precisa ser depois do início."
+
+    limpo["carga_horaria_min"], erro_carga = _carga_horaria(dados.get("carga_horaria"))
+    if erro_carga:
+        erros["carga_horaria"] = erro_carga
 
     limpo["modalidade"] = _texto(dados, "modalidade", 20)
     if limpo["modalidade"] not in catalogos.valores(catalogo.MODALIDADES):
@@ -132,6 +150,7 @@ def ficha(evento):
             "vale_carimbo": evento.tem_carimbo,
             "link_checkin": link_checkin(evento),
             "link_bruto": evento.link,
+            "carga_horaria": evento.carga_horaria_min / 60 if evento.carga_horaria_min else None,
         }
     )
     return dados

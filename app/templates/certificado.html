@@ -1,0 +1,102 @@
+{#- Certificado de participação, A4 deitado. Página solta (sem o cabeçalho do site), como o cartaz de check-in. -#}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Certificado · {{ c.evento }}</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='img/icone-192.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/certificado.css') }}">
+</head>
+<body class="pagina-certificado">
+  <div class="cert-barra">
+    <a class="botao botao--secundario" href="{{ url_for('passaporte.pagina_passaporte') }}#certificados">Voltar ao passaporte</a>
+    <div class="cert-barra__acoes">
+      <button class="botao botao--primario" type="button" id="imprimir">Imprimir ou salvar PDF</button>
+      <a class="botao botao--secundario" href="{{ link_linkedin }}" target="_blank" rel="noopener">Adicionar ao LinkedIn</a>
+      <button class="botao botao--secundario" type="button" id="copiar" data-link="{{ c.link_verificacao }}">Copiar link de verificação</button>
+    </div>
+    <p class="cert-barra__dica" id="cert-dica" aria-live="polite">Para salvar em PDF, escolha "Salvar como PDF" na janela de impressão.</p>
+  </div>
+
+  <div class="cert-folha">
+    <main class="cert">
+      <svg class="cert__brilho cert__brilho--1" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c.6 6.4 5.6 11.4 12 12-6.4.6-11.4 5.6-12 12-.6-6.4-5.6-11.4-12-12C6.4 11.4 11.4 6.4 12 0z"/></svg>
+      <svg class="cert__brilho cert__brilho--2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c.6 6.4 5.6 11.4 12 12-6.4.6-11.4 5.6-12 12-.6-6.4-5.6-11.4-12-12C6.4 11.4 11.4 6.4 12 0z"/></svg>
+      <svg class="cert__brilho cert__brilho--3" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c.6 6.4 5.6 11.4 12 12-6.4.6-11.4 5.6-12 12-.6-6.4-5.6-11.4-12-12C6.4 11.4 11.4 6.4 12 0z"/></svg>
+      <img class="cert__marca-dagua" src="{{ url_for('static', filename='img/logo-estrela-rosa.png') }}" alt="" width="912" height="927">
+
+      <header class="cert__topo">
+        <img class="cert__logo" src="{{ url_for('static', filename='img/logo-astrace.png') }}" alt="AstrAce" width="1699" height="540">
+        <p class="cert__numero">Certificado nº <strong>{{ c.codigo }}</strong></p>
+      </header>
+
+      <div class="cert__corpo">
+        <h1 class="cert__titulo">Certificado <span>de participação</span></h1>
+        <p class="cert__certificamos">Certificamos que</p>
+        <p class="cert__nome{% if c.nome|length > 38 %} cert__nome--longo{% endif %}">{{ c.nome }}</p>
+        <p class="cert__texto{% if c.evento|length > 80 %} cert__texto--longo{% endif %}">
+          participou do evento <strong>{{ c.evento }}</strong>{% if c.organizacao %}, promovido por {{ c.organizacao }}{% endif %},
+          realizado {% if not c.lugar %}on-line {% endif %}{{ c.periodo }}{% if c.lugar %}, em {{ c.lugar }}{% endif %}{% if c.carga %},
+          com carga horária de {{ c.carga }}{% endif %}.
+        </p>
+      </div>
+
+      <footer class="cert__rodape">
+        <div class="cert__assinatura">
+          <p class="cert__rubrica">Equipe AstrAce</p>
+          <p class="cert__legenda">AstrAce · mulheres e meninas na ciência<br>Emitido em {{ c.emitido_em }}</p>
+        </div>
+
+        {# Carimbo de borracha: o mesmo gesto do passaporte. O filtro "tinta" falha a cor como tinta de verdade. #}
+        <svg class="cert__selo" viewBox="0 0 200 200" role="img" aria-label="Selo do Passaporte AstrAce">
+          <defs>
+            <path id="selo-circulo" d="M100 100m-73 0a73 73 0 1 1 146 0a73 73 0 1 1-146 0"/>
+            <filter id="selo-tinta" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="ruido"/>
+              <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.6" result="falhas"/>
+              <feComposite in="SourceGraphic" in2="falhas" operator="in"/>
+            </filter>
+          </defs>
+          <g filter="url(#selo-tinta)">
+            <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" stroke-width="5"/>
+            <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="100" cy="100" r="57" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <text fill="currentColor" font-size="15" font-weight="700" textLength="452" lengthAdjust="spacing">
+              <textPath href="#selo-circulo">PASSAPORTE ASTRACE ✦ PARTICIPAÇÃO CONFIRMADA ✦</textPath>
+            </text>
+            <image href="{{ url_for('static', filename='img/logo-estrela-magenta-240.png') }}" x="55" y="54" width="90" height="91"/>
+          </g>
+        </svg>
+
+        <div class="cert__verificar">
+          <figure class="cert__qr">
+            {{ qr_svg|safe }}
+            <figcaption class="visualmente-oculto">QR code para conferir este certificado</figcaption>
+          </figure>
+          <p>Confira a autenticidade em<br><strong>{{ c.site_verificacao }}</strong><br>com o código <strong>{{ c.codigo }}</strong></p>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("imprimir").addEventListener("click", () => window.print());
+    const copiar = document.getElementById("copiar");
+    copiar.addEventListener("click", async () => {
+      const dica = document.getElementById("cert-dica");
+      try {
+        await navigator.clipboard.writeText(copiar.dataset.link);
+        dica.textContent = "Link copiado. Quem abrir vê que o certificado é verdadeiro.";
+      } catch {
+        dica.textContent = "Não deu para copiar. O link é: " + copiar.dataset.link;
+      }
+    });
+  </script>
+</body>
+</html>

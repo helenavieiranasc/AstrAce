@@ -679,6 +679,8 @@ function abrirFormEvento(evento, duplicar = false) {
         // Na cópia, as datas ficam em branco: quase sempre é outro dia.
         campo(formEvento, "inicio").value = duplicar ? "" : evento.inicio;
         campo(formEvento, "fim").value = duplicar ? "" : evento.fim ?? "";
+        campo(formEvento, "carga_horaria").value =
+            evento.carga_horaria === null ? "" : String(evento.carga_horaria).replace(".", ",");
         campo(formEvento, "modalidade").value = evento.modalidade;
         campo(formEvento, "local").value = evento.local ?? "";
         campo(formEvento, "uf").value = evento.uf ?? "";
@@ -710,6 +712,7 @@ function dadosEvento() {
         descricao: texto(dados, "descricao"),
         inicio: texto(dados, "inicio"),
         fim: texto(dados, "fim"),
+        carga_horaria: texto(dados, "carga_horaria"),
         modalidade: texto(dados, "modalidade"),
         local: texto(dados, "local"),
         uf: texto(dados, "uf"),

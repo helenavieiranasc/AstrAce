@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block titulo %}Verificar certificado · AstrAce{% endblock %}
+{% block descricao %}Confira se um certificado de participação emitido pelo AstrAce é verdadeiro.{% endblock %}
+
+{% block estilos %}
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/passaporte.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+{% set cores = {"valido": "verde", "digitar": "amarelo"} %}
+<div class="quadro">
+  <div class="cortica checkin">
+    <section class="postit postit--{{ cores.get(estado, 'rosa') }} checkin__nota verificar" aria-labelledby="verificar-titulo">
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+
+      {% if estado == "valido" %}
+        <p class="checkin__evento">Certificado nº {{ c.codigo }}</p>
+        <h1 id="verificar-titulo">Certificado verdadeiro</h1>
+        <p>Este certificado foi emitido pelo AstrAce para quem fez check-in no evento pelo QR code.</p>
+        <dl class="verificar__dados">
+          <dt>Participante</dt><dd>{{ c.nome }}</dd>
+          <dt>Evento</dt><dd>{{ c.evento }}</dd>
+          {% if c.organizacao %}<dt>Organização</dt><dd>{{ c.organizacao }}</dd>{% endif %}
+          <dt>Data</dt><dd>{{ c.data }}</dd>
+          <dt>Local</dt><dd>{{ c.lugar or "On-line" }}</dd>
+          {% if c.carga %}<dt>Carga horária</dt><dd>{{ c.carga }}</dd>{% endif %}
+          <dt>Emitido em</dt><dd>{{ c.emitido_em }}</dd>
+        </dl>
+        <p class="verificar__nota">Os dados do papel precisam ser iguais a estes. Se algo estiver diferente, o certificado foi alterado.</p>
+
+      {% else %}
+        {% if estado == "nao_encontrado" %}
+          <h1 id="verificar-titulo">Certificado não encontrado</h1>
+          <p>Nenhum certificado do AstrAce tem esse código. Confira se ele foi digitado igual ao do papel.</p>
+        {% else %}
+          <h1 id="verificar-titulo">Verificar certificado</h1>
+          <p>Digite o código que aparece no certificado, ao lado do QR code.</p>
+        {% endif %}
+        <form class="emitir" method="get" action="{{ url_for('passaporte.pagina_verificar_form') }}">
+          <label class="emitir__rotulo" for="verificar-codigo">Código do certificado</label>
+          <input class="emitir__nome verificar__codigo" id="verificar-codigo" name="codigo" value="{{ digitado or '' }}"
+                 placeholder="Ex.: 7KQ3M-XP9TD" autocapitalize="characters" autocomplete="off" spellcheck="false" required
+                 {% if erro %}aria-invalid="true" aria-describedby="verificar-erro"{% endif %}>
+          {% if erro %}<p class="emitir__erro" id="verificar-erro">O código tem 10 letras e números, como 7KQ3M-XP9TD.</p>{% endif %}
+          <p class="checkin__acoes"><button class="botao botao--primario" type="submit">Verificar</button></p>
+        </form>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -336,5 +336,158 @@
 }
 
 .checkin__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
   margin-top: 18px;
+}
+
+/* ---------- Certificados (abaixo do passaporte e nas páginas de emitir e verificar) ---------- */
+
+/* O passaporte ocupa a tela toda: o atalho mostra que tem mais coisa embaixo. */
+.passaporte-atalho {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: var(--magenta);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--papel);
+  text-decoration: none;
+}
+
+.passaporte-atalho:hover {
+  background: var(--magenta-escuro);
+}
+
+.passaporte-atalho svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.certificados {
+  max-width: 960px;
+  margin-top: 0;
+}
+
+.certificados__lista {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.certificados__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 16px 20px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel);
+}
+
+.certificados__icone {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.certificados__info {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.certificados__titulo {
+  margin: 0;
+  font-weight: 700;
+}
+
+.certificados__data,
+.certificados__espera {
+  margin: 0;
+  color: var(--tinta-suave);
+}
+
+.certificados__espera {
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.certificados__vazio {
+  max-width: 40rem;
+  margin: 0;
+  padding: 16px 20px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel);
+}
+
+.emitir__rotulo {
+  display: block;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.emitir__nome {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 2px solid var(--tinta);
+  border-radius: 6px;
+  background: var(--papel);
+  font-size: 1.15rem;
+}
+
+.emitir__nome[aria-invalid="true"] {
+  border-color: var(--magenta-escuro);
+}
+
+.emitir__ajuda {
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+
+.emitir__erro {
+  font-weight: 700;
+  color: var(--magenta-escuro);
+}
+
+.verificar__codigo {
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.verificar__dados {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 14px 0;
+}
+
+.verificar__dados dt {
+  font-weight: 700;
+}
+
+.verificar__dados dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.verificar__nota {
+  font-size: 0.95rem;
 }

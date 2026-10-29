@@ -51,6 +51,7 @@ def create_app(config=Config):
     app.cli.add_command(tornar_admin)
 
     from .servicos.banco import acrescentar_colunas
+    from .eventos.models import Evento
     from .noticias.models import Noticia
     from .vagas.models import Vaga
 
@@ -60,6 +61,6 @@ def create_app(config=Config):
         completar_colunas_mural(db)
         completar_colunas_vagas(db)
         completar_colunas_noticias(db)
-        acrescentar_colunas(db, Vaga, Noticia)  # imagem_url das vagas e das notícias
+        acrescentar_colunas(db, Vaga, Noticia, Evento)  # imagem_url das vagas e notícias; carga horária dos eventos
 
     return app

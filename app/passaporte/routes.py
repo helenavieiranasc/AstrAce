@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import jsonify, redirect, render_template, session, url_for
+from flask import abort, jsonify, redirect, render_template, request, session, url_for
 
 from .. import catalogos
 from ..conta.routes import (
@@ -11,8 +11,10 @@ from ..conta.routes import (
     _usuaria_logada,
     guardar_checkin_pendente,
 )
+from ..eventos.models import Evento
 from ..extensoes import db
-from . import bp, servico
+from ..servicos import qr
+from . import bp, certificados, servico
 from .models import Carimbo
 
 MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
@@ -46,7 +48,11 @@ def pagina_passaporte():
         return redirect(url_for("conta.pagina_cadastro"))
     # Quem já tinha conta antes do passaporte ganha o carimbo de boas-vindas aqui.
     servico.conceder_boas_vindas(usuaria)
-    return render_template("passaporte.html", passaporte=_dados_do_passaporte(usuaria))
+    return render_template(
+        "passaporte.html",
+        passaporte=_dados_do_passaporte(usuaria),
+        certificados=certificados.do_passaporte(usuaria),
+    )
 
 
 @bp.get("/checkin/<token>")
@@ -71,7 +77,8 @@ def pagina_checkin(token):
         if estado == "aberto":
             servico.carimbar_evento(usuaria, evento)
             estado = "carimbado"
-    return render_template("checkin.html", estado=estado, evento=evento)
+    certificado = certificados.situacao(usuaria, evento) if estado in ("carimbado", "repetido") else None
+    return render_template("checkin.html", estado=estado, evento=evento, certificado=certificado)
 
 
 @bp.post("/api/passaporte/carimbos/<codigo>/visto")
@@ -87,3 +94,97 @@ def api_carimbo_visto(codigo):
         carimbo.visto_em = datetime.utcnow()
         db.session.commit()
     return jsonify(carimbo.para_json())
+
+
+# ---------- Certificados ----------
+
+
+def _evento_ou_404(evento_id):
+    evento = db.session.get(Evento, evento_id)
+    if not evento:
+        abort(404)
+    return evento
+
+
+@bp.get("/certificados/evento/<int:evento_id>")
+def pagina_emitir_certificado(evento_id):
+    """Antes do primeiro certificado de um evento, a usuária confere o nome que vai sair no papel."""
+    usuaria = _usuaria_logada()
+    if not usuaria:
+        return redirect(url_for("conta.landing"))
+    if not _cadastro_completo(usuaria):
+        return redirect(url_for("conta.pagina_cadastro"))
+    evento = _evento_ou_404(evento_id)
+    situacao = certificados.situacao(usuaria, evento)
+    if situacao == "emitido":
+        codigo = certificados.certificado_do_evento(usuaria, evento).codigo
+        return redirect(url_for("passaporte.pagina_certificado", codigo=codigo))
+    return render_template(
+        "certificado_emitir.html",
+        situacao=situacao,
+        evento=evento,
+        nome=certificados.nome_sugerido(usuaria),
+        liberado_em=evento.termino,
+    ), (404 if situacao == "sem_checkin" else 200)
+
+
+@bp.post("/api/certificados/evento/<int:evento_id>")
+def api_emitir_certificado(evento_id):
+    """{"nome": "..."} -> emite o certificado e devolve {"url"} da página dele."""
+    usuaria = _usuaria_logada()
+    if not usuaria or not _cadastro_completo(usuaria):
+        return _erro("Entre com sua conta Google para emitir o certificado.", 401)
+    if not request.is_json:
+        return _erro("Envie os dados em JSON.", 415)
+    evento = db.session.get(Evento, evento_id)
+    if not evento:
+        return _erro("Esse evento não existe.", 404)
+
+    situacao = certificados.situacao(usuaria, evento)
+    if situacao == "sem_checkin":
+        return _erro("O certificado é de quem fez check-in no evento pelo QR code.", 403)
+    if situacao == "aguardando":
+        return _erro("O certificado fica pronto quando o evento terminar.", 409)
+
+    nome, erro = certificados.validar_nome((request.get_json(silent=True) or {}).get("nome"))
+    if erro:
+        return _erro(erro, 422, erros={"nome": erro})
+    certificado = certificados.emitir(usuaria, evento, nome)
+    return jsonify({"url": url_for("passaporte.pagina_certificado", codigo=certificado.codigo)}), 201
+
+
+@bp.get("/certificados/<codigo>")
+def pagina_certificado(codigo):
+    """O certificado para imprimir. Só a dona vê esta página; para as outras pessoas, vale a verificação."""
+    certificado = certificados.por_codigo(codigo)
+    usuaria = _usuaria_logada()
+    if not certificado or not usuaria or certificado.usuaria_id != usuaria.id:
+        return redirect(url_for("passaporte.pagina_verificar", codigo=codigo))
+    dados = certificados.dados(certificado)
+    return render_template(
+        "certificado.html",
+        c=dados,
+        qr_svg=qr.svg(dados["link_verificacao"]),
+        link_linkedin=certificados.link_linkedin(certificado),
+    )
+
+
+@bp.get("/verificar")
+def pagina_verificar_form():
+    """Quem recebeu um certificado impresso digita o código aqui (ou escaneia o QR)."""
+    digitado = request.args.get("codigo")
+    if digitado is None:
+        return render_template("verificar.html", estado="digitar")
+    codigo = certificados.normalizar_codigo(digitado)
+    if not codigo:
+        return render_template("verificar.html", estado="digitar", digitado=digitado, erro=True), 400
+    return redirect(url_for("passaporte.pagina_verificar", codigo=codigo))
+
+
+@bp.get("/verificar/<codigo>")
+def pagina_verificar(codigo):
+    """Página pública: confirma que o certificado existe e mostra só o que está impresso nele."""
+    certificado = certificados.por_codigo(codigo)
+    if not certificado:
+        return render_template("verificar.html", estado="nao_encontrado", digitado=codigo), 404
+    return render_template("verificar.html", estado="valido", c=certificados.dados(certificado))
