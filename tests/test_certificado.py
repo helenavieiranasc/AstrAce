@@ -186,12 +186,23 @@ def test_certificado_guarda_os_dados_do_dia_da_emissao(app, entrar, criar_evento
 
 
 def test_evento_online_e_sem_carga_horaria(entrar, criar_evento):
-    evento_id = criar_evento(modalidade="online", carga_horaria_min=None)
+    # Começo e fim no mesmo dia, seja qual for a hora do teste (o CI roda em UTC, até de madrugada).
+    fim = agora() - timedelta(hours=1)
+    inicio = max(fim - timedelta(hours=3), fim.replace(hour=0, minute=0))
+    evento_id = criar_evento(inicio, fim, modalidade="online", carga_horaria_min=None)
     cliente = entrar()
     cliente.get("/checkin/token-do-qr")
     pagina = cliente.get(emitir(cliente, evento_id).get_json()["url"]).get_data(as_text=True)
     assert "realizado on-line em" in pagina
     assert "carga horária" not in pagina
+
+
+def test_evento_de_varios_dias_diz_de_um_dia_a_outro(entrar, criar_evento):
+    evento_id = criar_evento(agora() - timedelta(days=2), agora() - timedelta(hours=1))
+    cliente = entrar()
+    cliente.get("/checkin/token-do-qr")
+    pagina = cliente.get(emitir(cliente, evento_id).get_json()["url"]).get_data(as_text=True)
+    assert "realizado de " in pagina
 
 
 def test_verificar_aceita_o_codigo_digitado_de_qualquer_jeito(app, entrar, criar_evento):
