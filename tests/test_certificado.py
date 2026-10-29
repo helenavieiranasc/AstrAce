@@ -85,7 +85,7 @@ def test_fluxo_completo_do_checkin_a_verificacao(app, entrar, criar_evento):
     assert "Carimbo recebido!" in checkin
     assert f"/certificados/evento/{evento_id}" in checkin  # o evento já acabou: o botão vai direto
 
-    passaporte = cliente.get("/passaporte").get_data(as_text=True)
+    passaporte = cliente.get("/perfil").get_data(as_text=True)
     assert "Meus certificados" in passaporte and "Emitir certificado" in passaporte
 
     confirmar = cliente.get(f"/certificados/evento/{evento_id}").get_data(as_text=True)
@@ -105,7 +105,7 @@ def test_fluxo_completo_do_checkin_a_verificacao(app, entrar, criar_evento):
     # Emitir de novo devolve o mesmo, e a página de emitir passa a levar direto ao certificado.
     assert emitir(cliente, evento_id, nome="Outro Nome").get_json()["url"] == url
     assert cliente.get(f"/certificados/evento/{evento_id}").headers["Location"].endswith(url)
-    assert "Ver certificado" in cliente.get("/passaporte").get_data(as_text=True)
+    assert "Ver certificado" in cliente.get("/perfil").get_data(as_text=True)
 
     # Qualquer pessoa confere, sem login.
     verificacao = app.test_client().get(f"/verificar/{codigo}")
@@ -122,7 +122,7 @@ def test_antes_do_fim_do_evento_ainda_nao_emite(app, entrar, criar_evento):
     assert "Quando o evento terminar" in checkin
 
     assert "Quase lá!" in cliente.get(f"/certificados/evento/{evento_id}").get_data(as_text=True)
-    assert "Fica pronto em" in cliente.get("/passaporte").get_data(as_text=True)
+    assert "Fica pronto em" in cliente.get("/perfil").get_data(as_text=True)
     assert emitir(cliente, evento_id).status_code == 409
     with app.app_context():
         assert Certificado.query.count() == 0
@@ -133,7 +133,7 @@ def test_sem_checkin_nao_tem_certificado(app, entrar, criar_evento):
     cliente = entrar()
     assert cliente.get(f"/certificados/evento/{evento_id}").status_code == 404
     assert emitir(cliente, evento_id).status_code == 403
-    assert "Meus certificados" in cliente.get("/passaporte").get_data(as_text=True)
+    assert "Meus certificados" in cliente.get("/perfil").get_data(as_text=True)
 
 
 def test_nome_vazio_ou_sem_letras_e_recusado(entrar, criar_evento):
@@ -272,3 +272,9 @@ def test_codigo_novo_e_normalizado():
     assert certificados.normalizar_codigo(codigo) == codigo
     assert certificados.normalizar_codigo(" 7kq3m xp9td ") == "7KQ3M-XP9TD"
     assert certificados.normalizar_codigo("curto") is None
+
+
+def test_certificados_ficam_no_perfil_e_nao_no_passaporte(entrar):
+    cliente = entrar()
+    assert "Meus certificados" in cliente.get("/perfil").get_data(as_text=True)
+    assert "Meus certificados" not in cliente.get("/passaporte").get_data(as_text=True)

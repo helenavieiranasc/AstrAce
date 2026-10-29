@@ -280,7 +280,14 @@ function lugarVazio(ctx: CanvasRenderingContext2D, x: number, y: number, raio: n
 /** Onde o carimbo de boas-vindas cai: centro em (u, v) da folha, de 0 a 1. */
 export const LUGAR_BOAS_VINDAS = { u: 0.5, v: 0.47 };
 
-export function paginaBoasVindas(numero: number): HTMLCanvasElement {
+/** Os dois lugares embaixo do carimbo de boas-vindas: recebem os dois primeiros carimbos de evento. */
+export const LUGARES_NA_BOAS_VINDAS = 2;
+
+export function paginaBoasVindas(
+  numero: number,
+  carimbos: Carimbo[] = [],
+  logo: HTMLImageElement | null = null,
+): HTMLCanvasElement {
   const [canvas, ctx] = tela();
   papel(ctx, numero, 23);
   titulo(ctx, "Carimbos");
@@ -289,8 +296,12 @@ export function paginaBoasVindas(numero: number): HTMLCanvasElement {
   ctx.textAlign = "center";
   ctx.fillText("Cada carimbo é um pedaço da sua jornada.", LARGURA / 2, 240);
   ctx.textAlign = "left";
-  lugarVazio(ctx, LARGURA * 0.27, ALTURA * 0.83, 120, "em breve");
-  lugarVazio(ctx, LARGURA * 0.73, ALTURA * 0.83, 120, "em breve");
+  for (let i = 0; i < LUGARES_NA_BOAS_VINDAS; i++) {
+    const x = LARGURA * (0.27 + i * 0.46);
+    const y = ALTURA * 0.83;
+    if (carimbos[i]) imprimirCarimboDeEvento(ctx, carimbos[i], logo, x, y);
+    else lugarVazio(ctx, x, y, 120, "em breve");
+  }
   return canvas;
 }
 

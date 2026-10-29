@@ -257,7 +257,11 @@ export async function montarPassaporte(palco: HTMLElement, opcoes: Opcoes): Prom
   cena.add(livro);
 
   // ----- Texturas das páginas -----
-  const canvasBoasVindas = Paginas.paginaBoasVindas(1);
+  // Carimbos dos check-ins nos eventos, do mais antigo ao mais novo: os dois primeiros ocupam os lugares
+  // da página de boas-vindas; os outros seguem para as páginas de eventos, 4 em cada.
+  const eventos = opcoes.dados.carimbos.filter((c) => c.codigo.startsWith("evento-"));
+  const naBoasVindas = Paginas.LUGARES_NA_BOAS_VINDAS;
+  const canvasBoasVindas = Paginas.paginaBoasVindas(1, eventos.slice(0, naBoasVindas), logoMagenta);
   const carimbo = opcoes.dados.carimbos.find((c) => c.codigo === "boas-vindas");
   if (carimbo && !opcoes.carimboNovo) Paginas.imprimirCarimbo(canvasBoasVindas, logoMagenta, carimbo.concedido_em);
   const texBoasVindas = texturaDe(T, canvasBoasVindas, anis);
@@ -321,11 +325,10 @@ export async function montarPassaporte(palco: HTMLElement, opcoes: Opcoes): Prom
   dentro.receiveShadow = true;
   capaGrupo.add(capaMalha, arte, dentro);
 
-  // Carimbos dos check-ins nos eventos, do mais antigo ao mais novo: 4 por página, em duas páginas.
-  const eventos = opcoes.dados.carimbos.filter((c) => c.codigo.startsWith("evento-"));
   const porPagina = Paginas.CARIMBOS_POR_PAGINA;
-  const eventos1 = Paginas.paginaEventos(2, 31, "Eventos", eventos.slice(0, porPagina), logoMagenta);
-  const eventos2 = Paginas.paginaEventos(3, 37, null, eventos.slice(porPagina, porPagina * 2), logoMagenta);
+  const restantes = eventos.slice(naBoasVindas);
+  const eventos1 = Paginas.paginaEventos(2, 31, "Eventos", restantes.slice(0, porPagina), logoMagenta);
+  const eventos2 = Paginas.paginaEventos(3, 37, null, restantes.slice(porPagina, porPagina * 2), logoMagenta);
   const folha1 = folha(T, texBoasVindas, texturaDe(T, eventos1, anis, true), 24);
   const folha2 = folha(
     T, texturaDe(T, eventos2, anis), texturaDe(T, Paginas.paginaAnotacoes(4), anis, true),
