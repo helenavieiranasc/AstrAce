@@ -87,6 +87,7 @@ O site roda no **PythonAnywhere** (plano gratuito), com o banco e os arquivos en
 ## 👥 Equipe
 
 - [Helena Vieira](https://github.com/helenavieiranasc)
+- [Maria Clara Pastor](https://github.com/mariaclarapastorsilva)
 - [Camila Ribeiro](https://github.com/camilaribeirox)
-- Kawan Mesquita
-- Caio
+- [Caio Grilo](https://github.com/grilocaio)
+- [Kawan Mesquita](https://github.com/kawanmt)
