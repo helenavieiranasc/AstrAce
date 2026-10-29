@@ -55,20 +55,56 @@
   background: rgb(42 28 21 / 0.5);
 }
 
-.lateral[open] .lateral__folha {
-  animation: lateral-entrar 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+.lateral[open]:not(.lateral--fechando) .lateral__folha {
+  animation: lateral-entrar 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-.lateral[open]::backdrop {
-  animation: lateral-fundo 0.32s ease;
+.lateral[open]:not(.lateral--fechando)::backdrop {
+  animation: lateral-fundo-entrar 0.34s ease forwards !important;
+}
+
+.lateral.lateral--fechando .lateral__folha {
+  animation: lateral-sair 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+.lateral.lateral--fechando::backdrop {
+  animation: lateral-fundo-sair 0.28s ease forwards !important;
 }
 
 @keyframes lateral-entrar {
-  from { transform: translateX(-100%); }
+  from {
+    transform: translate3d(-102%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-@keyframes lateral-fundo {
-  from { opacity: 0; }
+@keyframes lateral-sair {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-102%, 0, 0);
+  }
+}
+
+@keyframes lateral-fundo-entrar {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lateral-fundo-sair {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .lateral__folha {
@@ -81,6 +117,7 @@
   border-right: 1px solid var(--papel-borda);
   background: var(--papel);
   box-shadow: 12px 0 30px -10px rgb(42 28 21 / 0.5);
+  will-change: transform;
 }
 
 .lateral__topo {

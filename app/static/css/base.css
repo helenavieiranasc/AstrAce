@@ -109,6 +109,9 @@ textarea {
 /* ---------- Cabeçalho ---------- */
 
 .topo {
+  position: sticky;
+  top: 0;
+  z-index: 90;
   display: flex;
   align-items: center;
   gap: 8px 28px;
@@ -116,6 +119,16 @@ textarea {
   padding: 10px clamp(16px, 3vw, 40px);
   background: var(--papel);
   border-bottom: 4px solid var(--magenta);
+  box-shadow: 0 4px 16px rgb(42 28 21 / 0.16);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.38s ease;
+  will-change: transform;
+}
+
+.topo--oculto {
+  transform: translate3d(0, -104%, 0);
+  box-shadow: none;
+  pointer-events: none;
 }
 
 .topo__marca {
@@ -240,5 +253,19 @@ textarea {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .topo {
+    transition-duration: 0.38s !important;
+  }
+
+  .lateral[open]:not(.lateral--fechando) .lateral__folha,
+  .lateral[open]:not(.lateral--fechando)::backdrop {
+    animation-duration: 0.34s !important;
+  }
+
+  .lateral.lateral--fechando .lateral__folha,
+  .lateral.lateral--fechando::backdrop {
+    animation-duration: 0.28s !important;
   }
 }
