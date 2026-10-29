@@ -210,6 +210,11 @@
             </div>
           </div>
           <small>Horário de Brasília.</small>
+          <div class="campo">
+            <label for="ev-carga">Carga horária (horas)</label>
+            <input id="ev-carga" name="carga_horaria" inputmode="decimal" maxlength="6" placeholder="Ex.: 3 ou 1,5" aria-describedby="ev-carga-ajuda">
+            <small id="ev-carga-ajuda">Sai no certificado de participação. Em evento de vários dias, some as horas de todos eles. Em branco, o certificado não fala em horas.</small>
+          </div>
         </fieldset>
 
         <fieldset class="bloco">
@@ -266,8 +271,8 @@
           <label class="caixa caixa--destaque">
             <input type="checkbox" name="vale_carimbo" checked>
             <span>
-              <strong>Vale carimbo no passaporte</strong>
-              Cria um QR code para colar na entrada. Quem escanear no evento ganha um carimbo.
+              <strong>Vale carimbo e certificado</strong>
+              Cria um QR code para colar na entrada. Quem escanear no evento ganha um carimbo no passaporte e, quando o evento terminar, um certificado de participação.
             </span>
           </label>
         </fieldset>

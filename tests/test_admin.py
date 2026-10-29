@@ -143,6 +143,21 @@ def test_evento_invalido_devolve_os_erros_por_campo(cliente):
     assert "fim" in cliente.post("/api/admin/eventos", json=fim_antes).get_json()["erros"]
 
 
+def test_carga_horaria_do_certificado(app, cliente):
+    evento = cliente.post("/api/admin/eventos", json=_evento_valido(carga_horaria="1,5")).get_json()
+    assert evento["carga_horaria"] == 1.5
+    with app.app_context():
+        assert db.session.get(Evento, evento["id"]).carga_horaria_min == 90
+
+    sem = cliente.put(f"/api/admin/eventos/{evento['id']}", json=_evento_valido(carga_horaria="")).get_json()
+    assert sem["carga_horaria"] is None
+
+    for invalida in ("três", "0", "600"):
+        resposta = cliente.post("/api/admin/eventos", json=_evento_valido(carga_horaria=invalida))
+        assert resposta.status_code == 422
+        assert "carga_horaria" in resposta.get_json()["erros"], invalida
+
+
 def test_evento_online_nao_guarda_endereco(cliente):
     dados = _evento_valido(modalidade="online", local="", cidade="Recife", uf="")
     evento = cliente.post("/api/admin/eventos", json=dados).get_json()

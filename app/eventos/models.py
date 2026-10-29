@@ -29,6 +29,7 @@ class Evento(db.Model):
     area = db.Column(db.String(40), index=True)  # catalogos.AREAS; vazio = várias áreas
     imagem_url = db.Column(db.String(500))
     token_qr = db.Column(db.String(64), unique=True)
+    carga_horaria_min = db.Column(db.Integer)  # sai no certificado; vazio = o certificado não fala em horas
     oculto = db.Column(db.Boolean, nullable=False, default=False)
     criado_em = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

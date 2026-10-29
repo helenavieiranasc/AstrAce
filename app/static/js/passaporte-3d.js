@@ -251,8 +251,13 @@ export async function montarPassaporte(palco, opcoes) {
     dentro.position.set(FOLHA_L / 2 + 0.02, 0, -CAPA_E / 2 - 0.006);
     dentro.receiveShadow = true;
     capaGrupo.add(capaMalha, arte, dentro);
-    const folha1 = folha(T, texBoasVindas, texturaDe(T, Paginas.paginaEventos(2, 31, "Eventos"), anis, true), 24);
-    const folha2 = folha(T, texturaDe(T, Paginas.paginaEventos(3, 37, null), anis), texturaDe(T, Paginas.paginaAnotacoes(4), anis, true));
+    // Carimbos dos check-ins nos eventos, do mais antigo ao mais novo: 4 por página, em duas páginas.
+    const eventos = opcoes.dados.carimbos.filter((c) => c.codigo.startsWith("evento-"));
+    const porPagina = Paginas.CARIMBOS_POR_PAGINA;
+    const eventos1 = Paginas.paginaEventos(2, 31, "Eventos", eventos.slice(0, porPagina), logoMagenta);
+    const eventos2 = Paginas.paginaEventos(3, 37, null, eventos.slice(porPagina, porPagina * 2), logoMagenta);
+    const folha1 = folha(T, texBoasVindas, texturaDe(T, eventos1, anis, true), 24);
+    const folha2 = folha(T, texturaDe(T, eventos2, anis), texturaDe(T, Paginas.paginaAnotacoes(4), anis, true));
     const pecas = [
         { grupo: capaGrupo, folha: false },
         { grupo: folha1, folha: true },

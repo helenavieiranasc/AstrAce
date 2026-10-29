@@ -19,8 +19,13 @@ class Config:
     # Vazio: usa o endereço por onde a página foi aberta (serve para testar no computador).
     URL_PUBLICA = os.environ.get("URL_PUBLICA", "")
 
-    # Enquanto o login (Pessoa 2) não fica pronto, usa a primeira usuária do banco.
+    # Sem login, age como a primeira usuária do banco. Só vale em modo debug e nos testes (auth.login_dev_ativo).
     LOGIN_DEV = os.environ.get("LOGIN_DEV", "1") == "1"
+
+    # E-mails da equipe, separados por vírgula: quem entra com um deles tem o painel, sem precisar do tornar-admin.
+    ADMIN_EMAILS = frozenset(
+        email.strip().lower() for email in os.environ.get("ADMIN_EMAILS", "").split(",") if email.strip()
+    )
 
     # Login com Google (OAuth). Sem os dois, o botão avisa que o login não está disponível.
     GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")

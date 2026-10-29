@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block titulo %}Certificado · {{ evento.titulo }} · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/passaporte.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+{% set cores = {"pronto": "verde", "aguardando": "amarelo"} %}
+<div class="quadro">
+  <div class="cortica checkin">
+    <section class="postit postit--{{ cores.get(situacao, 'rosa') }} checkin__nota" aria-labelledby="emitir-titulo">
+      <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
+      <p class="checkin__evento">{{ evento.titulo }}</p>
+
+      {% if situacao == "pronto" %}
+        <h1 id="emitir-titulo">Seu certificado está pronto!</h1>
+        <form class="emitir" id="emitir" data-evento="{{ evento.id }}" novalidate>
+          <label class="emitir__rotulo" for="emitir-nome">Seu nome no certificado</label>
+          <input class="emitir__nome" id="emitir-nome" name="nome" value="{{ nome }}" maxlength="120"
+                 autocomplete="name" required aria-describedby="emitir-ajuda emitir-erro">
+          <p class="emitir__ajuda" id="emitir-ajuda">Confira com calma: depois de emitido, o nome não muda.
+            Escreva o nome pelo qual você quer ser reconhecida. Nome social é bem-vindo.</p>
+          <p class="emitir__erro" id="emitir-erro" role="alert" hidden></p>
+          <p class="checkin__acoes"><button class="botao botao--primario" type="submit">Emitir certificado</button></p>
+        </form>
+
+      {% elif situacao == "aguardando" %}
+        <h1 id="emitir-titulo">Quase lá!</h1>
+        <p>Seu check-in está registrado. O certificado fica pronto quando o evento terminar,
+          em {{ liberado_em.strftime("%d/%m às %Hh%M") }}. Ele vai estar no seu passaporte.</p>
+        <p class="checkin__acoes"><a class="botao botao--primario" href="{{ url_for('passaporte.pagina_passaporte') }}#certificados">Ver meu passaporte</a></p>
+
+      {% else %}
+        <h1 id="emitir-titulo">Sem check-in neste evento</h1>
+        <p>O certificado é de quem escaneou o QR code no evento. Se você estava lá e não escaneou,
+          fale com a organização do evento.</p>
+        <p class="checkin__acoes"><a class="link-mao" href="{{ url_for('eventos.pagina_eventos') }}">Ver a agenda de eventos</a></p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if situacao == "pronto" %}<script type="module" src="{{ url_for('static', filename='js/certificado.js') }}"></script>{% endif %}
+{% endblock %}

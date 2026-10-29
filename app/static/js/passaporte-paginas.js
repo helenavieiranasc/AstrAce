@@ -253,20 +253,30 @@ export function paginaBoasVindas(numero) {
     lugarVazio(ctx, LARGURA * 0.73, ALTURA * 0.83, 120, "em breve");
     return canvas;
 }
-export function paginaEventos(numero, semente, cabecalho) {
+/** Quantos carimbos de evento cabem numa página. */
+export const CARIMBOS_POR_PAGINA = 4;
+/** Página com até 4 carimbos de eventos (check-in pelo QR); os lugares que sobram ficam tracejados. */
+export function paginaEventos(numero, semente, cabecalho, carimbos = [], logo = null) {
     const [canvas, ctx] = tela();
     papel(ctx, numero, semente);
     if (cabecalho) {
         titulo(ctx, cabecalho);
         ctx.fillStyle = TINTA_SUAVE;
         ctx.font = `400 34px ${TEXTO}`;
-        linhasDeTexto(ctx, "Os carimbos dos eventos de que você participar vão aparecer aqui.", 110, 250, LARGURA - 220, 46);
+        const chamada = carimbos.length
+            ? "Cada evento de que você participou deixa a sua marca aqui."
+            : "Os carimbos dos eventos de que você participar vão aparecer aqui.";
+        linhasDeTexto(ctx, chamada, 110, 250, LARGURA - 220, 46);
     }
     const topo = cabecalho ? 470 : 300;
-    for (let linha = 0; linha < 2; linha++) {
-        for (let coluna = 0; coluna < 2; coluna++) {
-            lugarVazio(ctx, LARGURA * (0.29 + coluna * 0.42), topo + linha * 360, 130, "próximo carimbo");
-        }
+    for (let i = 0; i < CARIMBOS_POR_PAGINA; i++) {
+        const x = LARGURA * (0.29 + (i % 2) * 0.42);
+        const y = topo + Math.floor(i / 2) * 360;
+        const carimbo = carimbos[i];
+        if (carimbo)
+            imprimirCarimboDeEvento(ctx, carimbo, logo, x, y);
+        else
+            lugarVazio(ctx, x, y, 130, "próximo carimbo");
     }
     return canvas;
 }
@@ -335,8 +345,22 @@ export function imprimirCarimbo(pagina, logo, data) {
     m.fillText("AstrAce", lado / 2, 336);
     m.font = `700 22px ${TEXTO}`;
     m.fillText(data.split("-").reverse().join("/"), lado / 2, 368);
-    // Falhas de tinta: muitos pontinhos tirados e alguns riscos claros.
-    const sorte = aleatorio(97);
+    falhasDeTinta(m, lado, 97);
+    const ctx = pagina.getContext("2d");
+    const x = LUGAR_BOAS_VINDAS.u * LARGURA, y = LUGAR_BOAS_VINDAS.v * ALTURA;
+    const tamanho = LARGURA * 0.4; // do tamanho da borracha do carimbo 3D
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-0.12);
+    ctx.globalAlpha = 0.86;
+    ctx.globalCompositeOperation = "multiply";
+    ctx.drawImage(marca, -tamanho / 2, -tamanho / 2, tamanho, tamanho);
+    ctx.restore();
+}
+/** Falhas de tinta: muitos pontinhos tirados e alguns riscos claros. */
+function falhasDeTinta(m, lado, semente) {
+    const sorte = aleatorio(semente);
+    m.save();
     m.globalCompositeOperation = "destination-out";
     for (let i = 0; i < 1800; i++) {
         m.globalAlpha = 0.25 + sorte() * 0.75;
@@ -349,12 +373,102 @@ export function imprimirCarimbo(pagina, logo, data) {
         const y = sorte() * lado;
         m.fillRect(0, y, lado, 1 + sorte() * 3);
     }
-    const ctx = pagina.getContext("2d");
-    const x = LUGAR_BOAS_VINDAS.u * LARGURA, y = LUGAR_BOAS_VINDAS.v * ALTURA;
-    const tamanho = LARGURA * 0.4; // do tamanho da borracha do carimbo 3D
+    m.restore();
+}
+// Cada evento ganha uma cor de tinta, como carimbos de países diferentes.
+const TINTAS_DE_EVENTO = [MAGENTA, "#7e3fb4", "#17907f", "#2e6bd6", "#b5530b"];
+/** Número fixo a partir do texto: o mesmo carimbo sai sempre com a mesma cor, inclinação e falhas. */
+function hashDe(texto) {
+    let h = 7;
+    for (const ch of texto)
+        h = (h * 31 + ch.charCodeAt(0)) % 2147483647;
+    return h || 1;
+}
+/** Texto curvado num círculo: em cima, lido da esquerda para a direita; embaixo, também. */
+function textoEmArco(m, texto, centro, raio, emCima, espaco = 4) {
+    const letras = [...texto];
+    const larguras = letras.map((ch) => m.measureText(ch).width + espaco);
+    const angTotal = larguras.reduce((a, b) => a + b, 0) / raio;
+    let ang = emCima ? -Math.PI / 2 - angTotal / 2 : Math.PI / 2 + angTotal / 2;
+    m.textAlign = "center";
+    m.textBaseline = "middle";
+    letras.forEach((ch, i) => {
+        const passo = larguras[i] / raio;
+        const meio = emCima ? ang + passo / 2 : ang - passo / 2;
+        m.save();
+        m.translate(centro + raio * Math.cos(meio), centro + raio * Math.sin(meio));
+        m.rotate(emCima ? meio + Math.PI / 2 : meio - Math.PI / 2);
+        m.fillText(ch, 0, 0);
+        m.restore();
+        ang = emCima ? ang + passo : ang - passo;
+    });
+    m.textBaseline = "alphabetic";
+}
+/** Quebra o título em até 3 linhas que caibam na largura; a última ganha reticências se precisar. */
+function linhasDoTitulo(m, texto, largura, maximo) {
+    const linhas = [];
+    let linha = "";
+    const palavras = texto.split(/\s+/).filter(Boolean);
+    for (let i = 0; i < palavras.length; i++) {
+        const tentativa = linha ? `${linha} ${palavras[i]}` : palavras[i];
+        if (m.measureText(tentativa).width <= largura || !linha) {
+            linha = tentativa;
+            continue;
+        }
+        linhas.push(linha);
+        linha = palavras[i];
+        if (linhas.length === maximo - 1) {
+            linha = palavras.slice(i).join(" ");
+            break;
+        }
+    }
+    if (linha)
+        linhas.push(linha);
+    return linhas.map((l) => cortarTexto(m, l, largura));
+}
+/** Carimbo redondo de um evento, com o nome do evento e a data, impresso na página em (x, y). */
+function imprimirCarimboDeEvento(ctx, carimbo, logo, x, y) {
+    const lado = 400, centro = lado / 2;
+    const h = hashDe(carimbo.codigo);
+    const cor = TINTAS_DE_EVENTO[h % TINTAS_DE_EVENTO.length];
+    const marca = document.createElement("canvas");
+    marca.width = marca.height = lado;
+    const m = marca.getContext("2d");
+    m.fillStyle = cor;
+    m.strokeStyle = cor;
+    for (const [raio, largura] of [[186, 10], [166, 3], [118, 3]]) {
+        m.lineWidth = largura;
+        m.beginPath();
+        m.arc(centro, centro, raio, 0, Math.PI * 2);
+        m.stroke();
+    }
+    m.font = `700 26px ${TEXTO}`;
+    textoEmArco(m, "EVENTO · ASTRACE", centro, 142, true, 5);
+    m.font = `700 26px ${TEXTO}`;
+    textoEmArco(m, carimbo.concedido_em.split("-").reverse().join("/"), centro, 142, false, 4);
+    // Estrelinhas entre os dois textos curvos.
+    m.font = `700 22px ${TEXTO}`;
+    m.textAlign = "center";
+    m.textBaseline = "middle";
+    m.fillText("✦", centro - 142, centro);
+    m.fillText("✦", centro + 142, centro);
+    m.textBaseline = "alphabetic";
+    if (logo)
+        m.drawImage(silhueta(logo, cor, 62), centro - 31, 92);
+    m.font = `700 46px ${MAO}`;
+    m.textAlign = "center";
+    const linhas = linhasDoTitulo(m, carimbo.titulo, 200, 3);
+    const alturaLinha = 42;
+    let ly = 224 - ((linhas.length - 1) * alturaLinha) / 2;
+    for (const linha of linhas) {
+        m.fillText(linha, centro, ly);
+        ly += alturaLinha;
+    }
+    falhasDeTinta(m, lado, h);
+    const tamanho = 300;
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(-0.12);
+    ctx.rotate(((h % 17) - 8) / 60); // cada carimbo cai com uma inclinação diferente
     ctx.globalAlpha = 0.86;
     ctx.globalCompositeOperation = "multiply";
     ctx.drawImage(marca, -tamanho / 2, -tamanho / 2, tamanho, tamanho);

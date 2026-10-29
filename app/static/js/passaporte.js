@@ -12,7 +12,8 @@ const onde = el("passaporte-onde");
 const texto = el("passaporte-texto");
 const dica = el("passaporte-dica");
 const cortica = palco.parentElement;
-const sairTela = el("passaporte-sair-tela");
+const botaoTela = el("passaporte-tela-cheia");
+const botaoTelaTexto = el("passaporte-tela-cheia-texto");
 const boasVindas = dados.carimbos.find((c) => c.codigo === "boas-vindas");
 const ONDE = ["Passaporte fechado", "Identidade e carimbos", "Eventos", "Anotações"];
 // No celular, uma página por vez: [esquerda, direita] de cada abertura.
@@ -37,17 +38,21 @@ async function marcarVisto() {
     }
 }
 // ---------- Tela cheia ----------
-// Ao abrir, o passaporte cobre a tela toda. Usa a tela cheia do navegador quando existe
+// Só quando a pessoa pede, pelo botão. Usa a tela cheia do navegador quando existe
 // (precisa ser pedida no clique); onde não existe, como no iPhone, a camada fixa faz o papel.
 function emTelaCheia() {
     return cortica.classList.contains("passaporte-cortica--tela-cheia");
+}
+function marcarBotaoTela(ligada) {
+    botaoTela.setAttribute("aria-pressed", String(ligada));
+    botaoTelaTexto.textContent = ligada ? "Sair da tela cheia" : "Tela cheia";
 }
 function entrarTelaCheia() {
     if (emTelaCheia())
         return;
     cortica.classList.add("passaporte-cortica--tela-cheia");
     document.documentElement.classList.add("passaporte-sem-rolagem");
-    sairTela.hidden = false;
+    marcarBotaoTela(true);
     cortica.requestFullscreen?.({ navigationUI: "hide" }).catch(() => undefined);
 }
 function sairTelaCheia() {
@@ -55,11 +60,11 @@ function sairTelaCheia() {
         return;
     cortica.classList.remove("passaporte-cortica--tela-cheia");
     document.documentElement.classList.remove("passaporte-sem-rolagem");
-    sairTela.hidden = true;
+    marcarBotaoTela(false);
     if (document.fullscreenElement)
         document.exitFullscreen().catch(() => undefined);
 }
-sairTela.addEventListener("click", sairTelaCheia);
+botaoTela.addEventListener("click", () => (emTelaCheia() ? sairTelaCheia() : entrarTelaCheia()));
 // Esc (ou o gesto do sistema) tira o navegador da tela cheia: a camada sai junto.
 document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement)
@@ -82,7 +87,6 @@ async function iniciar() {
         dados,
         carimboNovo: Boolean(boasVindas && !boasVindas.visto),
         aoMudar: atualizar,
-        aoAbrir: entrarTelaCheia,
         aoCarimbar: () => {
             onde.textContent = "Carimbo de boas-vindas recebido!";
             void marcarVisto();
@@ -102,10 +106,9 @@ async function iniciar() {
         proximaTexto.textContent = viradas === 0 ? "Abrir passaporte" : "Próxima página";
         onde.textContent = lado ? ONDE_PAGINA[viradas][lado === "esq" ? 0 : 1] : (ONDE[viradas] ?? "");
         cortica.classList.toggle("passaporte-cortica--aberto", viradas > 0);
-        if (viradas === 0)
-            sairTelaCheia(); // fechou o passaporte: volta para a página
     }
     controles.hidden = false;
+    botaoTela.hidden = false;
     atualizar(0);
     // O teclado usa os botões; o 3D é só para o mouse e o toque (e fica escondido do leitor de tela).
     anterior.addEventListener("click", () => controle.anterior());
