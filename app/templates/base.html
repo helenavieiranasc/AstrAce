@@ -61,6 +61,12 @@
         <ul aria-labelledby="menu-jornada">
           <li><a href="/passaporte" {% if request.path.startswith('/passaporte') %}aria-current="page"{% endif %}>Passaporte</a></li>
         </ul>
+        {% if menu_admin %}
+        <p class="lateral__grupo" id="menu-equipe">Equipe</p>
+        <ul aria-labelledby="menu-equipe">
+          <li><a href="/admin" {% if request.path.startswith('/admin') %}aria-current="page"{% endif %}>Painel da equipe</a></li>
+        </ul>
+        {% endif %}
       </nav>
       <div class="lateral__acao">
         {% block acao_topo %}

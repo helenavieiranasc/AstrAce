@@ -17,6 +17,7 @@ def create_app(config=Config):
     from .eventos import models as _eventos  # noqa: F401
     from .vagas import models as _vagas  # noqa: F401
     from .noticias import models as _noticias  # noqa: F401
+    from .admin import models as _admin  # noqa: F401
     from .passaporte import models as _passaporte  # noqa: F401
     from .mural import bp as mural_bp, completar_colunas as completar_colunas_mural
     from .mural.seed import seed_mural
@@ -31,6 +32,7 @@ def create_app(config=Config):
     from .passaporte import bp as passaporte_bp
     from .mapa import bp as mapa_bp
     from .conta import bp as conta_bp, completar_colunas
+    from .admin import bp as admin_bp, tornar_admin
 
     app.register_blueprint(conta_bp)  # "/" é a landing page
     app.register_blueprint(mural_bp)
@@ -41,10 +43,16 @@ def create_app(config=Config):
     app.register_blueprint(quiz_bp)
     app.register_blueprint(passaporte_bp)
     app.register_blueprint(mapa_bp)
+    app.register_blueprint(admin_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)
     app.cli.add_command(seed_vagas)
     app.cli.add_command(seed_noticias)
+    app.cli.add_command(tornar_admin)
+
+    from .servicos.banco import acrescentar_colunas
+    from .noticias.models import Noticia
+    from .vagas.models import Vaga
 
     with app.app_context():
         db.create_all()
@@ -52,5 +60,6 @@ def create_app(config=Config):
         completar_colunas_mural(db)
         completar_colunas_vagas(db)
         completar_colunas_noticias(db)
+        acrescentar_colunas(db, Vaga, Noticia)  # imagem_url das vagas e das notícias
 
     return app

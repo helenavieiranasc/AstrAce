@@ -112,6 +112,16 @@ function htmlPrazo(v) {
     }
     return `<span class="${classes.join(" ")}">${esc(v.prazo_rotulo)}</span>`;
 }
+/** Nome da instituição, com o logo ao lado quando a equipe enviou um. */
+function htmlOrganizacao(v, bloco) {
+    const logo = urlSegura(v.imagem_url);
+    if (!logo)
+        return `<p class="${bloco}__organizacao">${esc(v.organizacao)}</p>`;
+    return `
+    <p class="${bloco}__organizacao ${bloco}__organizacao--logo">
+      <img class="${bloco}__logo" src="${esc(logo)}" alt="" loading="lazy">${esc(v.organizacao)}
+    </p>`;
+}
 function htmlCartao(v) {
     const pin = PINS[v.id % PINS.length];
     const local = v.cidade ? `${v.cidade}` : "Nacional / Online";
@@ -128,7 +138,7 @@ function htmlCartao(v) {
           <h3 class="cartao__titulo">
             <a class="cartao__link" href="/vagas?vaga=${v.id}" data-id="${v.id}">${esc(v.titulo)}</a>
           </h3>
-          <p class="cartao__organizacao">${esc(v.organizacao)}</p>
+          ${htmlOrganizacao(v, "cartao")}
           <p class="cartao__area">${esc(v.area_rotulo)}</p>
           ${htmlSelos(v.selos)}
           <p class="cartao__resumo">${esc(v.descricao_curta)}</p>
@@ -249,7 +259,7 @@ function htmlDetalhe(v) {
     return `
     <p class="cartao__tipo">${icone(v.icone)}${esc(v.tipo_rotulo)}</p>
     <h2 id="detalhe-titulo">${esc(v.titulo)}</h2>
-    <p class="detalhe__organizacao">${esc(v.organizacao)}</p>
+    ${htmlOrganizacao(v, "detalhe")}
     ${htmlSelos(v.selos)}
     <p class="detalhe__resumo">${esc(v.descricao)}</p>
     ${blocoAfirmativo}

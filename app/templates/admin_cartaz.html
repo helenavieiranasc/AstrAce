@@ -1,0 +1,55 @@
+{#- Cartaz A4 de check-in: imprime e cola na entrada do evento. Página solta, sem o cabeçalho do site. -#}
+{%- if evento.modalidade == "online" -%}
+  {%- set lugar = "Online" -%}
+{%- else -%}
+  {%- set lugar = [evento.local, [evento.cidade, evento.uf]|select|join(" - ")]|select|join(", ") -%}
+{%- endif -%}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Cartaz de check-in · {{ evento.titulo }}</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='img/icone-192.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-cartaz.css') }}">
+</head>
+<body class="pagina-cartaz">
+  <div class="cartaz-barra">
+    <a class="botao botao--secundario" href="/admin#eventos">Voltar ao painel</a>
+    <p>Imprima em A4. Cole na entrada, na altura dos olhos, onde dê para chegar perto com o celular.</p>
+    <button class="botao botao--primario" type="button" id="imprimir">Imprimir cartaz</button>
+  </div>
+
+  <main class="folha-a4">
+    <img class="folha-a4__logo" src="{{ url_for('static', filename='img/logo-astrace.png') }}" alt="AstrAce" width="1699" height="540">
+
+    <p class="folha-a4__chamada">Ganhe um carimbo no seu passaporte!</p>
+    <h1 class="folha-a4__titulo">{{ evento.titulo }}</h1>
+    <p class="folha-a4__quando">{{ evento.data_rotulo }}{% if lugar %} · {{ lugar }}{% endif %}</p>
+
+    <figure class="folha-a4__qr">
+      {{ qr_svg|safe }}
+      <img class="folha-a4__estrela" src="{{ url_for('static', filename='img/logo-estrela-magenta-240.png') }}" alt="" width="240" height="244">
+      <figcaption class="visualmente-oculto">QR code de check-in do evento</figcaption>
+    </figure>
+
+    <ol class="folha-a4__passos">
+      <li><span>1</span>Abra a câmera do celular</li>
+      <li><span>2</span>Aponte para o código</li>
+      <li><span>3</span>Entre na sua conta e pronto: o carimbo vai para o passaporte</li>
+    </ol>
+
+    <p class="folha-a4__link">Sem câmera? Digite <strong>{{ link }}</strong></p>
+    <p class="folha-a4__rodape">AstrAce · projetos, eventos e vagas para mulheres e meninas na ciência</p>
+  </main>
+
+  <script>
+    document.getElementById("imprimir").addEventListener("click", () => window.print());
+  </script>
+</body>
+</html>

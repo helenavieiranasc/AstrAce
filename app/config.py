@@ -12,6 +12,13 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
 
+    # O cookie da sessão não vai junto em POSTs vindos de outros sites.
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    # Endereço público do site (ex.: https://astrace.pythonanywhere.com), usado nos QR codes.
+    # Vazio: usa o endereço por onde a página foi aberta (serve para testar no computador).
+    URL_PUBLICA = os.environ.get("URL_PUBLICA", "")
+
     # Enquanto o login (Pessoa 2) não fica pronto, usa a primeira usuária do banco.
     LOGIN_DEV = os.environ.get("LOGIN_DEV", "1") == "1"
 

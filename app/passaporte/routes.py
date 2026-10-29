@@ -1,9 +1,16 @@
 from datetime import datetime
 
-from flask import jsonify, redirect, render_template, url_for
+from flask import jsonify, redirect, render_template, session, url_for
 
 from .. import catalogos
-from ..conta.routes import _cadastro_completo, _erro, _formacoes, _usuaria_logada
+from ..conta.routes import (
+    CHECKIN_PENDENTE,
+    _cadastro_completo,
+    _erro,
+    _formacoes,
+    _usuaria_logada,
+    guardar_checkin_pendente,
+)
 from ..extensoes import db
 from . import bp, servico
 from .models import Carimbo
@@ -40,6 +47,31 @@ def pagina_passaporte():
     # Quem já tinha conta antes do passaporte ganha o carimbo de boas-vindas aqui.
     servico.conceder_boas_vindas(usuaria)
     return render_template("passaporte.html", passaporte=_dados_do_passaporte(usuaria))
+
+
+@bp.get("/checkin/<token>")
+def pagina_checkin(token):
+    """Destino do QR impresso no evento (gerado no painel de admin): confere e dá o carimbo."""
+    evento = servico.evento_do_token(token)
+    if not evento:
+        return render_template("checkin.html", estado="invalido"), 404
+
+    usuaria = _usuaria_logada()
+    if not usuaria or not _cadastro_completo(usuaria):
+        guardar_checkin_pendente(token)
+        if usuaria:
+            return redirect(url_for("conta.pagina_cadastro"))
+        return render_template("checkin.html", estado="entrar", evento=evento)
+
+    session.pop(CHECKIN_PENDENTE, None)
+    if servico.carimbo_do_evento(usuaria, evento):
+        estado = "repetido"
+    else:
+        estado = servico.janela_do_checkin(evento)
+        if estado == "aberto":
+            servico.carimbar_evento(usuaria, evento)
+            estado = "carimbado"
+    return render_template("checkin.html", estado=estado, evento=evento)
 
 
 @bp.post("/api/passaporte/carimbos/<codigo>/visto")

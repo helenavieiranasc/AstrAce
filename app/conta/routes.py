@@ -1,4 +1,5 @@
 import secrets
+import time
 from datetime import date, datetime
 
 from flask import current_app, jsonify, redirect, render_template, request, session, url_for
@@ -17,6 +18,24 @@ ERROS_LOGIN = {
     "google": "Não conseguimos falar com o Google agora. Tente de novo em instantes.",
     "email": "Sua conta Google precisa ter o e-mail confirmado para entrar.",
 }
+
+# Token do QR que a usuária escaneou antes de entrar: depois do login (e do cadastro), a página
+# inicial leva de volta ao check-in. Passado esse tempo, o pedido é esquecido, para quem desistiu
+# de entrar não cair no check-in dias depois.
+CHECKIN_PENDENTE = "checkin_pendente"
+CHECKIN_PENDENTE_VALIDADE = 2 * 60 * 60  # segundos
+
+
+def guardar_checkin_pendente(token):
+    session[CHECKIN_PENDENTE] = {"token": token, "em": int(time.time())}
+
+
+def _tirar_checkin_pendente():
+    """O token guardado, se o QR foi escaneado há pouco tempo. Sempre limpa o pedido."""
+    pendente = session.pop(CHECKIN_PENDENTE, None)
+    if isinstance(pendente, dict) and time.time() - pendente.get("em", 0) <= CHECKIN_PENDENTE_VALIDADE:
+        return pendente.get("token")
+    return None
 
 
 def _erro(mensagem, status, **extra):
@@ -48,6 +67,9 @@ def landing():
     if usuaria:
         if not _cadastro_completo(usuaria):
             return redirect(url_for("conta.pagina_cadastro"))
+        token = _tirar_checkin_pendente()
+        if token:
+            return redirect(url_for("passaporte.pagina_checkin", token=token))
         return render_template("inicio.html", nome=usuaria.nome_publico)
     codigo = request.args.get("erro")
     return render_template(
@@ -90,8 +112,11 @@ def google_retorno():
     from ..passaporte.servico import conceder_boas_vindas
 
     conceder_boas_vindas(usuaria)  # o carimbo de boas-vindas do passaporte (só na primeira vez)
+    checkin_pendente = session.get(CHECKIN_PENDENTE)
     session.clear()
     session["usuaria_id"] = usuaria.id
+    if checkin_pendente:
+        session[CHECKIN_PENDENTE] = checkin_pendente
     session.permanent = True
     return redirect(_destino(usuaria))
 
