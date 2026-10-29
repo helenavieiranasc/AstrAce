@@ -32,6 +32,18 @@ def app(tmp_path):
     return create_app(ConfigTeste)
 
 
+def pular_carta(cliente, email="ana@example.com"):
+    """A usuária já decidiu sobre a carta (pulou o convite), como acontece depois do primeiro acesso."""
+    from app.carta.models import ADIADA, CartaFuturo
+    from app.usuarias.models import Usuaria
+
+    with cliente.application.app_context():
+        usuaria = Usuaria.query.filter_by(email=email).one()
+        if db.session.get(CartaFuturo, usuaria.id) is None:
+            db.session.add(CartaFuturo(usuaria_id=usuaria.id, estado=ADIADA))
+            db.session.commit()
+
+
 @pytest.fixture
 def entrar(app, monkeypatch):
     """Devolve uma função que abre um navegador novo, entra com uma conta Google falsa e termina o cadastro."""
@@ -47,6 +59,7 @@ def entrar(app, monkeypatch):
         estado = parse_qs(urlparse(ida.headers["Location"]).query)["state"][0]
         cliente.get(f"/entrar/google/retorno?code={sub}&state={estado}")
         assert cliente.post("/api/perfil", json={**PERFIL, "apelido": nome.split()[0]}).status_code == 200
+        pular_carta(cliente, email)
         return cliente
 
     return _entrar

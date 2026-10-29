@@ -14,6 +14,19 @@ from app.passaporte.models import Carimbo
 PERFIL = {"apelido": "Ana", "nivel": "graduacao", "area_interesse": "fisica", "estado": "PE", "cidade": "Recife"}
 
 
+def pular_carta(cliente, email="ana@example.com"):
+    """A usuária já decidiu sobre a carta (pulou o convite), como acontece depois do primeiro acesso."""
+    from app.carta.models import ADIADA, CartaFuturo
+    from app.usuarias.models import Usuaria
+
+    with cliente.application.app_context():
+        usuaria = Usuaria.query.filter_by(email=email).one()
+        if db.session.get(CartaFuturo, usuaria.id) is None:
+            db.session.add(CartaFuturo(usuaria_id=usuaria.id, estado=ADIADA))
+            db.session.commit()
+
+
+
 @pytest.fixture
 def app(tmp_path):
     class ConfigTeste(Config):
@@ -39,6 +52,7 @@ def logar(monkeypatch):
         retorno = cliente.get(f"/entrar/google/retorno?code=abc&state={estado}")
         if completar:
             assert cliente.post("/api/perfil", json=PERFIL).status_code == 200
+            pular_carta(cliente)
         return retorno
 
     return _logar
@@ -144,6 +158,7 @@ def test_quem_escaneia_sem_conta_volta_ao_checkin_depois_do_cadastro(app, logar,
     retorno = logar(cliente, completar=False)
     assert retorno.headers["Location"].endswith("/cadastro")
     assert cliente.post("/api/perfil", json=PERFIL).get_json()["proximo"] == "/"
+    pular_carta(cliente)
 
     inicio = cliente.get("/")
     assert inicio.headers["Location"].endswith("/checkin/token-do-qr")

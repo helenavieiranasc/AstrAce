@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block titulo %}Escrever para o futuro · AstrAce{% endblock %}
+{% block descricao %}Escreva uma carta para a cientista que você vai ser, escolha em quantos anos quer abri-la e sele o envelope.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carta.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro carta-quadro">
+  <div class="cortica carta-cortica">
+    <div class="carta-cena" id="carta-cena" data-modo="escrever">
+      <div class="carta-cena__area">
+        <div class="carta-cena__palco" id="carta-palco"></div>
+        <button class="carta-sair-tela" type="button" id="carta-sair-tela" hidden>Sair da tela cheia</button>
+        <button class="carta-sair-tela" type="button" id="carta-entrar-tela" hidden>Voltar à tela cheia</button>
+        <h1 class="carta-chip" id="carta-chip-texto">Carta para o futuro</h1>
+        <p class="carta-chip carta-chip--carregando" id="carta-carregando">Abrindo sua carta…</p>
+
+        {# A mensagem é escrita direto sobre o papel 3D: estes campos são posicionados em cima da carta (carta.ts). #}
+        <div class="carta-escrita" id="carta-escrita" hidden>
+          <label class="visualmente-oculto" for="carta-mensagem">Sua mensagem para a cientista que você vai ser</label>
+          <textarea id="carta-mensagem" class="carta-escrita__mensagem" maxlength="2500" placeholder="Querida eu do futuro…" aria-describedby="carta-erros"></textarea>
+          <div class="carta-escrita__ps">
+            <label for="carta-objetivos">P.S. (opcional): sonhos e objetivos</label>
+            <textarea id="carta-objetivos" maxlength="600" rows="2"></textarea>
+          </div>
+          <div class="carta-escrita__assinatura">
+            <label class="visualmente-oculto" for="carta-nome">Seu nome</label>
+            <input id="carta-nome" maxlength="60" autocomplete="name" placeholder="Seu nome">
+            <label class="visualmente-oculto" for="carta-area">Sua área</label>
+            <select id="carta-area"></select>
+          </div>
+        </div>
+      </div>
+
+      <aside class="carta-painel carta-painel--aberto" id="carta-painel" aria-label="Passos da carta">
+        <button class="carta-painel__alca" type="button" id="carta-painel-alca" aria-expanded="true" aria-controls="carta-painel">
+          <span>Passos da carta</span>
+        </button>
+
+        <div data-passo="abrir">
+          <p class="carta-painel__texto">Este envelope guarda uma carta em branco. Abra para escrever à cientista que você vai ser.</p>
+          <button class="botao botao--primario" type="button" id="carta-abrir">Abrir o envelope</button>
+          <a class="carta-painel__voltar" href="/">Voltar à página inicial</a>
+        </div>
+
+        <div data-passo="escrever" hidden>
+          <fieldset class="carta-anos" id="carta-anos-grupo" aria-describedby="carta-quando">
+            <legend>Em quantos anos quer abrir esta carta?</legend>
+            <div class="carta-anos__opcoes" id="carta-anos-opcoes"></div>
+          </fieldset>
+          <p class="carta-quando" id="carta-quando" aria-live="polite"></p>
+          <ul class="carta-erros" id="carta-erros" role="alert" hidden></ul>
+          <div class="carta-botoes">
+            <button class="botao botao--primario" type="button" id="carta-revisar">Revisar e selar</button>
+            <button class="botao botao--secundario" type="button" id="carta-salvar">Salvar e continuar depois</button>
+          </div>
+          <p class="carta-painel__nota" id="carta-status" role="status" aria-live="polite"></p>
+          <a class="carta-painel__voltar" href="/">Voltar à página inicial</a>
+        </div>
+
+        <div data-passo="revisar" hidden>
+          <h2 class="carta-painel__titulo">Tudo certo?</h2>
+          <p class="carta-painel__texto" id="carta-resumo"></p>
+          <div class="carta-botoes">
+            <button class="botao botao--primario" type="button" id="carta-enviar">Selar e enviar para o futuro</button>
+            <button class="botao botao--secundario" type="button" id="carta-voltar-escrever">Voltar a escrever</button>
+          </div>
+          <p class="carta-painel__nota" id="carta-enviar-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <div data-passo="selando" hidden>
+          <p class="carta-painel__texto">Dobrando e selando a sua carta…</p>
+        </div>
+
+        <div data-passo="enviada" hidden>
+          <h2 class="carta-painel__titulo" id="carta-final-titulo" tabindex="-1">Carta enviada!</h2>
+          <p class="carta-painel__texto" id="carta-final-texto"></p>
+          <div class="carta-botoes">
+            <a class="botao botao--primario" href="/">Ir para a página inicial</a>
+            <a class="botao botao--secundario" href="/perfil">Ver no meu perfil</a>
+          </div>
+        </div>
+
+        <div data-passo="guardada" hidden>
+          <h2 class="carta-painel__titulo">Sua carta para o futuro</h2>
+          <p class="carta-painel__texto" id="carta-guardada-texto"></p>
+          <div class="carta-botoes">
+            <a class="botao botao--primario" id="carta-guardada-acao" href="/carta/abrir" hidden>Abrir minha carta</a>
+            <button class="botao botao--secundario" type="button" id="carta-virar" hidden>Ver o outro lado</button>
+            <a class="botao botao--secundario" href="/perfil">Voltar ao perfil</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/carta.js') }}"></script>
+{% endblock %}

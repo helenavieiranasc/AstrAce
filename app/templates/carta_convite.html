@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block titulo %}Uma carta para o futuro · AstrAce{% endblock %}
+{% block descricao %}Escreva uma carta para a cientista que você vai ser. Ela fica selada e só abre na data que você escolher. É opcional.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carta.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro carta-quadro">
+  <div class="cortica carta-cortica">
+    <div class="carta-cena" id="carta-cena" data-modo="convite">
+      <div class="carta-cena__area">
+        <div class="carta-cena__palco" id="carta-palco"></div>
+        <h1 class="carta-chip">Uma carta para o futuro</h1>
+      </div>
+
+      <aside class="carta-painel" aria-label="Convite">
+        <p class="carta-painel__oi">Oi, {{ nome }}! Seja bem-vinda ao astrAce.</p>
+        <p class="carta-painel__texto">
+          Escreva uma carta para a cientista que você vai ser. Ela fica selada e só abre na data que você escolher.
+        </p>
+        <div class="carta-botoes">
+          <a class="botao botao--primario" href="/carta/escrever">Escrever minha carta</a>
+          {# Pular é uma ação de verdade: grava a escolha e leva para a página inicial. #}
+          <form method="post" action="/carta/adiar">
+            <button class="botao botao--secundario" type="submit">Não quero criar agora</button>
+          </form>
+        </div>
+        <p class="carta-painel__nota">Se você pular, pode escrever depois, pelo seu perfil.</p>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/carta.js') }}"></script>
+{% endblock %}

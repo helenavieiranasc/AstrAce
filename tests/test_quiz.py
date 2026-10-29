@@ -74,6 +74,8 @@ def test_quiz_no_menu_e_na_pagina_inicial(cliente):
         db.session.add(usuaria)
         db.session.flush()
         db.session.add(ContaUsuaria(usuaria_id=usuaria.id, cadastro_concluido_em=datetime.now()))
+        from app.carta.models import ADIADA, CartaFuturo
+        db.session.add(CartaFuturo(usuaria_id=usuaria.id, estado=ADIADA))
         db.session.commit()
         uid = usuaria.id
     with cliente.session_transaction() as sessao:

@@ -19,6 +19,7 @@ def create_app(config=Config):
     from .noticias import models as _noticias  # noqa: F401
     from .admin import models as _admin  # noqa: F401
     from .passaporte import models as _passaporte  # noqa: F401
+    from .carta import models as _carta  # noqa: F401
     from .mural import bp as mural_bp, completar_colunas as completar_colunas_mural
     from .mural.seed import seed_mural
     from .uploads import bp as uploads_bp
@@ -31,6 +32,8 @@ def create_app(config=Config):
     from .quiz import bp as quiz_bp
     from .passaporte import bp as passaporte_bp
     from .mapa import bp as mapa_bp
+    from .carta import bp as carta_bp
+    from .carta import routes as _carta_rotas  # noqa: F401  (registra as rotas no blueprint)
     from .conta import bp as conta_bp, completar_colunas
     from .admin import bp as admin_bp, tornar_admin
 
@@ -43,6 +46,7 @@ def create_app(config=Config):
     app.register_blueprint(quiz_bp)
     app.register_blueprint(passaporte_bp)
     app.register_blueprint(mapa_bp)
+    app.register_blueprint(carta_bp)
     app.register_blueprint(admin_bp)
     app.cli.add_command(seed_mural)
     app.cli.add_command(seed_eventos)
