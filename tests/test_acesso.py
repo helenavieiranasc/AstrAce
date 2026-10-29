@@ -111,3 +111,13 @@ def test_menu_lateral_so_para_quem_entrou(tmp_path):
         sessao["usuaria_id"] = uid
     pagina = logada.get("/mural").get_data(as_text=True)
     assert 'id="abrir-menu"' in pagina and 'id="menu-lateral"' in pagina and "menu-lateral.js" in pagina
+
+
+def test_widget_de_acessibilidade_vai_em_todas_as_paginas(tmp_path):
+    """O widget (CSS no cabeçalho, JS no fim) é servido pelo próprio site, sem CDN."""
+    app = _app(tmp_path)
+    cliente = app.test_client()
+    pagina = cliente.get("/").get_data(as_text=True)
+    assert "acessibilidade/a11y.css" in pagina and "acessibilidade/a11y.js" in pagina
+    assert cliente.get("/static/acessibilidade/a11y.js").status_code == 200
+    assert cliente.get("/static/acessibilidade/a11y.css").status_code == 200
