@@ -26,7 +26,9 @@ def tornar_admin(email, remover):
         raise click.ClickException(f"Ninguém entrou no site com {email}. Peça para ela entrar uma vez e rode de novo.")
     usuaria.papel = "usuaria" if remover else "admin"
     db.session.commit()
-    if remover:
+    if remover and usuaria.admin_pelo_env:
+        click.echo(f"{usuaria.nome} continua no painel: o e-mail está em ADMIN_EMAILS. Tire de lá também.")
+    elif remover:
         click.echo(f"{usuaria.nome} não acessa mais o painel.")
     else:
         click.echo(f"{usuaria.nome} agora acessa o painel em /admin.")

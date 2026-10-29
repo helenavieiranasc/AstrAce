@@ -66,7 +66,7 @@ Todos aceitam `--limpar`, que apaga os dados daquele tipo antes de recriar. Cuid
 
 | Comando | O que faz |
 | --- | --- |
-| `flask --app run tornar-admin pessoa@exemplo.com` | Dá acesso ao Painel da equipe. A pessoa precisa ter entrado no site pelo menos uma vez |
+| `flask --app run tornar-admin pessoa@exemplo.com` | Dá acesso ao Painel da equipe. A pessoa precisa ter entrado no site pelo menos uma vez. Para a equipe fixa, prefira `ADMIN_EMAILS` no `.env` |
 | `flask --app run tornar-admin pessoa@exemplo.com --remover` | Tira o acesso (volta a ser usuária comum) |
 
 Veja como o acesso funciona em [Painel da equipe](#painel-da-equipe-pessoa-5).
@@ -309,20 +309,23 @@ Só a dona mexe no projeto: para outra pessoa as três últimas rotas respondem 
 Página: `/admin`, só para contas com `papel = "admin"` (o link "Painel da equipe" aparece no menu só para elas).
 Abas: visão geral (números do banco e pendências), eventos, vagas, notícias, denúncias e destaques da semana.
 
-**Quem é admin.** Cada usuária tem a coluna `papel` (`"usuaria"` ou `"admin"`), e `usuaria.e_admin` diz se ela é admin.
-Não existe tela para promover alguém: quem já é da equipe roda o comando no servidor.
+**Quem é admin.** `usuaria.e_admin` é verdadeiro em dois casos, e basta um deles:
 
-1. A pessoa entra no site com o Google pelo menos uma vez, para a conta dela existir no banco.
-2. Alguém da equipe roda `flask --app run tornar-admin email-dela@gmail.com`.
-3. Na próxima página que ela abrir, o link "Painel da equipe" aparece no menu. Não precisa sair e entrar de novo:
-   o papel é lido do banco a cada página.
+1. **O e-mail está em `ADMIN_EMAILS` no `.env`** (o jeito recomendado para a equipe). Exemplo:
+   `ADMIN_EMAILS=pessoa1@gmail.com,pessoa2@gmail.com`. Quem entra com o Google usando um desses e-mails já tem o painel,
+   sem rodar nenhum comando. Maiúsculas não importam. Tirar o e-mail da lista (e reiniciar o site) tira o acesso.
+2. **A coluna `papel` vale `"admin"` no banco**, gravada pelo comando `flask --app run tornar-admin email@gmail.com`.
+   A pessoa precisa ter entrado no site uma vez antes. `--remover` volta o papel para `"usuaria"`, mas não tira
+   quem está em `ADMIN_EMAILS` (o comando avisa).
 
-`--remover` tira o acesso da mesma forma. O comando age no banco do `.env`, então precisa rodar onde o site roda.
+Nos dois casos, o acesso é conferido a cada página: não precisa sair e entrar de novo. O e-mail é o da conta Google
+(verificado pelo Google) e não pode ser trocado no perfil, então ninguém vira admin mudando o próprio e-mail.
+Cada lugar onde o site roda tem o seu `.env` (ele não vai para o git): a lista do servidor é a que vale no site no ar.
 
 **Atalho de desenvolvimento.** Com `LOGIN_DEV=1` (o padrão) e o site em `--debug`, quem abre o site sem login age
 como a primeira usuária do banco. Depois do `seed-mural`, ela é a admin de exemplo "Equipe AstrAce", por isso o painel
-abre direto no seu computador. O painel só aceita esse atalho em `--debug` ou nos testes. Com o site no ar, use
-`LOGIN_DEV=0` no `.env`: outras rotas que gravam (como `/api/vagas` e `/api/noticias`) ainda aceitam o atalho mesmo fora do debug.
+abre direto no seu computador. Fora do `--debug` (e dos testes), o atalho é ignorado em todo o site
+(`auth.login_dev_ativo()`): sem login, ninguém é tratada como usuária nem como admin. No servidor, use `LOGIN_DEV=0` mesmo assim.
 
 Toda rota do painel que grava exige JSON (um formulário de outro site não consegue disparar as ações).
 
@@ -358,8 +361,7 @@ precisa conseguir abrir o link; `127.0.0.1` só funciona no próprio computador)
 
 - **Pessoa 2 (login e perfil):** o login com Google e o cadastro inicial já existem (seção acima) e gravam `session["usuaria_id"]`,
   que o mural usa pelo `usuaria_atual()`. Pode adicionar campos em `Usuaria` à vontade, só não renomeie os que existem.
-  `LOGIN_DEV=1` ainda faz o site agir como a primeira usuária do banco quando ninguém entrou. Desligue (`LOGIN_DEV=0`)
-  quando o login com Google estiver configurado.
+  `LOGIN_DEV=1` faz o site agir como a primeira usuária do banco quando ninguém entrou, só em `--debug` e nos testes.
 - **Pessoa 3 (tipos B e eventos):** os campos extras de `software`, `social`, `aula` e `prototipo` entram na lista `campos` desses tipos em
   `app/mural/tipos.py`, e o material exigido pode ser ajustado em `material`. O formulário e a validação se montam sozinhos a partir dali.
   O cartaz de eventos fica no topo do mural (`.cartaz-eventos` em `templates/mural.html`) e aponta para `/eventos`.
