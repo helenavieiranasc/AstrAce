@@ -415,3 +415,97 @@ def validar(dados, autora):
             arquivos.append(capa)
 
     return limpo, erros, arquivos + fotos
+
+
+# ---------- Editar e excluir ----------
+
+# Campos que a edição aceita. Tipo, arquivos, fotos e capa continuam como estão.
+CAMPOS_EDITAVEIS = (
+    "titulo", "resumo", "area", "ano", "nivel", "instituicao", "cidade", "uf", "link_externo", "detalhes",
+)
+
+
+def pode_gerenciar(usuaria, projeto):
+    """Editar e excluir: só a autora do projeto ou uma administradora."""
+    return bool(usuaria and projeto and (usuaria.id == projeto.usuaria_id or usuaria.e_admin))
+
+
+def para_editar(projeto):
+    """O que o formulário de edição precisa: valores atuais, campos do tipo e opções."""
+    tipo = TIPOS_POR_VALOR.get(projeto.tipo, {"campos": [], "rotulo": projeto.tipo})
+    cidade, uf = projeto.cidade or "", projeto.uf or ""
+    if cidade and not uf:
+        # Projetos antigos guardaram só o nome da cidade: completa o estado quando o nome é único no Brasil.
+        achado = municipios.buscar_sem_uf(cidade)
+        if achado:
+            cidade, uf = achado[0], achado[1]
+    return {
+        "projeto": {
+            "id": projeto.id,
+            "tipo": projeto.tipo,
+            "tipo_rotulo": tipo["rotulo"],
+            "titulo": projeto.titulo,
+            "resumo": projeto.resumo,
+            "area": projeto.area,
+            "ano": projeto.ano,
+            "nivel": projeto.nivel or "",
+            "instituicao": projeto.instituicao or "",
+            "cidade": cidade,
+            "uf": uf,
+            "link_externo": projeto.link_externo or "",
+            "detalhes": projeto.detalhes or {},
+            "arquivos": len(projeto.materiais),
+            "fotos": len(projeto.fotos),
+            "autora": projeto.autora.nome_publico if projeto.autora else "Anônima",
+        },
+        "campos_extras": tipo["campos"],
+        "material": tipo.get("material"),
+        "opcoes": {"areas": catalogos.AREAS, "niveis": catalogos.NIVEIS, "estados": catalogos.ESTADOS},
+    }
+
+
+def editar(projeto, enviados):
+    """Aplica a edição e salva. Devolve os erros ({} quando deu certo).
+
+    A validação é a mesma do cadastro. Os valores que faltam (nível, instituição, local) vêm do
+    perfil da autora do projeto, e não de quem está editando (a admin pode editar o projeto de outra pessoa).
+    """
+    dados = {campo: enviados.get(campo) for campo in CAMPOS_EDITAVEIS}
+    dados.update({"tipo": projeto.tipo, "imagem_url": None, "arquivos": [], "fotos": []})
+    limpo, erros, _ = validar(dados, projeto.autora)
+
+    # O material exigido pelo tipo conta os arquivos que o projeto já tem.
+    for campo in ("arquivos", "fotos", "imagem_url"):
+        erros.pop(campo, None)
+    material = TIPOS_POR_VALOR[projeto.tipo]["material"]
+    tem_arquivo = bool(projeto.materiais) or (material["fotos_contam"] and bool(projeto.fotos))
+    tem_link = bool(limpo.get("link_externo"))
+    if material["exige"] == "link" and not tem_link:
+        erros.setdefault("link_externo", material["erro"])
+    elif material["exige"] == "um_dos_dois" and not (tem_arquivo or tem_link):
+        erros.setdefault("link_externo", "Este projeto não tem arquivo: deixe um link para mostrar o trabalho.")
+    if erros:
+        return erros
+
+    for campo in CAMPOS_EDITAVEIS:
+        setattr(projeto, campo, limpo[campo])
+    db.session.commit()
+    return {}
+
+
+def excluir(projeto):
+    """Apaga o projeto com estrelas, bilhetes, denúncias e arquivos (no banco e na pasta)."""
+    from ..uploads.routes import pasta_uploads  # import aqui: uploads não precisa conhecer o mural
+
+    nomes = [a.nome_salvo for a in projeto.arquivos]
+    # Estrela não tem relação no modelo (o ON DELETE CASCADE não vale no SQLite sem foreign_keys).
+    Estrela.query.filter_by(projeto_id=projeto.id).delete()
+    db.session.delete(projeto)  # bilhetes, denúncias e registros de arquivos vão juntos (cascade)
+    db.session.commit()
+
+    pasta = pasta_uploads()
+    for nome in nomes:
+        try:
+            (pasta / nome).unlink(missing_ok=True)
+        except OSError as falha:
+            current_app.logger.warning("Não deu para apagar o arquivo %s: %s", nome, falha)

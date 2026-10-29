@@ -557,6 +557,48 @@ async function copiarCitacao(qual: string): Promise<void> {
   }
 }
 
+/** Editar e excluir: só aparece para a autora e para a admin (o servidor confere de novo). */
+function htmlGerenciar(p: Detalhe): string {
+  if (!p.pode_gerenciar) return "";
+  const quem = p.minha ? "Este projeto é seu." : "Você é da equipe e pode mudar este projeto.";
+  return `
+    <div class="gerenciar">
+      <p class="gerenciar__quem">${quem}</p>
+      <a class="botao botao--secundario" href="/mural/projetos/${p.id}/editar">${icone("editar")}Editar</a>
+      <button class="botao botao--texto gerenciar__excluir" type="button" id="excluir" aria-expanded="false"
+        aria-controls="exclusao">${icone("lixeira")}Excluir</button>
+    </div>
+    <div class="exclusao" id="exclusao" role="group" aria-labelledby="exclusao-titulo" hidden>
+      <h3 id="exclusao-titulo">Excluir “${esc(p.titulo)}”?</h3>
+      <p>O projeto sai do mural e é apagado com os arquivos, as fotos, as estrelas e os bilhetes. Não dá para desfazer.</p>
+      <div class="exclusao__acoes">
+        <button class="botao botao--perigo" type="button" data-acao="confirmar-exclusao" data-id="${p.id}">Excluir de vez</button>
+        <button class="botao botao--texto" type="button" data-acao="cancelar-exclusao">Cancelar</button>
+      </div>
+      <p class="exclusao__resultado" id="exclusao-resultado" role="status"></p>
+    </div>`;
+}
+
+async function excluirProjeto(botao: HTMLButtonElement): Promise<void> {
+  botao.disabled = true;
+  botao.textContent = "Excluindo…";
+  try {
+    await api(`/api/projetos/${botao.dataset.id}`, { method: "DELETE" });
+    // O cartão de onde o detalhe foi aberto vai sumir: o foco volta para o título da lista.
+    const titulo = el("titulo-todos");
+    titulo.tabIndex = -1;
+    focoAntesDoDetalhe = titulo;
+    dialogo.close();
+    avisar("Projeto excluído.");
+    void carregarDestaques();
+    void carregar(true);
+  } catch (erro) {
+    el("exclusao-resultado").textContent = mensagemDeErro(erro);
+    botao.disabled = false;
+    botao.textContent = "Excluir de vez";
+  }
+}
+
 function htmlDetalhe(p: Detalhe): string {
   const imagem = urlSegura(p.imagem_url);
   const link = urlSegura(p.link_externo);
@@ -568,6 +610,7 @@ function htmlDetalhe(p: Detalhe): string {
     <p class="cartao__tipo">${icone(p.icone)}${esc(p.tipo_rotulo)}</p>
     <h2 id="detalhe-titulo">${esc(p.titulo)}</h2>
     <p class="detalhe__autora">por ${esc(p.autora)}</p>
+    ${htmlGerenciar(p)}
     ${htmlGaleria(p, imagem)}
     <p class="detalhe__resumo">${esc(p.resumo)}</p>
     ${htmlMateriais(p)}
@@ -827,6 +870,29 @@ function ligarEventos(): void {
       return;
     }
 
+    const exclusao = document.getElementById("exclusao");
+    if (exclusao) {
+      if (alvo.closest("#excluir")) {
+        const abrir = exclusao.hidden;
+        exclusao.hidden = !abrir;
+        el("excluir").setAttribute("aria-expanded", String(abrir));
+        // O foco começa no "Cancelar", para ninguém excluir sem querer com um Enter.
+        if (abrir) exclusao.querySelector<HTMLElement>('[data-acao="cancelar-exclusao"]')?.focus();
+        return;
+      }
+      if (alvo.closest('[data-acao="cancelar-exclusao"]')) {
+        exclusao.hidden = true;
+        el("excluir").setAttribute("aria-expanded", "false");
+        el("excluir").focus();
+        return;
+      }
+      const confirmar = alvo.closest<HTMLButtonElement>('[data-acao="confirmar-exclusao"]');
+      if (confirmar) {
+        void excluirProjeto(confirmar);
+        return;
+      }
+    }
+
     const formDenuncia = document.getElementById("denuncia") as HTMLFormElement | null;
     if (!formDenuncia) return;
     if (alvo.closest("#denunciar")) {
@@ -861,15 +927,18 @@ async function iniciar(): Promise<void> {
   aplicarFiltrosDaUrl();
   const filtros = lerFiltros();
   botaoLimpar.hidden = !temFiltro(filtros);
-  sincronizarUrl(filtros); // tira ?projeto= e ?publicado= da barra de endereço
+  sincronizarUrl(filtros); // tira ?projeto=, ?publicado= e ?editado= da barra de endereço
 
   void carregarDestaques();
   await carregar(true);
 
   const publicado = Number(params.get("publicado"));
+  const editado = Number(params.get("editado"));
   const projeto = Number(params.get("projeto"));
   if (publicado) {
     void abrirDetalhe(publicado, undefined, "Projeto publicado no mural.");
+  } else if (editado) {
+    void abrirDetalhe(editado, undefined, "Alterações salvas.");
   } else if (projeto) {
     void abrirDetalhe(projeto);
   }
