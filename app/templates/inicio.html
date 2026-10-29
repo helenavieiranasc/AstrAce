@@ -27,7 +27,7 @@
           <img src="{{ url_for('static', filename='img/logo-astrace.png') }}" alt="AstrAce" width="1699" height="540">
         </h1>
         <p class="inicio-marca__oi" id="inicio-oi">Oi, {{ nome }}!</p>
-        <p class="inicio-marca__texto">Este é o seu mural. Cada papel leva a um canto do astrAce: escolha um e boa exploração.</p>
+        <p class="inicio-marca__texto">Este é o seu mural. Cada papel leva a um canto do AstrAce: escolha um e boa exploração.</p>
         <svg class="inicio-rabisco inicio-rabisco--brilho1" viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg>
         <svg class="inicio-rabisco inicio-rabisco--brilho2" viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg>
         <svg class="inicio-rabisco inicio-rabisco--sublinhado" viewBox="0 0 120 12" aria-hidden="true"><path d="M3 8c20-5 45-6 70-3s30 2 44-1"/></svg>
@@ -46,13 +46,6 @@
           <span class="inicio-polaroide" style="--rot: 4deg"><svg viewBox="0 0 24 24">{{ icone_frasco }}</svg></span>
           <span class="inicio-polaroide" style="--rot: -2deg"><svg viewBox="0 0 24 24">{{ icone_codigo }}</svg></span>
         </span>
-        <span class="inicio-contagem" data-contagem="projetos" hidden></span>
-        <svg class="inicio-rabisco inicio-rabisco--atomo" viewBox="0 0 48 48" aria-hidden="true">
-          <ellipse cx="24" cy="24" rx="20" ry="7.5"/>
-          <ellipse cx="24" cy="24" rx="20" ry="7.5" transform="rotate(60 24 24)"/>
-          <ellipse cx="24" cy="24" rx="20" ry="7.5" transform="rotate(-60 24 24)"/>
-          <circle cx="24" cy="24" r="2.6" fill="currentColor"/>
-        </svg>
         <span class="inicio-abrir">ver o mural de projetos {{ seta }}</span>
       </a>
 
@@ -114,6 +107,9 @@
         </span>
       </a>
 
+      {# Globo e quiz formam uma coluna: o quiz fica logo embaixo do papel do globo e se estica para a direita. #}
+      <div class="inicio-mapa-quiz">
+
       {# ---------- Mapa de Inspiração: um globinho 3D que gira e leva ao mapa ---------- #}
       <a class="inicio-papel inicio-link inicio-globo" href="/mapa" style="--rot: 2deg; --i: 6" aria-labelledby="inicio-globo-titulo">
         <span class="pin" style="--cor-pin: var(--pin-magenta)" aria-hidden="true"></span>
@@ -139,21 +135,22 @@
         </span>
       </a>
 
-      {# ---------- Carta para o futuro: uma cartinha que muda conforme a carta (escrever, selada, chegou) ---------- #}
-      <a class="inicio-papel inicio-link inicio-cartinha inicio-cartinha--{{ cartinha.selo }}" href="{{ cartinha.href }}" style="--rot: 1.6deg; --i: 8">
+      </div>
+
+      {# ---------- Carta para o futuro: só o envelopinho 3D, flutuando como o aviãozinho. Leva à carta e muda conforme o estado dela. ---------- #}
+      <a class="inicio-cartinha inicio-cartinha--{{ cartinha.selo }}" href="{{ cartinha.href }}"
+         aria-label="{{ cartinha.titulo }}. {{ cartinha.texto }}" title="{{ cartinha.titulo }}">
         <span class="inicio-cartinha__envelope" aria-hidden="true">
+          {# Sem WebGL, fica este envelope desenhado. #}
           <span class="inicio-cartinha__folha"></span>
           <span class="inicio-cartinha__frente"></span>
           <span class="inicio-cartinha__aba"></span>
           <svg class="inicio-cartinha__lacre" viewBox="0 0 24 24">{{ brilho }}</svg>
-          <span class="inicio-cartinha__selo">{{ cartinha.selo }}</span>
-        </span>
-        <span class="inicio-cartinha__texto">
-          <span class="inicio-titulo">{{ cartinha.titulo }}</span>
-          <span class="inicio-texto">{{ cartinha.texto }}</span>
-          <span class="inicio-abrir">{% if cartinha.selo in ("nova", "rascunho") %}escrever{% else %}abrir{% endif %} {{ seta }}</span>
         </span>
       </a>
+
+      {# Um recado escrito na cortiça, só para enfeitar o canto de baixo. #}
+      <p class="inicio-recado">Cada descoberta começa com uma pergunta<svg viewBox="0 0 24 24" aria-hidden="true">{{ brilho }}</svg></p>
 
     </div>
   </div>

@@ -22,7 +22,7 @@ def mundi_svg():
 
 @bp.get("/api/mapa/historicas")
 def api_historicas():
-    """As mulheres da história, com a origem, a foto (e o crédito) e as fontes. Os projetos do astrAce
+    """As mulheres da história, com a origem, a foto (e o crédito) e as fontes. Os projetos do AstrAce
     continuam em /api/mural/mapa, agora com latitude e longitude de cada cidade."""
     return jsonify({"mulheres": historicas.carregar()})
 

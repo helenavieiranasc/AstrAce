@@ -1,4 +1,4 @@
-/* Página inicial: o mural de navegação do astrAce.
+/* Página inicial: o mural de navegação do AstrAce.
    Usa o quadro, os pins e os post-its de mural.css; aqui ficam só os papéis desta página. */
 
 .inicio-quadro {
@@ -15,8 +15,7 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-areas:
     "proj proj proj marc marc marc marc marc marc even even even"
-    "proj proj proj noti noti noti pass pass pass vaga vaga vaga"
-    "glob glob glob quiz quiz quiz quiz cart cart cart cart cart";
+    "glob glob glob noti noti noti pass pass pass vaga vaga vaga";
   align-items: start;
   gap: clamp(26px, 3vw, 44px) clamp(22px, 2.6vw, 40px);
   max-width: 1280px;
@@ -29,9 +28,50 @@
 .inicio-noticias { grid-area: noti; }
 .inicio-passaporte { grid-area: pass; }
 .inicio-vagas { grid-area: vaga; }
-.inicio-globo { grid-area: glob; }
-.inicio-quiz { grid-area: quiz; align-self: center; }
-.inicio-cartinha { grid-area: cart; align-self: center; }
+.inicio-mapa-quiz {
+  grid-area: glob;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 2.4vw, 32px);
+}
+/* O envelopinho fica na mesma célula das vagas, no canto de cima à direita: pega um pouco de Eventos e de Vagas. */
+.inicio-cartinha {
+  grid-area: vaga;
+  align-self: start;
+  justify-self: end;
+  margin-top: calc(-1 * (clamp(26px, 3vw, 44px) / 2 + clamp(132px, 13vw, 176px) / 2.9));
+  margin-right: -64px;
+}
+
+/* Um recado escrito direto na cortiça, no canto de baixo que sobra embaixo das notícias, do passaporte e das vagas. */
+.inicio-recado {
+  grid-column: 4 / -1;
+  grid-row: 2;
+  align-self: end;
+  justify-self: center;
+  max-width: none;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--fonte-mao);
+  font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--madeira-escura, #3f2618);
+  rotate: -2deg;
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.inicio-recado svg {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.2em;
+  vertical-align: baseline;
+  fill: var(--magenta);
+}
 
 /* ---------- Papel: o que todos têm em comum ---------- */
 
@@ -260,20 +300,6 @@
   box-shadow: 0 1px 1px rgb(42 28 21 / 0.18), 0 6px 10px -4px rgb(42 28 21 / 0.4);
   transform: rotate(var(--rot));
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Rabisco de átomo no meio da cartolina (só no desktop, onde ela fica alta). */
-.inicio-rabisco--atomo {
-  position: static;
-  align-self: center;
-  width: 92px;
-  height: 92px;
-  margin: auto 0;
-  color: var(--magenta-escuro);
-  stroke: currentColor;
-  stroke-width: 1.1;
-  opacity: 0.55;
-  rotate: -12deg;
 }
 
 .inicio-polaroide svg {
@@ -628,8 +654,9 @@
 
 .inicio-globo {
   align-items: center;
+  justify-content: center;
   gap: 2px;
-  padding: 22px 14px 14px;
+  padding: 20px 14px 12px;
   background: var(--papel);
   text-align: center;
 }
@@ -689,8 +716,9 @@
 .inicio-quiz {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 22px 20px 14px;
+  gap: 16px;
+  width: calc(100% + clamp(110px, 12vw, 170px));
+  padding: 22px 22px 14px;
   color: var(--tinta);
   text-decoration: none;
   transform: rotate(var(--rot));
@@ -702,13 +730,13 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: clamp(52px, 5.6vw, 68px);
+  width: clamp(46px, 4.6vw, 56px);
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--magenta);
   box-shadow: 0 4px 0 var(--magenta-escuro), 0 10px 14px -6px rgb(42 28 21 / 0.5);
   font-family: var(--fonte-mao);
-  font-size: clamp(2.4rem, 3.6vw, 3.2rem);
+  font-size: clamp(2rem, 3vw, 2.6rem);
   font-weight: 700;
   line-height: 1;
   color: #fff;
@@ -729,7 +757,7 @@
 
 .inicio-quiz__titulo {
   font-family: var(--fonte-mao);
-  font-size: clamp(1.6rem, 2.2vw, 2rem);
+  font-size: clamp(1.4rem, 1.9vw, 1.7rem);
   font-weight: 700;
   line-height: 0.95;
   color: var(--magenta-escuro);
@@ -737,8 +765,8 @@
 
 .inicio-quiz__texto {
   max-width: 38ch;
-  font-size: 0.88rem;
-  line-height: 1.35;
+  font-size: 0.82rem;
+  line-height: 1.3;
 }
 
 .inicio-quiz .inicio-abrir {
@@ -746,24 +774,40 @@
   font-size: 1.25rem;
 }
 
-/* ---------- Carta para o futuro: uma cartinha ---------- */
+/* ---------- Carta para o futuro: só o envelopinho, flutuando como o aviãozinho ---------- */
 
 .inicio-cartinha {
-  flex-direction: row;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
-  background: var(--papel);
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  align-self: start;
+  width: clamp(132px, 13vw, 176px);
+  aspect-ratio: 1.45;
+  text-decoration: none;
+  rotate: 4deg;
+  animation: inicio-pregar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(8 * 70ms);
+  transition: translate 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inicio-cartinha:hover {
+  translate: 0 -6px;
+}
+
+.inicio-cartinha:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 8px;
+  border-radius: 8px;
 }
 
 .inicio-cartinha__envelope {
-  position: relative;
-  flex: none;
-  width: clamp(104px, 11vw, 132px);
-  aspect-ratio: 1.45;
+  position: absolute;
+  inset: 0;
   --papel-env: #ffd9e8;
+  filter: drop-shadow(0 8px 8px rgb(42 28 21 / 0.35));
 }
 
+/* Versão sem WebGL: o envelope desenhado em CSS. */
 .inicio-cartinha__folha,
 .inicio-cartinha__frente,
 .inicio-cartinha__aba {
@@ -771,14 +815,12 @@
   inset: 0;
 }
 
-/* A folha de dentro sobe um pouco quando o mouse passa. */
 .inicio-cartinha__folha {
   inset: 6% 8% 12%;
   background:
     repeating-linear-gradient(transparent 0 9px, rgb(184 19 92 / 0.22) 9px 10px),
     #fff;
   border-radius: 3px;
-  box-shadow: 0 1px 2px rgb(42 28 21 / 0.3);
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -786,11 +828,9 @@
   transform: translateY(-34%);
 }
 
-/* A frente forma o "V" do envelope: corta a metade de cima no meio. */
 .inicio-cartinha__frente {
   background: var(--papel-env);
   border-radius: 4px;
-  box-shadow: 0 6px 12px -6px rgb(42 28 21 / 0.55);
   clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
 }
 
@@ -817,7 +857,6 @@
   background: var(--magenta-escuro);
   fill: #ffd6e8;
   translate: -50% -50%;
-  box-shadow: 0 2px 4px rgb(42 28 21 / 0.4);
   transition: opacity 0.2s ease;
 }
 
@@ -825,57 +864,14 @@
   opacity: 0;
 }
 
-.inicio-cartinha__selo {
-  position: absolute;
-  right: -10px;
-  bottom: -8px;
-  padding: 2px 10px;
-  border: 2px solid var(--pin-violeta);
-  border-radius: 6px;
-  background: var(--papel);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--pin-violeta);
-  rotate: -7deg;
-}
-
-/* Quando a carta chegou, a cartinha chama a atenção. */
+/* Quando a carta chegou, o envelope balança para chamar a atenção (em 3D, quem balança é a cena). */
 .inicio-cartinha--chegou .inicio-cartinha__envelope:not(.inicio-cartinha--3d) {
   animation: inicio-cartinha-balanco 2.4s ease-in-out infinite;
-}
-
-.inicio-cartinha--chegou .inicio-cartinha__selo {
-  background: var(--magenta);
-  border-color: var(--magenta);
-  color: #fff;
 }
 
 @keyframes inicio-cartinha-balanco {
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(3deg) translateY(-4px); }
-}
-
-.inicio-cartinha__texto {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.inicio-cartinha .inicio-titulo {
-  font-size: clamp(1.5rem, 2.1vw, 1.9rem);
-}
-
-.inicio-cartinha .inicio-texto {
-  font-size: 0.85rem;
-  line-height: 1.35;
-}
-
-.inicio-cartinha .inicio-abrir {
-  padding-top: 2px;
-  font-size: 1.25rem;
 }
 
 /* Com o envelope em 3D, o de CSS some; o canvas é um pouco maior que a caixa para o balanço não cortar. */
@@ -910,10 +906,6 @@
     align-self: start;
   }
 
-  .inicio-rabisco--atomo {
-    display: none;
-  }
-
   /* Aqui o cartão é largo: capa e texto lado a lado, com espaço à direita para o avião. */
   .inicio-passaporte {
     flex-direction: row;
@@ -932,9 +924,19 @@
     grid-template-areas:
       "marc marc marc marc marc marc"
       "proj proj proj even even even"
-      "vaga vaga vaga noti noti noti"
-      "pass pass pass pass glob glob"
-      "quiz quiz quiz cart cart cart";
+      "glob glob glob vaga vaga vaga"
+      "noti noti noti noti noti noti"
+      "pass pass pass pass pass pass";
+  }
+
+  .inicio-quiz {
+    width: 100%;
+  }
+
+  .inicio-recado {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    white-space: normal;
   }
 
   .inicio-adesivo--mascote {
@@ -945,8 +947,18 @@
 @media (max-width: 640px) {
   .inicio-mural {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "marc" "proj" "even" "vaga" "noti" "glob" "quiz" "cart" "pass";
+    grid-template-areas: "marc" "proj" "even" "cart" "vaga" "noti" "glob" "pass" "reca";
     gap: 34px;
+  }
+
+  .inicio-cartinha {
+    grid-area: cart;
+    justify-self: center;
+    margin: 0;
+  }
+
+  .inicio-recado {
+    grid-area: reca;
   }
 
   /* Menos inclinação no celular, para ler sem esforço. */
@@ -989,8 +1001,7 @@
     height: 124px;
   }
 
-  .inicio-quiz,
-  .inicio-cartinha {
+  .inicio-quiz {
     flex-direction: column;
     align-items: flex-start;
   }

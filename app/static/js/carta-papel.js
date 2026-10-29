@@ -296,7 +296,7 @@ export function envelopeFrente(d, logos) {
     ctx.fillText("CIÊNCIA", sx + sl / 2 + 3, sy + 300);
     ctx.letterSpacing = "0px";
     ctx.font = `400 22px ${TEXTO}`;
-    ctx.fillText("astrAce", sx + sl / 2, sy + 336);
+    ctx.fillText("AstrAce", sx + sl / 2, sy + 336);
     ctx.textAlign = "left";
     // Picote: recorta bolinhas na borda do selo (devolve o papel por baixo).
     ctx.fillStyle = "#fffaf2";
