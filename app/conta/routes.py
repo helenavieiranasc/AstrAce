@@ -5,6 +5,7 @@ from datetime import date, datetime
 from flask import current_app, jsonify, redirect, render_template, request, session, url_for
 
 from .. import catalogos
+from ..carta.models import CartaFuturo
 from ..extensoes import db
 from ..uploads.models import Arquivo
 from ..usuarias.models import ContaUsuaria, IdentidadeUsuaria, Usuaria
@@ -70,6 +71,10 @@ def landing():
         token = _tirar_checkin_pendente()
         if token:
             return redirect(url_for("passaporte.pagina_checkin", token=token))
+        # Primeiro acesso depois do cadastro: convite para a carta da cientista (opcional).
+        # Quem já decidiu (criou, pulou ou está criando) não vê o convite de novo.
+        if db.session.get(CartaFuturo, usuaria.id) is None:
+            return redirect(url_for("carta.pagina_convite"))
         return render_template("inicio.html", nome=usuaria.nome_publico)
     codigo = request.args.get("erro")
     return render_template(

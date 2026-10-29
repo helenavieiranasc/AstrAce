@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block titulo %}Abrir minha carta · AstrAce{% endblock %}
+{% block descricao %}Abra a carta que você escreveu para a cientista que você é hoje.{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carta.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="quadro carta-quadro">
+  <div class="cortica carta-cortica">
+    <div class="carta-cena" id="carta-cena" data-modo="abrir">
+      <div class="carta-cena__area">
+        <div class="carta-cena__palco" id="carta-palco"></div>
+        <button class="carta-sair-tela" type="button" id="carta-sair-tela" hidden>Sair da tela cheia</button>
+        <button class="carta-sair-tela" type="button" id="carta-entrar-tela" hidden>Voltar à tela cheia</button>
+        <h1 class="carta-chip">Minha carta para o futuro</h1>
+        <p class="carta-chip carta-chip--carregando" id="carta-carregando">Procurando sua carta…</p>
+
+        {# A mensagem só chega do servidor depois da data, e aparece como texto sobre o papel. #}
+        <div class="carta-leitura" id="carta-leitura" hidden>
+          <div class="carta-leitura__mensagem" id="carta-leitura-mensagem" tabindex="-1"></div>
+          <p class="carta-leitura__ps" id="carta-leitura-objetivos"></p>
+          <p class="carta-leitura__assinatura" id="carta-leitura-assinatura"></p>
+        </div>
+      </div>
+
+      <aside class="carta-painel" aria-label="Sua carta">
+        <div data-passo="aguardando" hidden>
+          <h2 class="carta-painel__titulo">Ainda não é hora</h2>
+          <p class="carta-painel__texto" id="carta-aguardando-texto"></p>
+          <div class="carta-botoes">
+            <a class="botao botao--secundario" href="/perfil">Voltar ao perfil</a>
+          </div>
+        </div>
+
+        <div data-passo="pronta" hidden>
+          <h2 class="carta-painel__titulo">Sua carta chegou</h2>
+          <p class="carta-painel__texto" id="carta-pronta-texto"></p>
+          <div class="carta-botoes">
+            <button class="botao botao--primario" type="button" id="carta-abrir-carta">Abrir minha carta</button>
+            <a class="botao botao--secundario" href="/perfil">Voltar ao perfil</a>
+          </div>
+        </div>
+
+        <div data-passo="lendo" hidden>
+          <p class="carta-painel__texto">Esta é a mensagem que você escreveu para você mesma.</p>
+          <div class="carta-botoes">
+            <a class="botao botao--primario" href="/perfil">Voltar ao perfil</a>
+          </div>
+        </div>
+
+        <div data-passo="sem-carta" hidden>
+          <h2 class="carta-painel__titulo">Nenhuma carta por aqui</h2>
+          <p class="carta-painel__texto">Você ainda não enviou uma carta para o futuro.</p>
+          <div class="carta-botoes">
+            <a class="botao botao--primario" href="/carta/escrever">Escrever minha carta</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/carta.js') }}"></script>
+{% endblock %}

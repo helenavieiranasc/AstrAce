@@ -5,6 +5,7 @@
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/conta.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carta.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -52,6 +53,19 @@
 
       <div class="perfil-folha__acoes">
         <a class="botao botao--secundario" href="{{ url_for('conta.pagina_editar_perfil') }}">Editar perfil</a>
+      </div>
+    </section>
+
+    {# Carta para o futuro: carta.ts preenche o bloco; sem a carta ele fica escondido e o perfil segue normal. #}
+    <section class="carta-perfil" id="carta-perfil" aria-labelledby="titulo-carta" hidden>
+      <div class="carta-perfil__texto">
+        <h2 class="fita" id="titulo-carta" tabindex="-1">Minha carta para o futuro</h2>
+        <p id="carta-perfil-texto"></p>
+        <a class="botao botao--primario" id="carta-perfil-acao" href="/carta/escrever"></a>
+      </div>
+      <div class="carta-perfil__grupo" id="carta-perfil-grupo" hidden>
+        <div class="carta-perfil__palco" id="carta-perfil-palco"></div>
+        <button class="botao botao--secundario" type="button" id="carta-perfil-virar" hidden>Ver o outro lado</button>
       </div>
     </section>
 
@@ -104,4 +118,5 @@
 
 {% block scripts %}
 <script type="module" src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/carta.js') }}"></script>
 {% endblock %}

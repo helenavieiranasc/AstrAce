@@ -122,8 +122,11 @@ def test_primeiro_acesso_vai_para_o_cadastro_e_depois_para_o_inicio(app, cliente
     salvo = cliente.post("/api/perfil", json=PERFIL_VALIDO)
     assert salvo.status_code == 200
     assert salvo.get_json()["proximo"] == "/"
+    # Primeiro acesso depois do cadastro: antes da página inicial, o convite da carta (opcional).
+    assert cliente.get("/").headers["Location"].endswith("/carta/convite")
+    assert cliente.post("/carta/adiar").headers["Location"].endswith("/")
     inicio = cliente.get("/")
-    assert inicio.status_code == 200  # com o cadastro pronto, o / é a página inicial
+    assert inicio.status_code == 200
     assert "Oi, Ana!" in inicio.get_data(as_text=True)
 
     with app.app_context():
