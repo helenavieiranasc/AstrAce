@@ -1,22 +1,14 @@
 """Quem pode usar o painel."""
 from functools import wraps
 
-from flask import current_app, jsonify, redirect, request, session, url_for
+from flask import jsonify, redirect, request, url_for
 
-from ..extensoes import db
-from ..usuarias.models import Usuaria
+from ..auth import usuaria_atual
 
 
 def admin_atual():
-    """A administradora que está usando o site, ou None.
-
-    O atalho LOGIN_DEV (agir como a primeira usuária do banco) só vale em modo debug e nos testes:
-    com o site no ar, ele daria o painel para qualquer visitante.
-    """
-    uid = session.get("usuaria_id")
-    usuaria = db.session.get(Usuaria, uid) if uid else None
-    if usuaria is None and current_app.config.get("LOGIN_DEV") and (current_app.debug or current_app.testing):
-        usuaria = Usuaria.query.order_by(Usuaria.id).first()
+    """A administradora que está usando o site, ou None (o atalho LOGIN_DEV segue a regra de auth.py)."""
+    usuaria = usuaria_atual()
     return usuaria if usuaria and usuaria.e_admin else None
 
 

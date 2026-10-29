@@ -5,6 +5,8 @@ Dono: Pessoa 2 (cadastro de perfil). Pode adicionar campos à vontade
 """
 from datetime import datetime
 
+from flask import current_app
+
 from ..extensoes import db
 
 
@@ -34,7 +36,12 @@ class Usuaria(db.Model):
 
     @property
     def e_admin(self):
-        return self.papel == "admin"
+        """Admin pelo papel no banco (comando tornar-admin) ou pelo e-mail em ADMIN_EMAILS no .env."""
+        return self.papel == "admin" or self.admin_pelo_env
+
+    @property
+    def admin_pelo_env(self):
+        return bool(self.email) and self.email.strip().lower() in current_app.config.get("ADMIN_EMAILS", ())
 
 
 class ContaUsuaria(db.Model):
