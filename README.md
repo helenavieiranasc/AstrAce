@@ -76,26 +76,6 @@ A carta fica selada e só abre na data escolhida.
 - **pytest:** testes automatizados
 - **PythonAnywhere:** hospedagem gratuita
 
-## ▶️ Como rodar
-
-Precisa de Python 3.11+ e, para mexer no TypeScript, Node.js.
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate          # Windows  (Linux/Mac: source .venv/bin/activate)
-pip install -r requirements.txt
-
-flask --app run seed-mural      # usuárias e projetos de exemplo
-flask --app run seed-eventos    # eventos de exemplo
-flask --app run seed-vagas      # vagas
-flask --app run seed-noticias   # notícias
-flask --app run run --debug     # abre em http://127.0.0.1:5000
-```
-
-Copie `.env.example` para `.env` e preencha as chaves do login com Google (`GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`). Os testes rodam com `pytest`.
-
-A documentação técnica completa (comandos, rotas e cada parte do sistema) está em [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md).
-
 ## ☁️ Hospedagem
 
 O site roda no **PythonAnywhere** (plano gratuito), com o banco e os arquivos enviados no mesmo lugar. Para atualizar: `git pull` no console do servidor e **Reload** na aba Web. No plano gratuito é preciso renovar o site uma vez por mês.
