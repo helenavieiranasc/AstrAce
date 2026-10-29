@@ -2221,3 +2221,76 @@ button.bilhete:focus-visible {
     width: auto;
   }
 }
+
+
+/* ---------- Editar e excluir (autora e admin) ---------- */
+
+.gerenciar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 4px 0 18px;
+  padding: 10px 14px;
+  border: 2px dashed var(--papel-borda);
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.gerenciar__quem {
+  flex: 1 1 200px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+.gerenciar .icone {
+  width: 18px;
+  height: 18px;
+}
+
+.gerenciar__excluir {
+  color: var(--magenta-escuro);
+}
+
+.exclusao {
+  margin: -6px 0 18px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--magenta-escuro);
+  border-radius: 0 8px 8px 0;
+  background: #fff0f5;
+}
+
+.exclusao h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.exclusao p {
+  margin: 0 0 12px;
+}
+
+.exclusao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.exclusao .botao--perigo {
+  background: var(--magenta-escuro);
+  color: #fff;
+}
+
+.exclusao .botao--perigo:hover {
+  background: var(--tinta);
+}
+
+.exclusao__resultado:empty {
+  display: none;
+}
+
+.exclusao__resultado {
+  margin: 10px 0 0;
+  color: var(--magenta-escuro);
+  font-weight: 700;
+}

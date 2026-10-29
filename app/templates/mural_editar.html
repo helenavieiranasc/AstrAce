@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block titulo %}Editar projeto · AstrAce{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mural.css') }}">
+{% endblock %}
+
+{% block acao_topo %}{% endblock %}
+
+{% block conteudo %}
+<div class="quadro quadro--publicar">
+  <div class="cortica cortica--form cortica--publicar">
+    {# Mesmos campos do "Publicar projeto". Tipo, arquivos e fotos não mudam aqui. #}
+    <form class="folha-form folha-form--publicar" id="form-editar" data-id="{{ projeto_id }}" novalidate>
+      <span class="pin" style="--cor-pin: var(--pin-violeta)" aria-hidden="true"></span>
+
+      <img class="folha-form__mascote" src="{{ url_for('static', filename='img/logo-estrela-original-240.png') }}"
+           alt="" width="240" height="244">
+      <a class="folha-form__voltar" href="/mural?projeto={{ projeto_id }}">Voltar ao projeto</a>
+      <h1>Editar projeto</h1>
+      <p class="folha-form__intro" id="editar-intro">Carregando projeto…</p>
+
+      <div class="resumo-erros" id="resumo-erros" role="alert" tabindex="-1" hidden></div>
+
+      <div id="editar-corpo" hidden>
+        <fieldset class="bloco">
+          <legend>Sobre o projeto</legend>
+
+          <div class="campo">
+            <label for="titulo">Título *</label>
+            <input id="titulo" name="titulo" maxlength="160" required aria-describedby="erro-titulo">
+            <p class="campo__erro" id="erro-titulo" hidden></p>
+          </div>
+
+          <div class="campo">
+            <label for="resumo">Resumo *</label>
+            <textarea id="resumo" name="resumo" rows="6" maxlength="3000" required
+                      aria-describedby="resumo-ajuda erro-resumo"></textarea>
+            <small id="resumo-ajuda"><span id="resumo-contador">0</span> de 3000 caracteres.</small>
+            <p class="campo__erro" id="erro-resumo" hidden></p>
+          </div>
+
+          <div class="linha">
+            <div class="campo">
+              <label for="area">Área *</label>
+              <select id="area" name="area" required aria-describedby="erro-area">
+                <option value="">Escolha</option>
+              </select>
+              <p class="campo__erro" id="erro-area" hidden></p>
+            </div>
+            <div class="campo">
+              <label for="ano">Ano *</label>
+              <input id="ano" name="ano" type="number" inputmode="numeric" min="1950" required aria-describedby="erro-ano">
+              <p class="campo__erro" id="erro-ano" hidden></p>
+            </div>
+            <div class="campo">
+              <label for="nivel">Nível</label>
+              <select id="nivel" name="nivel" aria-describedby="erro-nivel">
+                <option value="">O do perfil da autora</option>
+              </select>
+              <p class="campo__erro" id="erro-nivel" hidden></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco" id="bloco-extras" hidden>
+          <legend id="extras-titulo">Detalhes</legend>
+          <div id="extras"></div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Link</legend>
+          <div class="campo">
+            <label for="link_externo" id="link-rotulo">Link do projeto</label>
+            <input id="link_externo" name="link_externo" type="url" placeholder="https://"
+                   aria-describedby="link-ajuda erro-link_externo">
+            <small id="link-ajuda" hidden></small>
+            <p class="campo__erro" id="erro-link_externo" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloco">
+          <legend>Onde foi feito</legend>
+          <div class="linha">
+            <div class="campo">
+              <label for="instituicao">Instituição</label>
+              <input id="instituicao" name="instituicao" maxlength="160" placeholder="A do perfil da autora, se vazio">
+            </div>
+          </div>
+          <div class="linha">
+            <div class="campo">
+              <label for="uf">Estado</label>
+              <select id="uf" name="uf" autocomplete="address-level1" aria-describedby="erro-uf">
+                <option value="">Escolha</option>
+              </select>
+              <p class="campo__erro" id="erro-uf" hidden></p>
+            </div>
+            <div class="campo">
+              <label for="cidade">Cidade</label>
+              <select id="cidade" name="cidade" autocomplete="address-level2" disabled aria-describedby="erro-cidade">
+                <option value="">Escolha o estado primeiro</option>
+              </select>
+              <p class="campo__erro" id="erro-cidade" hidden></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="folha-form__acoes">
+          <button class="botao botao--primario botao--grande" type="submit" id="salvar">Salvar alterações</button>
+          <a class="botao botao--texto" href="/mural?projeto={{ projeto_id }}">Cancelar</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/editar-projeto.js') }}"></script>
+{% endblock %}

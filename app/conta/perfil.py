@@ -3,19 +3,16 @@
 As publicações são os projetos do mural: aqui só se lista, edita e exclui o que é
 da usuária logada. A criação continua em /mural/novo.
 """
-from flask import current_app, jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 
 from .. import catalogos
 from ..extensoes import db
 from ..mural import servico
-from ..mural.models import Estrela, Projeto, semana_atual
-from ..mural.tipos import TIPOS_POR_VALOR
-from ..uploads.routes import pasta_uploads
+from ..mural.models import Projeto, semana_atual
 from . import bp
 from .routes import _cadastro_completo, _erro, _formacoes, _usuaria_logada
 
-# Campos que a edição aceita. Tipo, arquivos, fotos e capa não mudam por aqui.
-CAMPOS_EDITAVEIS = ("titulo", "resumo", "area", "ano", "nivel", "instituicao", "cidade", "uf", "link_externo", "detalhes")
+# Editar e excluir seguem as regras de mural/servico.py (as mesmas do mural, onde a admin também pode).
 
 
 @bp.get("/perfil")
@@ -96,59 +93,17 @@ def api_publicacao_para_editar(projeto_id):
     _, projeto, erro = _da_usuaria(projeto_id)
     if erro:
         return erro
-    tipo = TIPOS_POR_VALOR.get(projeto.tipo, {"campos": [], "rotulo": projeto.tipo})
-    return jsonify({
-        "projeto": {
-            "id": projeto.id,
-            "tipo": projeto.tipo,
-            "tipo_rotulo": tipo["rotulo"],
-            "titulo": projeto.titulo,
-            "resumo": projeto.resumo,
-            "area": projeto.area,
-            "ano": projeto.ano,
-            "nivel": projeto.nivel or "",
-            "instituicao": projeto.instituicao or "",
-            "cidade": projeto.cidade or "",
-            "link_externo": projeto.link_externo or "",
-            "detalhes": projeto.detalhes or {},
-            "arquivos": len(projeto.materiais),
-            "fotos": len(projeto.fotos),
-        },
-        "campos_extras": tipo["campos"],
-        "material": tipo.get("material"),
-        "opcoes": {"areas": catalogos.AREAS, "niveis": catalogos.NIVEIS},
-    })
+    return jsonify(servico.para_editar(projeto))
 
 
 @bp.patch("/api/minhas-publicacoes/<int:projeto_id>")
 def api_editar_publicacao(projeto_id):
-    usuaria, projeto, erro = _da_usuaria(projeto_id)
+    _, projeto, erro = _da_usuaria(projeto_id)
     if erro:
         return erro
-
-    enviados = request.get_json(silent=True) or {}
-    dados = {campo: enviados.get(campo) for campo in CAMPOS_EDITAVEIS}
-    # A validação é a mesma do cadastro do mural; tipo, arquivos e capa ficam como estão.
-    dados.update({"tipo": projeto.tipo, "imagem_url": None, "arquivos": [], "fotos": []})
-    limpo, erros, _ = servico.validar(dados, usuaria)
-
-    # O material exigido pelo tipo conta os arquivos que o projeto já tem.
-    for campo in ("arquivos", "fotos", "imagem_url"):
-        erros.pop(campo, None)
-    material = TIPOS_POR_VALOR[projeto.tipo]["material"]
-    tem_arquivo = bool(projeto.materiais) or (material["fotos_contam"] and bool(projeto.fotos))
-    tem_link = bool(limpo.get("link_externo"))
-    if material["exige"] == "link" and not tem_link:
-        erros.setdefault("link_externo", material["erro"])
-    elif material["exige"] == "um_dos_dois" and not (tem_arquivo or tem_link):
-        erros.setdefault("link_externo", "Esta publicação não tem arquivo: deixe um link para mostrar o trabalho.")
-
+    erros = servico.editar(projeto, request.get_json(silent=True) or {})
     if erros:
         return _erro("Confira os campos marcados.", 422, erros=erros)
-
-    for campo in CAMPOS_EDITAVEIS:
-        setattr(projeto, campo, limpo[campo])
-    db.session.commit()
     return jsonify({"item": _item(projeto)})
 
 
@@ -157,18 +112,5 @@ def api_excluir_publicacao(projeto_id):
     _, projeto, erro = _da_usuaria(projeto_id)
     if erro:
         return erro
-
-    nomes = [a.nome_salvo for a in projeto.arquivos]
-    # Estrela não tem relação no modelo (o ON DELETE CASCADE não vale no SQLite sem foreign_keys).
-    Estrela.query.filter_by(projeto_id=projeto.id).delete()
-    db.session.delete(projeto)  # denúncias e registros de arquivos vão juntos (cascade)
-    db.session.commit()
-
-    pasta = pasta_uploads()
-    for nome in nomes:
-        try:
-            (pasta / nome).unlink(missing_ok=True)
-        except OSError as falha:
-            current_app.logger.warning("Não deu para apagar o arquivo %s: %s", nome, falha)
+    servico.excluir(projeto)
     return jsonify({"excluido": projeto_id})
-

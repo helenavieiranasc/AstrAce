@@ -44,6 +44,16 @@ def pagina_novo_projeto():
     return render_template("mural_novo.html")
 
 
+@bp.get("/mural/projetos/<int:projeto_id>/editar")
+def pagina_editar_projeto(projeto_id):
+    projeto = db.session.get(Projeto, projeto_id)
+    if not projeto:
+        abort(404)
+    if not servico.pode_gerenciar(usuaria_atual(), projeto):
+        return redirect(url_for("mural.pagina_mural", projeto=projeto.id))
+    return render_template("mural_editar.html", projeto_id=projeto.id)
+
+
 # ---------- API ----------
 
 @bp.get("/api/mural/opcoes")
@@ -121,6 +131,8 @@ def api_detalhe(projeto_id):
     dados["bilhetes"] = servico.bilhetes(projeto, usuaria)
     # A autora vê os bilhetes que recebeu, mas não deixa bilhete no próprio projeto.
     dados["minha"] = bool(usuaria and usuaria.id == projeto.usuaria_id)
+    # Editar e excluir aparecem para a autora e para a admin.
+    dados["pode_gerenciar"] = servico.pode_gerenciar(usuaria, projeto)
     dados["citacao"] = citacao.gerar(projeto, f"{request.url_root}mural?projeto={projeto.id}")
     return jsonify(dados)
 
@@ -169,6 +181,49 @@ def api_criar():
     db.session.add(projeto)
     db.session.commit()
     return jsonify(servico.detalhe(projeto)), 201
+
+
+def _projeto_gerenciavel(projeto_id):
+    """(projeto, resposta_de_erro). Quem pode é conferido aqui, no servidor."""
+    usuaria = usuaria_atual()
+    if not usuaria:
+        return None, _erro("Entre na sua conta para mudar projetos.", 401)
+    projeto = db.session.get(Projeto, projeto_id)
+    if not projeto:
+        abort(404)
+    if not servico.pode_gerenciar(usuaria, projeto):
+        if projeto.oculto:
+            abort(404)  # projeto fora do mural: para os outros, ele não existe
+        return None, _erro("Só quem publicou o projeto ou a equipe pode mudar ou excluir.", 403)
+    return projeto, None
+
+
+@bp.get("/api/projetos/<int:projeto_id>/edicao")
+def api_para_editar(projeto_id):
+    projeto, erro = _projeto_gerenciavel(projeto_id)
+    if erro:
+        return erro
+    return jsonify(servico.para_editar(projeto))
+
+
+@bp.patch("/api/projetos/<int:projeto_id>")
+def api_editar(projeto_id):
+    projeto, erro = _projeto_gerenciavel(projeto_id)
+    if erro:
+        return erro
+    erros = servico.editar(projeto, request.get_json(silent=True) or {})
+    if erros:
+        return _erro("Confira os campos marcados.", 422, erros=erros)
+    return jsonify(servico.detalhe(projeto))
+
+
+@bp.delete("/api/projetos/<int:projeto_id>")
+def api_excluir(projeto_id):
+    projeto, erro = _projeto_gerenciavel(projeto_id)
+    if erro:
+        return erro
+    servico.excluir(projeto)
+    return jsonify({"excluido": projeto_id})
 
 
 @bp.post("/api/projetos/<int:projeto_id>/denuncias")
