@@ -38,7 +38,7 @@ async function marcarVisto() {
     }
 }
 // ---------- Tela cheia ----------
-// Só quando a pessoa pede, pelo botão. Usa a tela cheia do navegador quando existe
+// Ao abrir a capa o passaporte cobre a tela toda; o botão alterna quando a pessoa quiser sair ou voltar. Usa a tela cheia do navegador quando existe
 // (precisa ser pedida no clique); onde não existe, como no iPhone, a camada fixa faz o papel.
 function emTelaCheia() {
     return cortica.classList.contains("passaporte-cortica--tela-cheia");
@@ -87,6 +87,7 @@ async function iniciar() {
         dados,
         carimboNovo: Boolean(boasVindas && !boasVindas.visto),
         aoMudar: atualizar,
+        aoAbrir: entrarTelaCheia,
         aoCarimbar: () => {
             onde.textContent = "Carimbo de boas-vindas recebido!";
             void marcarVisto();
@@ -106,6 +107,8 @@ async function iniciar() {
         proximaTexto.textContent = viradas === 0 ? "Abrir passaporte" : "Próxima página";
         onde.textContent = lado ? ONDE_PAGINA[viradas][lado === "esq" ? 0 : 1] : (ONDE[viradas] ?? "");
         cortica.classList.toggle("passaporte-cortica--aberto", viradas > 0);
+        if (viradas === 0)
+            sairTelaCheia(); // fechou o passaporte: volta para a página
     }
     controles.hidden = false;
     botaoTela.hidden = false;

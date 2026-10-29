@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu-lateral.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='acessibilidade/a11y.css') }}">
   {% if conta_topo %}<link rel="stylesheet" href="{{ url_for('static', filename='css/conta-topo.css') }}">{% endif %}
   {% block estilos %}{% endblock %}
 </head>
@@ -21,17 +22,21 @@
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
+    {# O menu só existe para quem entrou: sem login, o cabeçalho tem só a marca. #}
+    {% if conta_topo %}
     <button class="topo__menu" type="button" id="abrir-menu" aria-controls="menu-lateral" aria-expanded="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
       <span>Menu</span>
     </button>
+    {% endif %}
     <a class="topo__marca" href="/">
       <img src="{{ url_for('static', filename='img/logo-astrace-topo.png') }}" alt="AstrAce, página inicial" width="289" height="92">
     </a>
     {% if conta_topo %}{% include "_conta_topo.html" %}{% endif %}
   </header>
 
-  {# Barra lateral com a navegação e a ação da página (o que antes ficava no cabeçalho). #}
+  {# Barra lateral com a navegação e a ação da página (o que antes ficava no cabeçalho). Só para quem entrou. #}
+  {% if conta_topo %}
   <dialog class="lateral" id="menu-lateral" aria-labelledby="menu-lateral-titulo">
     <div class="lateral__folha">
       <div class="lateral__topo">
@@ -76,13 +81,17 @@
       </div>
     </div>
   </dialog>
+  {% endif %}
 
   <main id="conteudo">
     {% block conteudo %}{% endblock %}
   </main>
 
   {% block scripts %}{% endblock %}
+  <script src="{{ url_for('static', filename='acessibilidade/a11y.js') }}" defer></script>
+  {% if conta_topo %}
   <script type="module" src="{{ url_for('static', filename='js/menu-lateral.js') }}"></script>
-  {% if conta_topo %}<script type="module" src="{{ url_for('static', filename='js/conta-topo.js') }}"></script>{% endif %}
+  <script type="module" src="{{ url_for('static', filename='js/conta-topo.js') }}"></script>
+  {% endif %}
 </body>
 </html>

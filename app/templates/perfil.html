@@ -56,18 +56,47 @@
       </div>
     </section>
 
-    {# Carta para o futuro: carta.ts preenche o bloco; sem a carta ele fica escondido e o perfil segue normal. #}
-    <section class="carta-perfil" id="carta-perfil" aria-labelledby="titulo-carta" hidden>
-      <div class="carta-perfil__texto">
-        <h2 class="fita" id="titulo-carta" tabindex="-1">Minha carta para o futuro</h2>
-        <p id="carta-perfil-texto"></p>
-        <a class="botao botao--primario" id="carta-perfil-acao" href="/carta/escrever"></a>
-      </div>
-      <div class="carta-perfil__grupo" id="carta-perfil-grupo" hidden>
-        <div class="carta-perfil__palco" id="carta-perfil-palco"></div>
-        <button class="botao botao--secundario" type="button" id="carta-perfil-virar" hidden>Ver o outro lado</button>
-      </div>
-    </section>
+    {# Uma folha dividida ao meio: a carta para o futuro de um lado e os certificados do outro. #}
+    <div class="carta-certificados">
+      {# Carta para o futuro: carta.ts preenche o bloco; sem a carta ele fica escondido e os certificados ocupam a folha. #}
+      <section class="carta-perfil" id="carta-perfil" aria-labelledby="titulo-carta" hidden>
+        <div class="carta-perfil__texto">
+          <h2 class="fita" id="titulo-carta" tabindex="-1">Minha carta para o futuro</h2>
+          <p id="carta-perfil-texto"></p>
+          <a class="botao botao--primario" id="carta-perfil-acao" href="/carta/escrever"></a>
+        </div>
+        <div class="carta-perfil__grupo" id="carta-perfil-grupo" hidden>
+          <div class="carta-perfil__palco" id="carta-perfil-palco"></div>
+          <button class="botao botao--secundario" type="button" id="carta-perfil-virar" hidden>Ver o outro lado</button>
+        </div>
+      </section>
+
+      <section class="certificados-perfil" id="certificados" aria-labelledby="titulo-certificados">
+        <h2 class="fita" id="titulo-certificados">Meus certificados</h2>
+        {% if certificados %}
+        <ul class="certificados__lista">
+          {% for item in certificados %}
+          <li class="certificados__item">
+            <div class="certificados__info">
+              <p class="certificados__titulo">{{ item.titulo }}</p>
+              <p class="certificados__data">{{ item.data }}</p>
+            </div>
+            {% if item.situacao == "emitido" %}
+              <a class="botao botao--primario" href="{{ url_for('passaporte.pagina_certificado', codigo=item.codigo) }}">Ver certificado</a>
+            {% elif item.situacao == "pronto" %}
+              <a class="botao botao--primario" href="{{ url_for('passaporte.pagina_emitir_certificado', evento_id=item.evento_id) }}">Emitir certificado</a>
+            {% else %}
+              <p class="certificados__espera">Fica pronto em {{ item.liberado_em.strftime("%d/%m às %Hh%M") }}</p>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="certificados__vazio">Escaneie o QR code de um evento e, quando ele terminar, o seu certificado de participação aparece aqui.</p>
+        <a class="link-mao" href="/eventos">Ver a agenda de eventos</a>
+        {% endif %}
+      </section>
+    </div>
 
     <section class="minhas" aria-labelledby="titulo-minhas">
       <div class="minhas__cabecalho">

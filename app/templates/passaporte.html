@@ -15,12 +15,6 @@
     <div class="passaporte-cabeca">
       <h1 class="fita">Seu passaporte</h1>
       <p class="passaporte-dica" id="passaporte-dica">Toque na capa para abrir.<span class="passaporte-dica__resto"> Depois, toque nas páginas para virar.</span></p>
-      {% if certificados %}
-      <a class="passaporte-atalho" href="#certificados">
-        Meus certificados ({{ certificados|length }})
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-      </a>
-      {% endif %}
     </div>
 
     {# O passaporte 3D entra aqui. Sem WebGL, quem aparece é a versão em texto logo abaixo. #}
@@ -28,7 +22,7 @@
       <p class="passaporte-palco__carregando" id="passaporte-carregando">Abrindo a gaveta…</p>
     </div>
 
-    {# Tela cheia só quando a pessoa pede: o botão alterna entre entrar e sair. #}
+    {# A capa aberta já entra em tela cheia; o botão alterna entre sair e voltar. #}
     <button class="passaporte-sair-tela" type="button" id="passaporte-tela-cheia" aria-pressed="false" hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path class="passaporte-tela-cheia__entrar" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
@@ -81,36 +75,6 @@
 
   </div>
 </div>
-
-{# Certificados: fora do quadro do passaporte 3D, que ocupa a tela inteira. #}
-<section class="quadro certificados" id="certificados" aria-labelledby="certificados-titulo">
-  <div class="cortica">
-    <h2 class="fita" id="certificados-titulo">Meus certificados</h2>
-    {% if certificados %}
-    <ul class="certificados__lista">
-      {% for item in certificados %}
-      <li class="certificados__item">
-        <svg class="certificados__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h14v12H5z"/><path d="M8.5 7.5h7M8.5 10.5h5"/><circle cx="15" cy="17.5" r="2.6"/><path d="m13.6 19.6-.8 2.9 2.2-1 2.2 1-.8-2.9"/></svg>
-        <div class="certificados__info">
-          <p class="certificados__titulo">{{ item.titulo }}</p>
-          <p class="certificados__data">{{ item.data }}</p>
-        </div>
-        {% if item.situacao == "emitido" %}
-          <a class="botao botao--primario" href="{{ url_for('passaporte.pagina_certificado', codigo=item.codigo) }}">Ver certificado</a>
-        {% elif item.situacao == "pronto" %}
-          <a class="botao botao--primario" href="{{ url_for('passaporte.pagina_emitir_certificado', evento_id=item.evento_id) }}">Emitir certificado</a>
-        {% else %}
-          <p class="certificados__espera">Fica pronto em {{ item.liberado_em.strftime("%d/%m às %Hh%M") }}</p>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="certificados__vazio">Escaneie o QR code de um evento e, quando ele terminar, o seu certificado de participação aparece aqui.
-      <a class="link-mao" href="/eventos">Ver a agenda de eventos</a></p>
-    {% endif %}
-  </div>
-</section>
 
 <script type="application/json" id="passaporte-dados">{{ p | tojson }}</script>
 {% endblock %}

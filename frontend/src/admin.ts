@@ -1,4 +1,5 @@
 // Painel da equipe (Pessoa 5): visão geral, eventos, vagas, notícias, denúncias e destaques da semana.
+import { iniciarCalendarios } from "./calendario.js";
 import {
   ErroApi,
   EXTENSOES_IMAGEM,
@@ -161,6 +162,8 @@ const listaDestaques = el<HTMLUListElement>("lista-destaques");
 const listaCandidatos = el<HTMLUListElement>("lista-candidatos");
 
 const dialogoEvento = el<HTMLDialogElement>("dialogo-evento");
+iniciarCalendarios(); // datas e horários com o calendário do site
+
 const formEvento = el<HTMLFormElement>("form-evento");
 const errosEvento = el("erros-evento");
 const dialogoVaga = el<HTMLDialogElement>("dialogo-vaga");

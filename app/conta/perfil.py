@@ -26,6 +26,8 @@ def pagina_perfil():
     if not _cadastro_completo(usuaria):
         return redirect(url_for("conta.pagina_cadastro"))
 
+    from ..passaporte import certificados  # import aqui: o passaporte também importa a conta
+
     conta = usuaria.conta
     publicas = {i.identidade for i in usuaria.identidades if i.publica}
     return render_template(
@@ -38,6 +40,7 @@ def pagina_perfil():
         escola=usuaria.instituicao if usuaria.nivel == "ensino_medio" else None,
         local=", ".join(p for p in (usuaria.cidade, conta.estado) if p),
         identidades=[i["rotulo"] for i in catalogos.IDENTIDADES if i["valor"] in publicas],
+        certificados=certificados.do_passaporte(usuaria),
         salvo=request.args.get("salvo") == "1",
     )
 

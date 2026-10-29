@@ -1134,3 +1134,346 @@
     padding: 8px 14px 10px;
   }
 }
+
+/* ---------- Caixas de seleção e calendários dos formulários do painel ---------- */
+
+/* Datas e horas: o mesmo papel dos outros campos, com o ícone do calendário em magenta. */
+.painel-form input[type="datetime-local"],
+.painel-form input[type="date"],
+.painel-form input[type="time"] {
+  accent-color: var(--magenta);
+  color-scheme: light;
+  cursor: pointer;
+}
+
+.painel-form input[type="datetime-local"]:focus,
+.painel-form input[type="date"]:focus,
+.painel-form input[type="time"]:focus {
+  border-color: var(--magenta);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--postit-rosa);
+}
+
+.painel-form input::-webkit-calendar-picker-indicator {
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  /* escurece e tinge o ícone padrão para combinar com o magenta do site */
+  filter: invert(18%) sepia(80%) saturate(3500%) hue-rotate(310deg) brightness(90%);
+  opacity: 0.85;
+}
+
+.painel-form input::-webkit-calendar-picker-indicator:hover {
+  background: var(--rosa-claro);
+  opacity: 1;
+}
+
+.painel-form select {
+  cursor: pointer;
+}
+
+.painel-form select:focus {
+  border-color: var(--magenta);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--postit-rosa);
+}
+
+/* Lista aberta com o estilo do site (Chrome e Edge 135+); nos outros navegadores fica a lista do sistema. */
+@supports (appearance: base-select) {
+  .painel-form select,
+  .painel-form select::picker(select) {
+    appearance: base-select;
+  }
+
+  .painel-form select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-inline: 12px 14px;
+  }
+
+  .painel-form select:has(option[value=""]:checked) {
+    color: var(--tinta-suave);
+  }
+
+  .painel-form select::picker-icon {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-top: -4px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: 45deg;
+    transition: rotate 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s ease;
+  }
+
+  .painel-form select:open::picker-icon {
+    margin-top: 4px;
+    rotate: 225deg;
+  }
+
+  .painel-form select::picker(select) {
+    min-width: anchor-size(width);
+    max-height: min(320px, 50vh);
+    margin-block: 6px;
+    padding: 6px;
+    overflow-y: auto;
+    border: 2px solid var(--papel-borda);
+    border-radius: 10px;
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: var(--sombra-papel-alta);
+    scrollbar-width: thin;
+    scrollbar-color: var(--postit-rosa) transparent;
+  }
+
+  .painel-form option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .painel-form option::checkmark {
+    display: none;
+  }
+
+  .painel-form option[value=""] {
+    color: var(--tinta-suave);
+  }
+
+  .painel-form option:hover,
+  .painel-form option:focus-visible {
+    outline: none;
+    background: var(--rosa-claro);
+  }
+
+  .painel-form option:checked {
+    background: #fff0f6;
+    font-weight: 700;
+    color: var(--magenta-escuro);
+  }
+
+  .painel-form option:checked:hover,
+  .painel-form option:checked:focus-visible {
+    background: var(--postit-rosa);
+  }
+}
+
+.painel-form .bloco > small {
+  display: block;
+  margin: 2px 0 14px;
+  color: var(--tinta-suave);
+}
+
+/* ---------- Calendário do painel (calendario.ts troca o seletor do navegador) ---------- */
+
+.cal {
+  position: relative;
+}
+
+.cal__campo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cal__campo:hover,
+.cal__campo[aria-expanded="true"] {
+  border-color: var(--magenta);
+}
+
+.cal__campo svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cal__texto--vazio {
+  color: var(--tinta-suave);
+}
+
+.campo--erro .cal__campo {
+  border-color: var(--perigo, #b3261e);
+}
+
+.cal__painel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: min(320px, calc(100vw - 48px));
+  padding: 14px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 12px;
+  background: var(--papel);
+  box-shadow: var(--sombra-papel-alta);
+}
+
+.cal__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cal__titulo {
+  margin: 0;
+  font-family: var(--fonte-mao);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--magenta-escuro);
+}
+
+.cal__titulo::first-letter {
+  text-transform: uppercase;
+}
+
+.cal__nav {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--papel-borda);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+
+.cal__nav:hover {
+  border-color: var(--magenta);
+  background: var(--rosa-claro);
+}
+
+.cal__nav svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--magenta-escuro);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cal__semana,
+.cal__grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal__semana span {
+  padding: 4px 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+.cal__dia {
+  aspect-ratio: 1;
+  min-height: 36px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.cal__dia:hover {
+  background: var(--rosa-claro);
+}
+
+.cal__dia--hoje {
+  border-color: var(--papel-borda);
+  font-weight: 700;
+}
+
+.cal__dia[aria-pressed="true"] {
+  background: var(--magenta);
+  border-color: var(--magenta);
+  font-weight: 700;
+  color: #fff;
+}
+
+.cal__hora {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--papel-borda);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.cal__hora label {
+  display: grid;
+  gap: 2px;
+}
+
+.cal__hora > span {
+  padding-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.cal__select {
+  min-width: 72px;
+}
+
+.cal__rodape {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--papel-borda);
+}
+
+.cal__acao {
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  font-weight: 700;
+  color: var(--magenta-escuro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.cal__acao:hover {
+  color: var(--tinta);
+}
+
+.cal__ok {
+  margin-left: auto;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--magenta);
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+.cal__ok:hover {
+  background: var(--magenta-escuro);
+}
