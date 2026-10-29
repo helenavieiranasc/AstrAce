@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-astrace-modo-escuro.png">
-    <img src="app/static/img/logo-astrace.png" alt="AstrAce" width="460">
-  </picture>
+  <img src="docs/logo-astrace-readme.png" alt="AstrAce" width="460">
 </p>
 
 <p align="center"><b>"Ciência feita por meninas e mulheres!"</b></p>
