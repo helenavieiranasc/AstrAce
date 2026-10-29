@@ -788,13 +788,7 @@ function ligarEventos() {
         void enviarDenuncia(e.target);
     });
 }
-function preencherCartaz() {
-    const hoje = new Date();
-    el("cartaz-mes").textContent = hoje.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
-    el("cartaz-dia").textContent = String(hoje.getDate());
-}
 async function iniciar() {
-    preencherCartaz();
     ligarEventos();
     try {
         opcoes = await api("/api/mural/opcoes");
